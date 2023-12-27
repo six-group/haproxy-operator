@@ -12,7 +12,7 @@ require (
 	github.com/openshift/api v0.0.0-20210505180709-d0a89da74761 // latest commit of branch https://github.com/openshift/api/tree/release-4.8
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.59.0
 	go.uber.org/multierr v1.11.0
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.26.0
 	k8s.io/api v0.25.0
 	k8s.io/apimachinery v0.25.0
 	k8s.io/client-go v0.25.0
@@ -67,7 +67,6 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.mongodb.org/mongo-driver v1.13.1 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sys v0.7.0 // indirect
