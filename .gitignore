@@ -23,7 +23,7 @@ testbin/*
 go.work
 
 # Kubernetes Generated files - skip generated files, except for vendored files
-config
+./config
 !vendor/**/zz_generated.*
 
 # Editor and IDE paraphernalia
