@@ -11,7 +11,7 @@ require (
 	github.com/onsi/gomega v1.19.0
 	github.com/openshift/api v0.0.0-20210505180709-d0a89da74761 // latest commit of branch https://github.com/openshift/api/tree/release-4.8
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.59.0
-	go.uber.org/multierr v1.6.0
+	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.19.1
 	k8s.io/api v0.25.0
 	k8s.io/apimachinery v0.25.0
