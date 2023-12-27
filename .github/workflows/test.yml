@@ -34,7 +34,7 @@ jobs:
         with:
           version: v1.54
   ginkgo:
-    name: test
+    name: unit-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v5
@@ -42,4 +42,7 @@ jobs:
           go-version: '1.21'
           cache: false
       - uses: actions/checkout@v4
-      - run: go run github.com/onsi/ginkgo/v2/ginkgo -r --randomize-all --randomize-suites --race --trace --fail-on-pending --keep-going --vet off --cover
+      - run: go run github.com/onsi/ginkgo/v2/ginkgo@v2.1.4 -r --randomize-all --randomize-suites --race --trace --fail-on-pending --keep-going --vet off --cover
+      - uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: coverprofile.out
