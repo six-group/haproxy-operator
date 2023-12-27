@@ -3,7 +3,6 @@ run:
 linters:
   enable:
     - asciicheck
-    - depguard
     - dogsled
     - durationcheck
     - errcheck
@@ -26,6 +25,8 @@ linters:
     - typecheck
     - unconvert
     - unused
+  disable:
+  - depguard # See issue: https://github.com/golangci/golangci-lint/issues/3906
 linters-settings:
   gosec:
     # Exclude generated files

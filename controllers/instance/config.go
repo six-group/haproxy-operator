@@ -331,7 +331,8 @@ func (r *Reconciler) generateBackendMappingFiles(ctx context.Context, instance *
 
 		for _, rules := range frontend.Spec.BackendSwitching {
 			if rules.Backend.RegexMapping != nil {
-				selector, err := metav1.LabelSelectorAsSelector(&rules.Backend.RegexMapping.LabelSelector)
+				labelSelector := rules.Backend.RegexMapping.LabelSelector
+				selector, err := metav1.LabelSelectorAsSelector(&labelSelector)
 				if err != nil {
 					frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
 					frontend.Status.Error = err.Error()
