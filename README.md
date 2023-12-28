@@ -1,2 +1,0 @@
-# haproxy-operator
-HAProxy Operator
