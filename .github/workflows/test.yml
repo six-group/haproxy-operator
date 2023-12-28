@@ -20,8 +20,15 @@ jobs:
           cache: false
       - uses: actions/checkout@v4
       - run: go mod tidy && git diff --exit-code go.mod go.sum
+  helm:
+    name: helm-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: helm lint helm/haproxy-operator/ --strict
+      - run: helm template chart helm/haproxy-operator > /dev/null
   golangci:
-    name: lint
+    name: golangci-lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
