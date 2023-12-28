@@ -46,5 +46,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - uses: helm/chart-releaser-action@v1.6.0
+        with:
+          charts_dir: helm/haproxy-operator
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
