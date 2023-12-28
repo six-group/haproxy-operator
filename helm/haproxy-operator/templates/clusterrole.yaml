@@ -1,0 +1,90 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.name }}
+rules:
+  - apiGroups:
+      - config.haproxy.com
+    resources:
+      - '*'
+    verbs:
+      - get
+      - list
+      - watch
+      - get
+      - patch
+      - update
+      - delete
+  - apiGroups:
+      - proxy.haproxy.com
+    resources:
+      - instances
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - proxy.haproxy.com
+    resources:
+      - instances/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - proxy.haproxy.com
+    resources:
+      - instances/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - ''
+    resources:
+      - configmaps
+      - services
+      - secrets
+      - endpoints
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - delete
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+      - routes/custom-host
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - delete
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - delete
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - patch
+      - update

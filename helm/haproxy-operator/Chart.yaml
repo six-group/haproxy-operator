@@ -1,0 +1,10 @@
+apiVersion: v2
+name: haprox-operator
+version: 1.0.0
+appVersion: v1.0.0
+description: Install HAProxy Operator
+sources:
+  - https://github.com/six-group/haproxy-operator
+maintainers:
+  - name: snorwin
+  - name: m-terra
