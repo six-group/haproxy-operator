@@ -21,8 +21,15 @@ jobs:
       - uses: actions/checkout@v4
       - run: go mod tidy && git diff --exit-code go.mod go.sum
       - run: go run github.com/elastic/crd-ref-docs@v0.0.10 --config docs/config.yaml --renderer=markdown --output-path docs/api-reference.md && git diff --exit-code docs/api-reference.md
+  helm:
+    name: helm-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: helm lint helm/haproxy-operator/ --strict
+      - run: helm template chart helm/haproxy-operator > /dev/null
   golangci:
-    name: lint
+    name: golangci-lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

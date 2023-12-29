@@ -1,0 +1,1188 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.10.0
+  creationTimestamp: null
+  name: frontends.config.haproxy.com
+spec:
+  group: config.haproxy.com
+  names:
+    kind: Frontend
+    listKind: FrontendList
+    plural: frontends
+    singular: frontend
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.mode
+      name: Mode
+      type: string
+    - jsonPath: .status.phase
+      name: Phase
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Frontend is the Schema for the frontends API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FrontendSpec defines the desired state of Frontend
+            properties:
+              acl:
+                description: ACL (Access Control Lists) provides a flexible solution
+                  to perform content switching and generally to take decisions based
+                  on content extracted from the request, the response or any environmental
+                  status
+                items:
+                  properties:
+                    criterion:
+                      description: Criterion is the name of a sample fetch method,
+                        or one of its ACL specific declinations.
+                      pattern: ^[^\s]+$
+                      type: string
+                    name:
+                      description: Name
+                      pattern: ^[^\s]+$
+                      type: string
+                    values:
+                      description: Values are of the type supported by the criterion.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - criterion
+                  - name
+                  - values
+                  type: object
+                type: array
+              backendSwitching:
+                description: BackendSwitching rules specify the specific backend used
+                  if/unless an ACL-based condition is matched.
+                items:
+                  properties:
+                    backend:
+                      description: Backend reference used to resolve the backend name.
+                      properties:
+                        name:
+                          description: Name of a specific backend
+                          type: string
+                        regexMapping:
+                          description: Mapping of multiple backends
+                          properties:
+                            name:
+                              description: Name to identify the mapping
+                              type: string
+                            parameter:
+                              default: base
+                              description: 'Parameter which will be used for the mapping
+                                (default: base)'
+                              type: string
+                            selector:
+                              description: LabelSelector to select multiple backends
+                              properties:
+                                matchExpressions:
+                                  description: matchExpressions is a list of label
+                                    selector requirements. The requirements are ANDed.
+                                  items:
+                                    description: A label selector requirement is a
+                                      selector that contains values, a key, and an
+                                      operator that relates the key and values.
+                                    properties:
+                                      key:
+                                        description: key is the label key that the
+                                          selector applies to.
+                                        type: string
+                                      operator:
+                                        description: operator represents a key's relationship
+                                          to a set of values. Valid operators are
+                                          In, NotIn, Exists and DoesNotExist.
+                                        type: string
+                                      values:
+                                        description: values is an array of string
+                                          values. If the operator is In or NotIn,
+                                          the values array must be non-empty. If the
+                                          operator is Exists or DoesNotExist, the
+                                          values array must be empty. This array is
+                                          replaced during a strategic merge patch.
+                                        items:
+                                          type: string
+                                        type: array
+                                    required:
+                                    - key
+                                    - operator
+                                    type: object
+                                  type: array
+                                matchLabels:
+                                  additionalProperties:
+                                    type: string
+                                  description: matchLabels is a map of {key,value}
+                                    pairs. A single {key,value} in the matchLabels
+                                    map is equivalent to an element of matchExpressions,
+                                    whose key field is "key", the operator is "In",
+                                    and the values array contains only "value". The
+                                    requirements are ANDed.
+                                  type: object
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          required:
+                          - name
+                          - parameter
+                          - selector
+                          type: object
+                      type: object
+                    condition:
+                      description: Condition is a condition composed of ACLs.
+                      type: string
+                    conditionType:
+                      description: ConditionType specifies the type of the condition
+                        matching ('if' or 'unless')
+                      enum:
+                      - if
+                      - unless
+                      type: string
+                  type: object
+                type: array
+              binds:
+                description: Binds defines the frontend listening addresses, ports
+                  and its configuration.
+                items:
+                  properties:
+                    acceptProxy:
+                      description: AcceptProxy enforces the use of the PROXY protocol
+                        over any connection accepted by any of the sockets declared
+                        on the same line.
+                      type: boolean
+                    address:
+                      description: Address can be a host name, an IPv4 address, an
+                        IPv6 address, or '*' (is equal to the special address "0.0.0.0").
+                      pattern: ^[^\s]+$
+                      type: string
+                    hidden:
+                      description: Hidden hides the bind and prevent exposing the
+                        Bind in services or routes
+                      type: boolean
+                    name:
+                      description: Name for these sockets, which will be reported
+                        on the stats page.
+                      type: string
+                    port:
+                      description: Port
+                      format: int64
+                      maximum: 65535
+                      minimum: 1
+                      type: integer
+                    portRangeEnd:
+                      description: PortRangeEnd if set it must be greater than Port
+                      format: int64
+                      maximum: 65535
+                      minimum: 1
+                      type: integer
+                    ssl:
+                      description: SSL configures OpenSSL
+                      properties:
+                        alpn:
+                          description: Alpn enables the TLS ALPN extension and advertises
+                            the specified protocol list as supported on top of ALPN.
+                          items:
+                            type: string
+                          type: array
+                        caCertificate:
+                          description: CACertificate configures the CACertificate
+                            used for the Server or Bind client certificate
+                          properties:
+                            name:
+                              type: string
+                            value:
+                              type: string
+                            valueFrom:
+                              items:
+                                properties:
+                                  configMapKeyRef:
+                                    description: ConfigMapKeyRef selects a key of
+                                      a ConfigMap
+                                    properties:
+                                      key:
+                                        description: The key to select.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info:
+                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion,
+                                          kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the ConfigMap
+                                          or its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                  secretKeyRef:
+                                    description: SecretKeyRef selects a key of a secret
+                                      in the pod namespace
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info:
+                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion,
+                                          kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the Secret or
+                                          its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                type: object
+                              type: array
+                          required:
+                          - name
+                          type: object
+                        certificate:
+                          description: Certificate configures a PEM based Certificate
+                            file containing both the required certificates and any
+                            associated private keys.
+                          properties:
+                            name:
+                              type: string
+                            value:
+                              type: string
+                            valueFrom:
+                              items:
+                                properties:
+                                  configMapKeyRef:
+                                    description: ConfigMapKeyRef selects a key of
+                                      a ConfigMap
+                                    properties:
+                                      key:
+                                        description: The key to select.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info:
+                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion,
+                                          kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the ConfigMap
+                                          or its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                  secretKeyRef:
+                                    description: SecretKeyRef selects a key of a secret
+                                      in the pod namespace
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info:
+                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion,
+                                          kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the Secret or
+                                          its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                type: object
+                              type: array
+                          required:
+                          - name
+                          type: object
+                        enabled:
+                          description: Enabled enables SSL deciphering on connections
+                            instantiated from this listener. A certificate is necessary.
+                            All contents in the buffers will appear in clear text,
+                            so that ACLs and HTTP processing will only have access
+                            to deciphered contents. SSLv3 is disabled per default,
+                            set MinVersion to SSLv3 to enable it.
+                          type: boolean
+                        minVersion:
+                          description: MinVersion enforces use of the specified version
+                            or upper on SSL connections instantiated from this listener.
+                          enum:
+                          - SSLv3
+                          - TLSv1.0
+                          - TLSv1.1
+                          - TLSv1.2
+                          - TLSv1.3
+                          type: string
+                        sni:
+                          description: SNI parameter evaluates the sample fetch expression,
+                            converts it to a string and uses the result as the host
+                            name sent in the SNI TLS extension to the server.
+                          type: string
+                        verify:
+                          description: Verify is only available when support for OpenSSL
+                            was built in. If set to 'none', client certificate is
+                            not requested. This is the default. In other cases, a
+                            client certificate is requested. If the client does not
+                            provide a certificate after the request and if 'Verify'
+                            is set to 'required', then the handshake is aborted, while
+                            it would have succeeded if set to 'optional'. The verification
+                            of the certificate provided by the client using CAs from
+                            CACertificate. On verify failure the handshake abortes,
+                            regardless of the 'verify' option.
+                          enum:
+                          - none
+                          - optional
+                          - required
+                          type: string
+                      required:
+                      - enabled
+                      type: object
+                    sslCertificateList:
+                      description: This setting is only available when support for
+                        OpenSSL was built in. It designates a list of PEM file with
+                        an optional ssl configuration and a SNI filter per certificate.
+                      properties:
+                        elements:
+                          description: Elements is a list of SSL configuration and
+                            a SNI filter per certificate. If backend switching based
+                            on regex is used the host certificate
+                          items:
+                            properties:
+                              alpn:
+                                description: Alpn enables the TLS ALPN extension and
+                                  advertises the specified protocol list as supported
+                                  on top of ALPN.
+                                items:
+                                  type: string
+                                type: array
+                              certificate:
+                                description: Certificate that will be presented to
+                                  clients who provide a valid TLSServerNameIndication
+                                  field matching the SNIFilter.
+                                properties:
+                                  name:
+                                    type: string
+                                  value:
+                                    type: string
+                                  valueFrom:
+                                    items:
+                                      properties:
+                                        configMapKeyRef:
+                                          description: ConfigMapKeyRef selects a key
+                                            of a ConfigMap
+                                          properties:
+                                            key:
+                                              description: The key to select.
+                                              type: string
+                                            name:
+                                              description: 'Name of the referent.
+                                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                                TODO: Add other useful fields. apiVersion,
+                                                kind, uid?'
+                                              type: string
+                                            optional:
+                                              description: Specify whether the ConfigMap
+                                                or its key must be defined
+                                              type: boolean
+                                          required:
+                                          - key
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        secretKeyRef:
+                                          description: SecretKeyRef selects a key
+                                            of a secret in the pod namespace
+                                          properties:
+                                            key:
+                                              description: The key of the secret to
+                                                select from.  Must be a valid secret
+                                                key.
+                                              type: string
+                                            name:
+                                              description: 'Name of the referent.
+                                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                                TODO: Add other useful fields. apiVersion,
+                                                kind, uid?'
+                                              type: string
+                                            optional:
+                                              description: Specify whether the Secret
+                                                or its key must be defined
+                                              type: boolean
+                                          required:
+                                          - key
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                      type: object
+                                    type: array
+                                required:
+                                - name
+                                type: object
+                              sniFilter:
+                                description: SNIFilter specifies the filter for the
+                                  SSL Certificate.  Wildcards are supported in the
+                                  SNIFilter. Negative filter are also supported.
+                                type: string
+                            required:
+                            - certificate
+                            - sniFilter
+                            type: object
+                          type: array
+                        name:
+                          description: Name is the name of the certificate list
+                          type: string
+                        selector:
+                          description: LabelSelector to select multiple backend certificates
+                          properties:
+                            matchExpressions:
+                              description: matchExpressions is a list of label selector
+                                requirements. The requirements are ANDed.
+                              items:
+                                description: A label selector requirement is a selector
+                                  that contains values, a key, and an operator that
+                                  relates the key and values.
+                                properties:
+                                  key:
+                                    description: key is the label key that the selector
+                                      applies to.
+                                    type: string
+                                  operator:
+                                    description: operator represents a key's relationship
+                                      to a set of values. Valid operators are In,
+                                      NotIn, Exists and DoesNotExist.
+                                    type: string
+                                  values:
+                                    description: values is an array of string values.
+                                      If the operator is In or NotIn, the values array
+                                      must be non-empty. If the operator is Exists
+                                      or DoesNotExist, the values array must be empty.
+                                      This array is replaced during a strategic merge
+                                      patch.
+                                    items:
+                                      type: string
+                                    type: array
+                                required:
+                                - key
+                                - operator
+                                type: object
+                              type: array
+                            matchLabels:
+                              additionalProperties:
+                                type: string
+                              description: matchLabels is a map of {key,value} pairs.
+                                A single {key,value} in the matchLabels map is equivalent
+                                to an element of matchExpressions, whose key field
+                                is "key", the operator is "In", and the values array
+                                contains only "value". The requirements are ANDed.
+                              type: object
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      required:
+                      - name
+                      type: object
+                    transparent:
+                      description: Transparent is an optional keyword which is supported
+                        only on certain Linux kernels. It indicates that the addresses
+                        will be bound even if they do not belong to the local machine,
+                        and that packets targeting any of these addresses will be
+                        intercepted just as if the addresses were locally configured.
+                        This normally requires that IP forwarding is enabled. Caution!
+                        do not use this with the default address '*', as it would
+                        redirect any traffic for the specified port.
+                      type: boolean
+                  required:
+                  - name
+                  - port
+                  type: object
+                minItems: 1
+                type: array
+              defaultBackend:
+                description: DefaultBackend to use when no 'use_backend' rule has
+                  been matched.
+                properties:
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              errorFiles:
+                description: ErrorFiles custom error files to be used
+                items:
+                  properties:
+                    code:
+                      description: Code is the HTTP status code.
+                      enum:
+                      - 200
+                      - 400
+                      - 401
+                      - 403
+                      - 404
+                      - 405
+                      - 407
+                      - 408
+                      - 410
+                      - 413
+                      - 425
+                      - 429
+                      - 500
+                      - 501
+                      - 502
+                      - 503
+                      - 504
+                      format: int64
+                      type: integer
+                    file:
+                      description: File designates a file containing the full HTTP
+                        response.
+                      properties:
+                        name:
+                          type: string
+                        value:
+                          type: string
+                        valueFrom:
+                          properties:
+                            configMapKeyRef:
+                              description: ConfigMapKeyRef selects a key of a ConfigMap.
+                              properties:
+                                key:
+                                  description: The key to select.
+                                  type: string
+                                name:
+                                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind,
+                                    uid?'
+                                  type: string
+                                optional:
+                                  description: Specify whether the ConfigMap or its
+                                    key must be defined
+                                  type: boolean
+                              required:
+                              - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          type: object
+                      required:
+                      - name
+                      type: object
+                  required:
+                  - code
+                  - file
+                  type: object
+                type: array
+              forwardFor:
+                description: Forwardfor enable insertion of the X-Forwarded-For header
+                  to requests sent to servers
+                properties:
+                  enabled:
+                    type: boolean
+                  except:
+                    description: 'Pattern: ^[^\s]+$'
+                    type: string
+                  header:
+                    description: 'Pattern: ^[^\s]+$'
+                    type: string
+                  ifnone:
+                    type: boolean
+                required:
+                - enabled
+                type: object
+              httpPretendKeepalive:
+                description: HTTPPretendKeepalive will keep the connection alive.
+                  It is recommended not to enable this option by default.
+                type: boolean
+              httpRequest:
+                description: HTTPRequest rules define a set of rules which apply to
+                  layer 7 processing.
+                properties:
+                  addHeader:
+                    description: AddHeader appends HTTP header fields
+                    items:
+                      properties:
+                        condition:
+                          description: Condition is a condition composed of ACLs.
+                          type: string
+                        conditionType:
+                          description: ConditionType specifies the type of the condition
+                            matching ('if' or 'unless')
+                          enum:
+                          - if
+                          - unless
+                          type: string
+                        name:
+                          description: Name specifies the header name
+                          type: string
+                        value:
+                          description: Value specifies the header value
+                          properties:
+                            env:
+                              description: Env variable with the header value
+                              properties:
+                                name:
+                                  description: Name of the environment variable. Must
+                                    be a C_IDENTIFIER.
+                                  type: string
+                                value:
+                                  description: 'Variable references $(VAR_NAME) are
+                                    expanded using the previously defined environment
+                                    variables in the container and any service environment
+                                    variables. If a variable cannot be resolved, the
+                                    reference in the input string will be unchanged.
+                                    Double $$ are reduced to a single $, which allows
+                                    for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
+                                    will produce the string literal "$(VAR_NAME)".
+                                    Escaped references will never be expanded, regardless
+                                    of whether the variable exists or not. Defaults
+                                    to "".'
+                                  type: string
+                                valueFrom:
+                                  description: Source for the environment variable's
+                                    value. Cannot be used if value is not empty.
+                                  properties:
+                                    configMapKeyRef:
+                                      description: Selects a key of a ConfigMap.
+                                      properties:
+                                        key:
+                                          description: The key to select.
+                                          type: string
+                                        name:
+                                          description: 'Name of the referent. More
+                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion,
+                                            kind, uid?'
+                                          type: string
+                                        optional:
+                                          description: Specify whether the ConfigMap
+                                            or its key must be defined
+                                          type: boolean
+                                      required:
+                                      - key
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    fieldRef:
+                                      description: 'Selects a field of the pod: supports
+                                        metadata.name, metadata.namespace, `metadata.labels[''<KEY>'']`,
+                                        `metadata.annotations[''<KEY>'']`, spec.nodeName,
+                                        spec.serviceAccountName, status.hostIP, status.podIP,
+                                        status.podIPs.'
+                                      properties:
+                                        apiVersion:
+                                          description: Version of the schema the FieldPath
+                                            is written in terms of, defaults to "v1".
+                                          type: string
+                                        fieldPath:
+                                          description: Path of the field to select
+                                            in the specified API version.
+                                          type: string
+                                      required:
+                                      - fieldPath
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    resourceFieldRef:
+                                      description: 'Selects a resource of the container:
+                                        only resources limits and requests (limits.cpu,
+                                        limits.memory, limits.ephemeral-storage, requests.cpu,
+                                        requests.memory and requests.ephemeral-storage)
+                                        are currently supported.'
+                                      properties:
+                                        containerName:
+                                          description: 'Container name: required for
+                                            volumes, optional for env vars'
+                                          type: string
+                                        divisor:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: Specifies the output format
+                                            of the exposed resources, defaults to
+                                            "1"
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        resource:
+                                          description: 'Required: resource to select'
+                                          type: string
+                                      required:
+                                      - resource
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    secretKeyRef:
+                                      description: Selects a key of a secret in the
+                                        pod's namespace
+                                      properties:
+                                        key:
+                                          description: The key of the secret to select
+                                            from.  Must be a valid secret key.
+                                          type: string
+                                        name:
+                                          description: 'Name of the referent. More
+                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion,
+                                            kind, uid?'
+                                          type: string
+                                        optional:
+                                          description: Specify whether the Secret
+                                            or its key must be defined
+                                          type: boolean
+                                      required:
+                                      - key
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                  type: object
+                              required:
+                              - name
+                              type: object
+                            format:
+                              description: Format specifies the format of the header
+                                value (implicit default is '%s')
+                              type: string
+                            str:
+                              description: Str with the header value
+                              type: string
+                          type: object
+                      required:
+                      - name
+                      - value
+                      type: object
+                    type: array
+                  deny:
+                    description: Deny stops the evaluation of the rules and immediately
+                      rejects the request and emits an HTTP 403 error. Optionally
+                      the status code specified as an argument to deny_status.
+                    properties:
+                      condition:
+                        description: Condition is a condition composed of ACLs.
+                        type: string
+                      conditionType:
+                        description: ConditionType specifies the type of the condition
+                          matching ('if' or 'unless')
+                        enum:
+                        - if
+                        - unless
+                        type: string
+                      enabled:
+                        description: Enabled enables deny http request
+                        type: boolean
+                    required:
+                    - enabled
+                    type: object
+                  denyStatus:
+                    description: DenyStatus is the HTTP status code.
+                    format: int64
+                    maximum: 599
+                    minimum: 200
+                    type: integer
+                  redirect:
+                    description: Redirect performs an HTTP redirection based on a
+                      redirect rule.
+                    items:
+                      properties:
+                        code:
+                          description: Code indicates which type of HTTP redirection
+                            is desired.
+                          enum:
+                          - 301
+                          - 302
+                          - 303
+                          - 307
+                          - 308
+                          format: int64
+                          type: integer
+                        condition:
+                          description: Condition is a condition composed of ACLs.
+                          type: string
+                        conditionType:
+                          description: ConditionType specifies the type of the condition
+                            matching ('if' or 'unless')
+                          enum:
+                          - if
+                          - unless
+                          type: string
+                        option:
+                          description: Value to redirect
+                          properties:
+                            ClearCookie:
+                              description: ClearCookie is to instruct the browser
+                                to delete the cookie. It will be added with NAME (and
+                                optionally "="). To add "=" type any string in the
+                                value field
+                              properties:
+                                name:
+                                  description: Name
+                                  type: string
+                                value:
+                                  description: Value
+                                  type: string
+                              type: object
+                            SetCookie:
+                              description: SetCookie adds header to the redirection.
+                                It will be added with NAME (and optionally "=value")
+                              properties:
+                                name:
+                                  description: Name
+                                  type: string
+                                value:
+                                  description: Value
+                                  type: string
+                              type: object
+                            appendSlash:
+                              description: AppendSlash adds a / character at the end
+                                of the URL.
+                              type: boolean
+                            dropQuery:
+                              description: DropQuery removes the query string from
+                                the original URL when performing the concatenation.
+                              type: boolean
+                          type: object
+                        type:
+                          description: Type selects a mode and value to redirect
+                          properties:
+                            insert:
+                              description: Prefix adds a prefix to the URL's location.
+                              type: boolean
+                            location:
+                              description: Location replaces the entire location of
+                                a URL.
+                              type: boolean
+                            prefix:
+                              description: Scheme redirects to a different scheme.
+                              type: boolean
+                          type: object
+                        value:
+                          description: Value to redirect
+                          type: string
+                      type: object
+                    type: array
+                  return:
+                    description: Return stops the evaluation of the rules and immediately
+                      returns a response.
+                    properties:
+                      content:
+                        description: Content is a full HTTP response specifying the
+                          errorfile to use, or the response payload specifying the
+                          file or the string to use.
+                        properties:
+                          format:
+                            description: ContentFormat defines the format of the Content.
+                              Can be one an errorfile or a string.
+                            enum:
+                            - default-errorfile
+                            - errorfile
+                            - errorfiles
+                            - file
+                            - lf-file
+                            - string
+                            - lf-string
+                            type: string
+                          type:
+                            description: Type specifies the content-type of the HTTP
+                              REsponse.
+                            type: string
+                          value:
+                            description: Value specifying the file or the string to
+                              use.
+                            type: string
+                        required:
+                        - format
+                        - type
+                        - value
+                        type: object
+                      status:
+                        default: 200
+                        description: Status can be optionally specified, the default
+                          status code used for the response is 200.
+                        format: int64
+                        type: integer
+                    required:
+                    - content
+                    type: object
+                  setHeader:
+                    description: SetHeader sets HTTP header fields
+                    items:
+                      properties:
+                        condition:
+                          description: Condition is a condition composed of ACLs.
+                          type: string
+                        conditionType:
+                          description: ConditionType specifies the type of the condition
+                            matching ('if' or 'unless')
+                          enum:
+                          - if
+                          - unless
+                          type: string
+                        name:
+                          description: Name specifies the header name
+                          type: string
+                        value:
+                          description: Value specifies the header value
+                          properties:
+                            env:
+                              description: Env variable with the header value
+                              properties:
+                                name:
+                                  description: Name of the environment variable. Must
+                                    be a C_IDENTIFIER.
+                                  type: string
+                                value:
+                                  description: 'Variable references $(VAR_NAME) are
+                                    expanded using the previously defined environment
+                                    variables in the container and any service environment
+                                    variables. If a variable cannot be resolved, the
+                                    reference in the input string will be unchanged.
+                                    Double $$ are reduced to a single $, which allows
+                                    for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
+                                    will produce the string literal "$(VAR_NAME)".
+                                    Escaped references will never be expanded, regardless
+                                    of whether the variable exists or not. Defaults
+                                    to "".'
+                                  type: string
+                                valueFrom:
+                                  description: Source for the environment variable's
+                                    value. Cannot be used if value is not empty.
+                                  properties:
+                                    configMapKeyRef:
+                                      description: Selects a key of a ConfigMap.
+                                      properties:
+                                        key:
+                                          description: The key to select.
+                                          type: string
+                                        name:
+                                          description: 'Name of the referent. More
+                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion,
+                                            kind, uid?'
+                                          type: string
+                                        optional:
+                                          description: Specify whether the ConfigMap
+                                            or its key must be defined
+                                          type: boolean
+                                      required:
+                                      - key
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    fieldRef:
+                                      description: 'Selects a field of the pod: supports
+                                        metadata.name, metadata.namespace, `metadata.labels[''<KEY>'']`,
+                                        `metadata.annotations[''<KEY>'']`, spec.nodeName,
+                                        spec.serviceAccountName, status.hostIP, status.podIP,
+                                        status.podIPs.'
+                                      properties:
+                                        apiVersion:
+                                          description: Version of the schema the FieldPath
+                                            is written in terms of, defaults to "v1".
+                                          type: string
+                                        fieldPath:
+                                          description: Path of the field to select
+                                            in the specified API version.
+                                          type: string
+                                      required:
+                                      - fieldPath
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    resourceFieldRef:
+                                      description: 'Selects a resource of the container:
+                                        only resources limits and requests (limits.cpu,
+                                        limits.memory, limits.ephemeral-storage, requests.cpu,
+                                        requests.memory and requests.ephemeral-storage)
+                                        are currently supported.'
+                                      properties:
+                                        containerName:
+                                          description: 'Container name: required for
+                                            volumes, optional for env vars'
+                                          type: string
+                                        divisor:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: Specifies the output format
+                                            of the exposed resources, defaults to
+                                            "1"
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        resource:
+                                          description: 'Required: resource to select'
+                                          type: string
+                                      required:
+                                      - resource
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    secretKeyRef:
+                                      description: Selects a key of a secret in the
+                                        pod's namespace
+                                      properties:
+                                        key:
+                                          description: The key of the secret to select
+                                            from.  Must be a valid secret key.
+                                          type: string
+                                        name:
+                                          description: 'Name of the referent. More
+                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion,
+                                            kind, uid?'
+                                          type: string
+                                        optional:
+                                          description: Specify whether the Secret
+                                            or its key must be defined
+                                          type: boolean
+                                      required:
+                                      - key
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                  type: object
+                              required:
+                              - name
+                              type: object
+                            format:
+                              description: Format specifies the format of the header
+                                value (implicit default is '%s')
+                              type: string
+                            str:
+                              description: Str with the header value
+                              type: string
+                          type: object
+                      required:
+                      - name
+                      - value
+                      type: object
+                    type: array
+                  setPath:
+                    description: SetPath sets request path
+                    items:
+                      properties:
+                        condition:
+                          description: Condition is a condition composed of ACLs.
+                          type: string
+                        conditionType:
+                          description: ConditionType specifies the type of the condition
+                            matching ('if' or 'unless')
+                          enum:
+                          - if
+                          - unless
+                          type: string
+                        format:
+                          description: Value specifies the path value
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              mode:
+                default: http
+                description: Mode can be either 'tcp' or 'http'. In TCP mode it is
+                  a layer 4 proxy. In HTTP mode it is a layer 7 proxy.
+                enum:
+                - http
+                - tcp
+                type: string
+              tcpRequest:
+                description: TCPRequest rules perform an action on an incoming connection
+                  depending on a layer 4 condition.
+                items:
+                  properties:
+                    action:
+                      description: Action defines the action to perform if the condition
+                        applies.
+                      enum:
+                      - accept
+                      - capture
+                      - do-resolve
+                      - expect-netscaler-cip
+                      - expect-proxy
+                      - reject
+                      - sc-inc-gpc0
+                      - sc-inc-gpc1
+                      - sc-set-gpt0
+                      - send-spoe-group
+                      - set-dst-port
+                      - set-dst
+                      - set-priority
+                      - set-src
+                      - set-var
+                      - silent-drop
+                      - track-sc0
+                      - track-sc1
+                      - track-sc2
+                      - unset-var
+                      - use-service
+                      - lua
+                      type: string
+                    condition:
+                      description: Condition is a condition composed of ACLs.
+                      type: string
+                    conditionType:
+                      description: ConditionType specifies the type of the condition
+                        matching ('if' or 'unless')
+                      enum:
+                      - if
+                      - unless
+                      type: string
+                    timeout:
+                      description: Timeout sets timeout for the action
+                      type: string
+                    type:
+                      description: Type specifies the type of the tcp-request rule.
+                      enum:
+                      - connection
+                      - content
+                      - inspect-delay
+                      - session
+                      type: string
+                  required:
+                  - type
+                  type: object
+                type: array
+              timeouts:
+                additionalProperties:
+                  type: string
+                description: 'Timeouts: check, connect, http-keep-alive, http-request,
+                  queue, server, tunnel. The timeout value specified in milliseconds
+                  by default, but can be in any other unit if the number is suffixed
+                  by the unit. More info: https://cbonte.github.io/haproxy-dconv/2.6/configuration.html'
+                type: object
+            required:
+            - binds
+            - defaultBackend
+            - mode
+            type: object
+          status:
+            description: Status defines the observed state of an object
+            properties:
+              error:
+                description: Error shows the actual error message if Phase is 'Error'.
+                type: string
+              observedGeneration:
+                description: ObservedGeneration the generation observed by the controller.
+                format: int64
+                type: integer
+              phase:
+                description: Phase is a simple, high-level summary of where the object
+                  is in its lifecycle.
+                type: string
+            required:
+            - phase
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

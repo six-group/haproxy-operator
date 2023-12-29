@@ -33,3 +33,27 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
           provenance: false
+  release-helm-chart:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    if: ${{ github.event.release.tag_name != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          VERSION=$(echo "${{github.event.release.tag_name }}" | sed 's/v//g')
+          sed -i "s/^version:.*$/version: ${VERSION}/"        ./helm/haproxy-operator/Chart.yaml
+          sed -i "s/^appVersion:.*$/appVersion: v${VERSION}/" ./helm/haproxy-operator/Chart.yaml
+      - uses: helm/chart-releaser-action@v1.6.0
+        with:
+          charts_dir: helm
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
