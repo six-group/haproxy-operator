@@ -1,3 +1,11 @@
+[![GitHub Action](https://img.shields.io/badge/GitHub-Action-blue)](https://github.com/features/actions)
+[![Github Build](https://github.com/six-group/haproxy-operator/actions/workflows/publish.yml/badge.svg)](https://github.com/six-group/haproxy-operator/actions/workflows/publish.yml)
+[![Github Test](https://github.com/six-group/haproxy-operator/actions/workflows/test.yml/badge.svg)](https://github.com/six-group/haproxy-operator/actions/workflows/test.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/six-group/haproxy-operator)](https://goreportcard.com/report/github.com/six-group/haproxy-operator)
+[![Coveralls github](https://img.shields.io/coveralls/github/six-group/haproxy-operator?logo=coveralls)](https://coveralls.io/github/six-group/haproxy-operator?branch=master)
+[![GitHub Release](https://img.shields.io/github/release/six-group/haproxy-operator.svg?style=flat)](https://github.com/six-group/haproxy-operator/releases)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # HAProxy Operator
 HAProxy Operator is a Kubernetes-native solution designed to automate the deployment, configuration, and management of HAProxy instances using Custom Resources to abstract the key components such as backends, frontends, and listens.
 
