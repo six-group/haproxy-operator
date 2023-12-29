@@ -1,0 +1,28 @@
+name: generate-html
+
+on:
+  push:
+    ignore_paths:
+      - '**.html'
+
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: helm plugin install https://github.com/halkeye/helm-repo-html
+      - run: helm repo-html --template _index.html.tpl 
+      - run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git add index.html
+          git commit -m "Udpate index.html"
+      - uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: 'gh-pages'

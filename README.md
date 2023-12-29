@@ -1,0 +1,1 @@
+For fruther details, see: https://six-group.github.io/haproxy-operator
