@@ -2,7 +2,7 @@ name: generate-html
 
 on:
   push:
-    ignore_paths:
+    paths-ignore:
       - '**.html'
 
   workflow_dispatch:
