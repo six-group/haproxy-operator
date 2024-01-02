@@ -6,7 +6,7 @@ require (
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-openapi/strfmt v0.22.0
 	github.com/haproxytech/client-native/v4 v4.1.7
-	github.com/haproxytech/config-parser/v4 v4.1.2
+	github.com/haproxytech/config-parser/v4 v4.2.1
 	github.com/onsi/ginkgo/v2 v2.13.0
 	github.com/onsi/gomega v1.30.0
 	github.com/openshift/api v0.0.0-20231117205818-971e4ba78c9a // latest commit of branch https://github.com/openshift/api/tree/release-4.14
@@ -70,7 +70,7 @@ require (
 	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.mongodb.org/mongo-driver v1.13.1 // indirect
-	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
