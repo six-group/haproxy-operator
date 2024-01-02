@@ -13,7 +13,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -194,9 +194,9 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 			}
 		}
 
-		if pointer.BoolDeref(instance.Spec.AllowPrivilegedPorts, false) {
+		if ptr.Deref(instance.Spec.AllowPrivilegedPorts, false) {
 			statefulset.Spec.Template.Spec.Containers[0].SecurityContext = &corev1.SecurityContext{
-				Privileged: pointer.Bool(true),
+				Privileged: ptr.To(true),
 			}
 		}
 

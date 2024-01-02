@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/gomega"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 )
 
 var simpleBackend = `
@@ -63,7 +62,7 @@ var _ = Describe("Backend", Label("type"), func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
 				Spec: configv1alpha1.BackendSpec{
-					Redispatch: pointer.Bool(true),
+					Redispatch: ptr.To(true),
 				},
 			}
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
@@ -102,7 +101,7 @@ var _ = Describe("Backend", Label("type"), func() {
 									},
 									Alpn: []string{"h2", "http/1.0"},
 								},
-								Weight: pointer.Int64(256),
+								Weight: ptr.To(int64(256)),
 								Check: &configv1alpha1.Check{
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 5 * time.Second},
@@ -146,7 +145,7 @@ var _ = Describe("Backend", Label("type"), func() {
 				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
 				Spec: configv1alpha1.BackendSpec{
 					BaseSpec: configv1alpha1.BaseSpec{
-						HTTPPretendKeepalive: pointer.Bool(true),
+						HTTPPretendKeepalive: ptr.To(true),
 					},
 				},
 			}
@@ -177,12 +176,12 @@ var _ = Describe("Backend", Label("type"), func() {
 						Mode: configv1alpha1.CookieMode{
 							Rewrite: true,
 						},
-						Indirect: pointer.Bool(true),
-						NoCache:  pointer.Bool(true),
-						PostOnly: pointer.Bool(true),
-						Preserve: pointer.Bool(true),
-						HTTPOnly: pointer.Bool(true),
-						Secure:   pointer.Bool(true),
+						Indirect: ptr.To(true),
+						NoCache:  ptr.To(true),
+						PostOnly: ptr.To(true),
+						Preserve: ptr.To(true),
+						HTTPOnly: ptr.To(true),
+						Secure:   ptr.To(true),
 						Domain: []string{
 							"domain1", ".openshift",
 						},
@@ -229,7 +228,7 @@ var _ = Describe("Backend", Label("type"), func() {
 									},
 									Alpn: []string{"h2", "http/1.0"},
 								},
-								Weight: pointer.Int64(256),
+								Weight: ptr.To(int64(256)),
 								Check: &configv1alpha1.Check{
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 5 * time.Second},
@@ -256,7 +255,7 @@ var _ = Describe("Backend", Label("type"), func() {
 										ConditionType: "unless",
 										Condition:     "has_www",
 									},
-									Code: pointer.Int64(301),
+									Code: ptr.To(int64(301)),
 									Type: configv1alpha1.RedirectType{
 										Location: true,
 									},
@@ -282,7 +281,7 @@ var _ = Describe("Backend", Label("type"), func() {
 										ConditionType: "unless",
 										Condition:     "begins_with_api",
 									},
-									Code: pointer.Int64(301),
+									Code: ptr.To(int64(301)),
 									Type: configv1alpha1.RedirectType{
 										Prefix: true,
 									},

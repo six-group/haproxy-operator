@@ -10,7 +10,7 @@ import (
 	parser "github.com/haproxytech/config-parser/v4"
 	"github.com/six-group/haproxy-operator/pkg/hash"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // BackendSpec defines the desired state of Backend
@@ -75,13 +75,13 @@ func (b *Backend) Model() (models.Backend, error) {
 	}
 
 	if b.Spec.CheckTimeout != nil {
-		model.CheckTimeout = pointer.Int64(b.Spec.CheckTimeout.Milliseconds())
+		model.CheckTimeout = ptr.To(b.Spec.CheckTimeout.Milliseconds())
 	}
 
 	if b.Spec.Forwardfor != nil {
 		var enabled *string
 		if b.Spec.Forwardfor.Enabled {
-			enabled = pointer.String(models.ForwardforEnabledEnabled)
+			enabled = ptr.To(models.ForwardforEnabledEnabled)
 		}
 		model.Forwardfor = &models.Forwardfor{
 			Enabled: enabled,
@@ -97,7 +97,7 @@ func (b *Backend) Model() (models.Backend, error) {
 
 	if b.Spec.Redispatch != nil && *b.Spec.Redispatch {
 		model.Redispatch = &models.Redispatch{
-			Enabled:  pointer.String(models.RedispatchEnabledEnabled),
+			Enabled:  ptr.To(models.RedispatchEnabledEnabled),
 			Interval: 3,
 		}
 	}
@@ -111,7 +111,7 @@ func (b *Backend) Model() (models.Backend, error) {
 
 	if b.Spec.Balance != nil {
 		model.Balance = &models.Balance{
-			Algorithm: pointer.String(strings.ToLower(b.Spec.Balance.Algorithm)),
+			Algorithm: ptr.To(strings.ToLower(b.Spec.Balance.Algorithm)),
 		}
 	}
 
@@ -119,16 +119,16 @@ func (b *Backend) Model() (models.Backend, error) {
 		name := hash.GetMD5Hash(b.Spec.Cookie.Name)
 
 		model.Cookie = &models.Cookie{
-			Httponly: pointer.BoolDeref(b.Spec.Cookie.HTTPOnly, false),
-			Indirect: pointer.BoolDeref(b.Spec.Cookie.Indirect, false),
+			Httponly: ptr.Deref(b.Spec.Cookie.HTTPOnly, false),
+			Indirect: ptr.Deref(b.Spec.Cookie.Indirect, false),
 			Maxidle:  b.Spec.Cookie.MaxIdle,
 			Maxlife:  b.Spec.Cookie.MaxLife,
-			Name:     pointer.String(name),
-			Nocache:  pointer.BoolDeref(b.Spec.Cookie.NoCache, false),
-			Postonly: pointer.BoolDeref(b.Spec.Cookie.PostOnly, false),
-			Preserve: pointer.BoolDeref(b.Spec.Cookie.Preserve, false),
-			Secure:   pointer.BoolDeref(b.Spec.Cookie.Secure, false),
-			Dynamic:  pointer.BoolDeref(b.Spec.Cookie.Dynamic, false),
+			Name:     ptr.To(name),
+			Nocache:  ptr.Deref(b.Spec.Cookie.NoCache, false),
+			Postonly: ptr.Deref(b.Spec.Cookie.PostOnly, false),
+			Preserve: ptr.Deref(b.Spec.Cookie.Preserve, false),
+			Secure:   ptr.Deref(b.Spec.Cookie.Secure, false),
+			Dynamic:  ptr.Deref(b.Spec.Cookie.Dynamic, false),
 		}
 
 		for _, attr := range b.Spec.Cookie.Attribute {
@@ -154,7 +154,7 @@ func (b *Backend) Model() (models.Backend, error) {
 			return models.Backend{}, fmt.Errorf("you can only select one cookie mode")
 		}
 
-		if pointer.BoolDeref(b.Spec.Cookie.Dynamic, false) {
+		if ptr.Deref(b.Spec.Cookie.Dynamic, false) {
 			model.DynamicCookieKey = name
 		}
 	}
@@ -162,19 +162,19 @@ func (b *Backend) Model() (models.Backend, error) {
 	for name, timeout := range b.Spec.Timeouts {
 		switch name {
 		case "check":
-			model.CheckTimeout = pointer.Int64(timeout.Milliseconds())
+			model.CheckTimeout = ptr.To(timeout.Milliseconds())
 		case "connect":
-			model.ConnectTimeout = pointer.Int64(timeout.Milliseconds())
+			model.ConnectTimeout = ptr.To(timeout.Milliseconds())
 		case "http-keep-alive":
-			model.HTTPKeepAliveTimeout = pointer.Int64(timeout.Milliseconds())
+			model.HTTPKeepAliveTimeout = ptr.To(timeout.Milliseconds())
 		case "http-request":
-			model.HTTPRequestTimeout = pointer.Int64(timeout.Milliseconds())
+			model.HTTPRequestTimeout = ptr.To(timeout.Milliseconds())
 		case "queue":
-			model.QueueTimeout = pointer.Int64(timeout.Milliseconds())
+			model.QueueTimeout = ptr.To(timeout.Milliseconds())
 		case "server":
-			model.ServerTimeout = pointer.Int64(timeout.Milliseconds())
+			model.ServerTimeout = ptr.To(timeout.Milliseconds())
 		case "tunnel":
-			model.TunnelTimeout = pointer.Int64(timeout.Milliseconds())
+			model.TunnelTimeout = ptr.To(timeout.Milliseconds())
 		default:
 			return model, fmt.Errorf("timeout %s unknown", name)
 		}

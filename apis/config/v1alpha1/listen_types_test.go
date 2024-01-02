@@ -9,7 +9,7 @@ import (
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 var simple = `
@@ -61,13 +61,13 @@ var _ = Describe("Listen", Label("type"), func() {
 									},
 									Name: "X-Forwarded-Host",
 									Value: configv1alpha1.HTTPHeaderValue{
-										Str: pointer.String("local.com"),
+										Str: ptr.To("local.com"),
 									},
 								},
 								{
 									Name: "X-Forwarded-Port",
 									Value: configv1alpha1.HTTPHeaderValue{
-										Str: pointer.String("8055"),
+										Str: ptr.To("8055"),
 									},
 								},
 							},
@@ -88,14 +88,14 @@ var _ = Describe("Listen", Label("type"), func() {
 									},
 									Name: "SOAPAction",
 									Value: configv1alpha1.HTTPHeaderValue{
-										Str: pointer.String("\"urn:mediate\""),
+										Str: ptr.To("\"urn:mediate\""),
 									},
 								},
 								{
 									Name: "X-Forwarded-Proto",
 									Value: configv1alpha1.HTTPHeaderValue{
-										Str:    pointer.String("s"),
-										Format: pointer.String("http%s"),
+										Str:    ptr.To("s"),
+										Format: ptr.To("http%s"),
 									},
 								},
 								{
@@ -104,7 +104,7 @@ var _ = Describe("Listen", Label("type"), func() {
 										Env: &corev1.EnvVar{
 											Name: "PROTO_VERSION",
 										},
-										Format: pointer.String("\"%s\""),
+										Format: ptr.To("\"%s\""),
 									},
 								},
 							},
@@ -153,7 +153,7 @@ var _ = Describe("Listen", Label("type"), func() {
 				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
 				Spec: configv1alpha1.ListenSpec{
 					ServerTemplates: []configv1alpha1.ServerTemplate{
-						{FQDN: "google.com", NumMin: pointer.Int64(1), Num: 3, Port: 80, Prefix: "srv", ServerParams: configv1alpha1.ServerParams{Check: &configv1alpha1.Check{Enabled: true}}},
+						{FQDN: "google.com", NumMin: ptr.To(int64(1)), Num: 3, Port: 80, Prefix: "srv", ServerParams: configv1alpha1.ServerParams{Check: &configv1alpha1.Check{Enabled: true}}},
 					},
 				},
 			}
@@ -178,7 +178,7 @@ var _ = Describe("Listen", Label("type"), func() {
 			listen := &configv1alpha1.Listen{
 				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
 				Spec: configv1alpha1.ListenSpec{
-					Redispatch: pointer.Bool(true),
+					Redispatch: ptr.To(true),
 				},
 			}
 			Ω(listen.AddToParser(p)).ShouldNot(HaveOccurred())
@@ -240,7 +240,7 @@ var _ = Describe("Listen", Label("type"), func() {
 									},
 									SNI: "str(localhost)",
 								},
-								Weight: pointer.Int64(256),
+								Weight: ptr.To(int64(256)),
 								Check: &configv1alpha1.Check{
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 5 * time.Second},
@@ -408,12 +408,12 @@ var _ = Describe("Listen", Label("type"), func() {
 						Mode: configv1alpha1.CookieMode{
 							Rewrite: true,
 						},
-						Indirect:  pointer.Bool(true),
-						NoCache:   pointer.Bool(true),
-						PostOnly:  pointer.Bool(true),
-						Preserve:  pointer.Bool(true),
-						HTTPOnly:  pointer.Bool(true),
-						Secure:    pointer.Bool(true),
+						Indirect:  ptr.To(true),
+						NoCache:   ptr.To(true),
+						PostOnly:  ptr.To(true),
+						Preserve:  ptr.To(true),
+						HTTPOnly:  ptr.To(true),
+						Secure:    ptr.To(true),
 						Domain:    []string{"domain1", ".openshift"},
 						MaxIdle:   120,
 						MaxLife:   45,
@@ -431,7 +431,7 @@ var _ = Describe("Listen", Label("type"), func() {
 					BaseSpec: configv1alpha1.BaseSpec{
 						HTTPRequest: &configv1alpha1.HTTPRequestRules{
 							Return: &configv1alpha1.HTTPReturn{
-								Status: pointer.Int64(200),
+								Status: ptr.To(int64(200)),
 								Content: configv1alpha1.HTTPReturnContent{
 									Type:   "text/plain",
 									Format: "lf-string",
