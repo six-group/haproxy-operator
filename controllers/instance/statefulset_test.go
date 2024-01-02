@@ -68,7 +68,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 		})
 
 		It("create statefulset", func() {
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
 			r := Reconciler{
 				Client: cli,
 				Scheme: scheme,

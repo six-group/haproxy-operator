@@ -52,7 +52,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				},
 			}
 
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(proxy, frontend).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(proxy, frontend).WithStatusSubresource(proxy, frontend).Build()
 			r := config.Reconciler{
 				Client: cli,
 				Scheme: scheme,
@@ -96,7 +96,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				},
 			}
 
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(proxy, listen).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(proxy, listen).WithStatusSubresource(proxy, listen).Build()
 			r := config.Reconciler{
 				Client: cli,
 				Scheme: scheme,
@@ -119,7 +119,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				},
 			}
 
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(listen).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(listen).WithStatusSubresource(listen).Build()
 			r := config.Reconciler{
 				Client: cli,
 				Scheme: scheme,
@@ -161,7 +161,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				},
 			}
 
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(proxy, listen).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(proxy, listen).WithStatusSubresource(proxy, listen).Build()
 			r := config.Reconciler{
 				Client: cli,
 				Scheme: scheme,
@@ -193,7 +193,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					OwnerReferences: []metav1.OwnerReference{*reference.DeepCopy()},
 				},
 			}
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(backend).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(backend).WithStatusSubresource(backend).Build()
 			r := config.Reconciler{
 				Client: cli,
 				Scheme: scheme,

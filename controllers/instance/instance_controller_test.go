@@ -348,7 +348,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 		})
 
 		It("should deploy haproxy instance", func() {
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
 			r := instance.Reconciler{
 				Client: cli,
 				Scheme: scheme,
@@ -385,7 +385,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			backend.Name = "foo"
 			frontend.Name = "foo"
 
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
 			r := instance.Reconciler{
 				Client: cli,
 				Scheme: scheme,
@@ -404,7 +404,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 		})
 
 		It("should set status to pending if there is no listens", func() {
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(proxy).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(proxy).WithStatusSubresource(proxy).Build()
 			r := instance.Reconciler{
 				Client: cli,
 				Scheme: scheme,
@@ -418,7 +418,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(proxy.Status.Error).ShouldNot(BeEmpty())
 		})
 		It("should create custom certs", func() {
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
 			r := instance.Reconciler{
 				Client: cli,
 				Scheme: scheme,
