@@ -13,7 +13,7 @@ import (
 	"github.com/six-group/haproxy-operator/pkg/hash"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -161,7 +161,7 @@ func (t *TCPRequestRule) Model() (models.TCPRequestRule, error) {
 		Cond:     t.ConditionType,
 		CondTest: t.Condition,
 		Type:     t.Type,
-		Index:    pointer.Int64(0),
+		Index:    ptr.To(int64(0)),
 	}
 
 	if t.Action != nil {
@@ -169,7 +169,7 @@ func (t *TCPRequestRule) Model() (models.TCPRequestRule, error) {
 	}
 
 	if t.Timeout != nil {
-		model.Timeout = pointer.Int64(t.Timeout.Milliseconds())
+		model.Timeout = ptr.To(t.Timeout.Milliseconds())
 	}
 
 	return model, model.Validate(strfmt.Default)
@@ -198,7 +198,7 @@ func (a *ACL) Model() (models.ACL, error) {
 		ACLName:   a.Name,
 		Criterion: a.Criterion,
 		Value:     values,
-		Index:     pointer.Int64(0),
+		Index:     ptr.To(int64(0)),
 	}
 
 	return model, model.Validate(strfmt.Default)
@@ -285,12 +285,12 @@ type Bind struct {
 func (b *Bind) Model() (models.Bind, error) {
 	model := models.Bind{
 		Address:      b.Address,
-		Port:         pointer.Int64(b.Port),
+		Port:         ptr.To(b.Port),
 		PortRangeEnd: b.PortRangeEnd,
 		BindParams: models.BindParams{
 			Name:        b.Name,
 			Transparent: b.Transparent,
-			AcceptProxy: pointer.BoolDeref(b.AcceptProxy, false),
+			AcceptProxy: ptr.Deref(b.AcceptProxy, false),
 		},
 	}
 
@@ -384,7 +384,7 @@ func (s *ServerTemplate) Model() (models.ServerTemplate, error) {
 			InitAddr: s.InitAddr,
 		},
 		Fqdn:   s.FQDN,
-		Port:   pointer.Int64(s.Port),
+		Port:   ptr.To(s.Port),
 		Prefix: s.Prefix,
 	}
 
@@ -394,7 +394,7 @@ func (s *ServerTemplate) Model() (models.ServerTemplate, error) {
 		model.NumOrRange = strconv.Itoa(int(s.Num))
 	}
 
-	if pointer.BoolDeref(s.SendProxy, false) {
+	if ptr.Deref(s.SendProxy, false) {
 		model.SendProxy = models.ServerParamsSendProxyEnabled
 	}
 
@@ -415,6 +415,7 @@ func (s *ServerTemplate) Model() (models.ServerTemplate, error) {
 
 	if s.SSL != nil && s.SSL.Enabled {
 		model.Ssl = models.ServerParamsSslEnabled
+		model.Verify = s.SSL.Verify
 
 		if s.SSL.Certificate != nil {
 			model.SslCertificate = s.SSL.Certificate.FilePath()
@@ -439,7 +440,7 @@ func (s *ServerTemplate) Model() (models.ServerTemplate, error) {
 		model.Check = models.ServerParamsCheckEnabled
 
 		if s.Check.Inter != nil {
-			model.Inter = pointer.Int64(s.Check.Inter.Milliseconds())
+			model.Inter = ptr.To(s.Check.Inter.Milliseconds())
 		}
 
 		model.Rise = s.Check.Rise
@@ -506,14 +507,14 @@ func (s *Server) Model() (models.Server, error) {
 		},
 		Name:    s.Name,
 		Address: s.Address,
-		Port:    pointer.Int64(s.Port),
+		Port:    ptr.To(s.Port),
 	}
 
 	if s.Cookie {
 		model.ServerParams.Cookie = hash.GetMD5Hash(model.Address + ":" + strconv.Itoa(int(*model.Port)))
 	}
 
-	if pointer.BoolDeref(s.SendProxy, false) {
+	if ptr.Deref(s.SendProxy, false) {
 		model.SendProxy = models.ServerParamsSendProxyEnabled
 	}
 
@@ -558,7 +559,7 @@ func (s *Server) Model() (models.Server, error) {
 		model.Check = models.ServerParamsCheckEnabled
 
 		if s.Check.Inter != nil {
-			model.Inter = pointer.Int64(s.Check.Inter.Milliseconds())
+			model.Inter = ptr.To(s.Check.Inter.Milliseconds())
 		}
 
 		model.Rise = s.Check.Rise
@@ -628,7 +629,7 @@ type Balance struct {
 
 func (b *Balance) Model() (models.Balance, error) {
 	model := models.Balance{
-		Algorithm: pointer.String(b.Algorithm),
+		Algorithm: ptr.To(b.Algorithm),
 	}
 
 	return model, model.Validate(strfmt.Default)
@@ -747,7 +748,7 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 	for idx, header := range h.SetHeader {
 		model = append(model, &models.HTTPRequestRule{
 			Type:      "set-header",
-			Index:     pointer.Int64(int64(idx)),
+			Index:     ptr.To(int64(idx)),
 			HdrName:   header.Name,
 			HdrFormat: header.Value.String(),
 			Cond:      header.ConditionType,
@@ -758,7 +759,7 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 	for idx, path := range h.SetPath {
 		model = append(model, &models.HTTPRequestRule{
 			Type:     "set-path",
-			Index:    pointer.Int64(int64(idx)),
+			Index:    ptr.To(int64(idx)),
 			PathFmt:  path.Value,
 			Cond:     path.ConditionType,
 			CondTest: path.Condition,
@@ -768,7 +769,7 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 	for idx, header := range h.AddHeader {
 		model = append(model, &models.HTTPRequestRule{
 			Type:      "add-header",
-			Index:     pointer.Int64(int64(idx)),
+			Index:     ptr.To(int64(idx)),
 			HdrName:   header.Name,
 			HdrFormat: header.Value.String(),
 			Cond:      header.ConditionType,
@@ -779,7 +780,7 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 	if h.Deny != nil && h.Deny.Enabled {
 		model = append(model, &models.HTTPRequestRule{
 			DenyStatus: h.DenyStatus,
-			Index:      pointer.Int64(int64(0)),
+			Index:      ptr.To(int64(0)),
 			Type:       "deny",
 			Cond:       h.Deny.ConditionType,
 			CondTest:   h.Deny.Condition,
@@ -790,7 +791,7 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		redirectRule := &models.HTTPRequestRule{
 			Cond:       redirect.ConditionType,
 			CondTest:   redirect.Condition,
-			Index:      pointer.Int64(int64(idx)),
+			Index:      ptr.To(int64(idx)),
 			RedirCode:  redirect.Code,
 			RedirValue: redirect.Value,
 			Type:       "redirect",
@@ -846,14 +847,14 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		model = append(model, &models.HTTPRequestRule{
 			Type:                "return",
 			ReturnStatusCode:    h.Return.Status,
-			ReturnContentType:   pointer.String(h.Return.Content.Type),
+			ReturnContentType:   ptr.To(h.Return.Content.Type),
 			ReturnContentFormat: h.Return.Content.Format,
 			ReturnContent:       value,
 		})
 	}
 
 	for i := 0; i < len(model); i++ {
-		model[i].Index = pointer.Int64(int64(i))
+		model[i].Index = ptr.To(int64(i))
 	}
 
 	return model, model.Validate(strfmt.Default)
@@ -900,7 +901,7 @@ type HTTPHeaderValue struct {
 }
 
 func (h *HTTPHeaderValue) String() string {
-	str := pointer.StringDeref(h.Str, "")
+	str := ptr.Deref(h.Str, "")
 	if h.Env != nil {
 		str = fmt.Sprintf("${%s}", h.Env.Name)
 	}

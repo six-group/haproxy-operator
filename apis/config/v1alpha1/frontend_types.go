@@ -10,7 +10,7 @@ import (
 	parser "github.com/haproxytech/config-parser/v4"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // FrontendSpec defines the desired state of Frontend
@@ -36,7 +36,7 @@ func (b *BackendSwitchingRule) Model() (models.BackendSwitchingRule, error) {
 	model := models.BackendSwitchingRule{
 		Cond:     b.ConditionType,
 		CondTest: b.Condition,
-		Index:    pointer.Int64(0),
+		Index:    ptr.To(int64(0)),
 		Name:     b.Backend.String(),
 	}
 
@@ -55,7 +55,7 @@ func (b *BackendReference) String() string {
 		return fmt.Sprintf("%%[%s,map_reg(%s)]", b.RegexMapping.Parameter, b.RegexMapping.FilePath())
 	}
 
-	return pointer.StringDeref(b.Name, "")
+	return ptr.Deref(b.Name, "")
 }
 
 func (r *RegexBackendMapping) FoundCondition() string {
@@ -110,7 +110,7 @@ func (f *Frontend) Model() (models.Frontend, error) {
 	if f.Spec.Forwardfor != nil {
 		var enabled *string
 		if f.Spec.Forwardfor.Enabled {
-			enabled = pointer.String(models.ForwardforEnabledEnabled)
+			enabled = ptr.To(models.ForwardforEnabledEnabled)
 		}
 		model.Forwardfor = &models.Forwardfor{
 			Enabled: enabled,
@@ -123,11 +123,11 @@ func (f *Frontend) Model() (models.Frontend, error) {
 	for name, timeout := range f.Spec.Timeouts {
 		switch name {
 		case "client":
-			model.ClientTimeout = pointer.Int64(timeout.Milliseconds())
+			model.ClientTimeout = ptr.To(timeout.Milliseconds())
 		case "http-keep-alive":
-			model.HTTPKeepAliveTimeout = pointer.Int64(timeout.Milliseconds())
+			model.HTTPKeepAliveTimeout = ptr.To(timeout.Milliseconds())
 		case "http-request":
-			model.HTTPRequestTimeout = pointer.Int64(timeout.Milliseconds())
+			model.HTTPRequestTimeout = ptr.To(timeout.Milliseconds())
 		default:
 			return model, fmt.Errorf("timeout %s unknown", name)
 		}

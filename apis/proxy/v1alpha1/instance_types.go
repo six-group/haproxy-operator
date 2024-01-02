@@ -17,7 +17,7 @@ import (
 	"go.uber.org/multierr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // InstanceSpec defines the desired state of Instance
@@ -122,7 +122,7 @@ func (m *Metrics) AddToParser(p parser.Parser) error {
 		StatsOptions: &models.StatsOptions{
 			StatsEnable:       true,
 			StatsURIPrefix:    "/stats",
-			StatsRefreshDelay: pointer.Int64((10 * time.Second).Milliseconds()),
+			StatsRefreshDelay: ptr.To((10 * time.Second).Milliseconds()),
 		},
 	}
 	if err := p.SectionsCreate(parser.Frontends, frontend.Name); err != nil {
@@ -136,8 +136,8 @@ func (m *Metrics) AddToParser(p parser.Parser) error {
 		BindParams: models.BindParams{
 			Name: "metrics",
 		},
-		Port:    pointer.Int64(m.Port),
-		Address: pointer.StringDeref(m.Address, "0.0.0.0"),
+		Port:    ptr.To(m.Port),
+		Address: ptr.Deref(m.Address, "0.0.0.0"),
 	}
 	if err := p.Insert(parser.Frontends, frontend.Name, "bind", configuration.SerializeBind(bind), 0); err != nil {
 		return err
@@ -187,7 +187,7 @@ type DefaultsLoggingConfiguration struct {
 func (l *DefaultsLoggingConfiguration) Model() (models.LogTarget, error) {
 	logTarget := models.LogTarget{
 		Global: l.Enabled,
-		Index:  pointer.Int64(0),
+		Index:  ptr.To(int64(0)),
 	}
 
 	return logTarget, logTarget.Validate(strfmt.Default)
@@ -228,8 +228,8 @@ type GlobalConfiguration struct {
 
 func (g *GlobalConfiguration) Model() (models.Global, error) {
 	global := models.Global{
-		Maxconn:  pointer.Int64Deref(g.Maxconn, 0),
-		Nbthread: pointer.Int64Deref(g.Nbthread, 0),
+		Maxconn:  ptr.Deref(g.Maxconn, 0),
+		Nbthread: ptr.Deref(g.Nbthread, 0),
 	}
 
 	if g.AdditionalParameters != "" {
@@ -248,12 +248,12 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 	}
 
 	if g.StatsTimeout != nil {
-		global.StatsTimeout = pointer.Int64(g.StatsTimeout.Milliseconds())
+		global.StatsTimeout = ptr.To(g.StatsTimeout.Milliseconds())
 	}
 
 	if g.Reload {
 		global.RuntimeAPIs = append(global.RuntimeAPIs, &models.RuntimeAPI{
-			Address: pointer.String("/var/lib/haproxy/run/haproxy.sock"),
+			Address: ptr.To("/var/lib/haproxy/run/haproxy.sock"),
 			BindParams: models.BindParams{
 				ExposeFdListeners: true,
 				Level:             "admin",
@@ -291,7 +291,7 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 	}
 
 	if g.HardStopAfter != nil {
-		global.HardStopAfter = pointer.Int64(g.HardStopAfter.Milliseconds())
+		global.HardStopAfter = ptr.To(g.HardStopAfter.Milliseconds())
 	}
 
 	return global, global.Validate(strfmt.Default)
@@ -407,8 +407,8 @@ type GlobalSSLTuneOptions struct {
 
 func (t *GlobalTuneOptions) Model() (models.GlobalTuneOptions, error) {
 	opts := models.GlobalTuneOptions{
-		Maxrewrite: pointer.Int64Deref(t.Maxrewrite, 0),
-		Bufsize:    pointer.Int64Deref(t.Bufsize, 0),
+		Maxrewrite: ptr.Deref(t.Maxrewrite, 0),
+		Bufsize:    ptr.Deref(t.Bufsize, 0),
 	}
 
 	if t.SSL != nil {
@@ -421,7 +421,7 @@ func (t *GlobalTuneOptions) Model() (models.GlobalTuneOptions, error) {
 		opts.SslCaptureBufferSize = t.SSL.CaptureBufferSize
 
 		if t.SSL.Lifetime != nil {
-			opts.SslLifetime = pointer.Int64(int64(math.Round(t.SSL.Lifetime.Seconds())))
+			opts.SslLifetime = ptr.To(int64(math.Round(t.SSL.Lifetime.Seconds())))
 		}
 	}
 
@@ -462,15 +462,15 @@ func (l *GlobalLoggingConfiguration) Model() (models.LogTarget, models.GlobalLog
 		Level:    l.Level,
 		Facility: l.Facility,
 		Format:   l.Format,
-		Index:    pointer.Int64(0),
+		Index:    ptr.To(int64(0)),
 	}
 
 	logSendHostname := models.GlobalLogSendHostname{
-		Enabled: pointer.String("disabled"),
+		Enabled: ptr.To("disabled"),
 	}
-	if pointer.BoolDeref(l.SendHostname, false) {
-		logSendHostname.Enabled = pointer.String(models.GlobalLogSendHostnameEnabledEnabled)
-		logSendHostname.Param = pointer.StringDeref(l.Hostname, "")
+	if ptr.Deref(l.SendHostname, false) {
+		logSendHostname.Enabled = ptr.To(models.GlobalLogSendHostnameEnabledEnabled)
+		logSendHostname.Param = ptr.Deref(l.Hostname, "")
 	}
 
 	return logTarget, logSendHostname, multierr.Combine(logTarget.Validate(strfmt.Default), logSendHostname.Validate(strfmt.Default))
@@ -516,25 +516,25 @@ func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
 	for name, timeout := range d.Timeouts {
 		switch name {
 		case "check":
-			defaults.CheckTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.CheckTimeout = ptr.To(timeout.Milliseconds())
 		case "client":
-			defaults.ClientTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.ClientTimeout = ptr.To(timeout.Milliseconds())
 		case "client-fin":
-			defaults.ClientFinTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.ClientFinTimeout = ptr.To(timeout.Milliseconds())
 		case "connect":
-			defaults.ConnectTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.ConnectTimeout = ptr.To(timeout.Milliseconds())
 		case "http-keep-alive":
-			defaults.HTTPKeepAliveTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.HTTPKeepAliveTimeout = ptr.To(timeout.Milliseconds())
 		case "http-request":
-			defaults.HTTPRequestTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.HTTPRequestTimeout = ptr.To(timeout.Milliseconds())
 		case "queue":
-			defaults.QueueTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.QueueTimeout = ptr.To(timeout.Milliseconds())
 		case "server":
-			defaults.ServerTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.ServerTimeout = ptr.To(timeout.Milliseconds())
 		case "server-fin":
-			defaults.ServerFinTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.ServerFinTimeout = ptr.To(timeout.Milliseconds())
 		case "tunnel":
-			defaults.TunnelTimeout = pointer.Int64(timeout.Milliseconds())
+			defaults.TunnelTimeout = ptr.To(timeout.Milliseconds())
 		default:
 			return defaults, fmt.Errorf("timeout %s unknown", name)
 		}
@@ -550,8 +550,8 @@ func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
 	}
 
 	if d.Logging != nil {
-		defaults.Httplog = pointer.BoolDeref(d.Logging.HTTPLog, false)
-		defaults.Tcplog = pointer.BoolDeref(d.Logging.TCPLog, false)
+		defaults.Httplog = ptr.Deref(d.Logging.HTTPLog, false)
+		defaults.Tcplog = ptr.Deref(d.Logging.TCPLog, false)
 	}
 
 	return defaults, defaults.Validate(strfmt.Default)

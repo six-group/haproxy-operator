@@ -18,7 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -71,7 +71,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 								Enabled:      true,
 								Address:      "/var/lib/rsyslog/rsyslog.sock",
 								Facility:     "local0",
-								SendHostname: pointer.Bool(true),
+								SendHostname: ptr.To(true),
 							},
 							HardStopAfter: &dur,
 						},
@@ -103,8 +103,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Address:     "unix@/var/lib/haproxy/run/local.sock",
 							Port:        9443,
 							Name:        "https",
-							AcceptProxy: pointer.Bool(true),
-							Hidden:      pointer.Bool(true),
+							AcceptProxy: ptr.To(true),
+							Hidden:      ptr.To(true),
 							SSL: &configv1alpha1.SSL{
 								Enabled: true,
 							},
@@ -138,8 +138,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Address:     "unix@/var/lib/haproxy/run/local.sock",
 							Port:        9443,
 							Name:        "https",
-							AcceptProxy: pointer.Bool(true),
-							Hidden:      pointer.Bool(true),
+							AcceptProxy: ptr.To(true),
+							Hidden:      ptr.To(true),
 							SSL: &configv1alpha1.SSL{
 								Enabled: true,
 							},
@@ -164,8 +164,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Address:     "unix@/var/lib/haproxy/run/local.sock",
 							Port:        9443,
 							Name:        "https",
-							AcceptProxy: pointer.Bool(true),
-							Hidden:      pointer.Bool(true),
+							AcceptProxy: ptr.To(true),
+							Hidden:      ptr.To(true),
 							SSL: &configv1alpha1.SSL{
 								Enabled: true,
 							},
@@ -204,7 +204,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 									Alpn: []string{"h2", "http/1.0"},
 								},
 								VerifyHost: "routername.namespace.svc",
-								Weight:     pointer.Int64(256),
+								Weight:     ptr.To(int64(256)),
 								Check: &configv1alpha1.Check{
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 5 * time.Second},
@@ -248,7 +248,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 									Alpn: []string{"h2", "http/1.0"},
 								},
 								VerifyHost: "routername.namespace.svc",
-								Weight:     pointer.Int64(256),
+								Weight:     ptr.To(int64(256)),
 								Check: &configv1alpha1.Check{
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 5 * time.Second},
@@ -286,8 +286,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Address:     "${BIND_ADDRESS}",
 							Port:        int64(20005),
 							Name:        fmt.Sprintf("tcp-%d", 20005),
-							AcceptProxy: pointer.Bool(true),
-							Hidden:      pointer.Bool(true),
+							AcceptProxy: ptr.To(true),
+							Hidden:      ptr.To(true),
 							SSL: &configv1alpha1.SSL{
 								Enabled: true,
 							},
@@ -312,9 +312,9 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 									Verify:  "required",
 									Alpn:    []string{"http/1.1", "h2"},
 								},
-								Weight:     pointer.Int64(256),
+								Weight:     ptr.To(int64(256)),
 								VerifyHost: "routeName" + "." + "routeName" + ".svc",
-								InitAddr:   pointer.String("none"),
+								InitAddr:   ptr.To("none"),
 								Check: &configv1alpha1.Check{
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 500 * time.Millisecond},
@@ -336,7 +336,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					Labels:    labels,
 				},
 				Spec: configv1alpha1.ResolverSpec{
-					ParseResolvConf: pointer.Bool(true),
+					ParseResolvConf: ptr.To(true),
 					Hold: &configv1alpha1.Hold{
 						Nx:    &metav1.Duration{Duration: 500 * time.Millisecond},
 						Valid: &metav1.Duration{Duration: 1 * time.Second},

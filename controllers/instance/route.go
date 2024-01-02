@@ -10,7 +10,7 @@ import (
 	"github.com/six-group/haproxy-operator/pkg/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -41,7 +41,7 @@ func (r *Reconciler) createOrUpdateRouteForFrontend(ctx context.Context, instanc
 	logger := log.FromContext(ctx)
 
 	for _, bind := range frontend.Spec.Binds {
-		if pointer.BoolDeref(bind.Hidden, false) {
+		if ptr.Deref(bind.Hidden, false) {
 			continue
 		}
 

@@ -1,6 +1,9 @@
 package v1alpha1_test
 
 import (
+	"fmt"
+	"time"
+
 	parser "github.com/haproxytech/config-parser/v4"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -25,7 +28,6 @@ var _ = Describe("Frontend", Label("type"), func() {
 			p, err = parser.New()
 			Ω(err).ShouldNot(HaveOccurred())
 		})
-
 		It("should create frontend", func() {
 			frontend := &configv1alpha1.Frontend{
 				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
@@ -33,7 +35,6 @@ var _ = Describe("Frontend", Label("type"), func() {
 			Ω(frontend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(Equal(simpleFrontend))
 		})
-
 		It("should create map_reg", func() {
 			backend := configv1alpha1.BackendReference{
 				RegexMapping: &configv1alpha1.RegexBackendMapping{
@@ -59,6 +60,43 @@ var _ = Describe("Frontend", Label("type"), func() {
 			Ω(frontend.AddToParser(p)).ShouldNot(HaveOccurred())
 			a := p.String()
 			Ω(a).Should(Equal(withBackendRule))
+		})
+		It("should set timeouts", func() {
+			timeouts := map[string]metav1.Duration{
+				"client":          {Duration: 5 * time.Second},
+				"http-keep-alive": {Duration: 10 * time.Second},
+				"http-request":    {Duration: 15 * time.Second},
+			}
+
+			frontend := &configv1alpha1.Frontend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.FrontendSpec{
+					BaseSpec: configv1alpha1.BaseSpec{
+						Timeouts: timeouts,
+					},
+				},
+			}
+			Ω(frontend.AddToParser(p)).ShouldNot(HaveOccurred())
+
+			for name, duration := range timeouts {
+				Ω(p.String()).Should(ContainSubstring(fmt.Sprintf("timeout %s %d", name, duration.Duration.Milliseconds())))
+			}
+		})
+		It("should not set invalid timeouts", func() {
+			timeouts := map[string]metav1.Duration{
+				"server": {Duration: 5 * time.Second},
+				"tunnel": {Duration: 10 * time.Second},
+			}
+
+			frontend := &configv1alpha1.Frontend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.FrontendSpec{
+					BaseSpec: configv1alpha1.BaseSpec{
+						Timeouts: timeouts,
+					},
+				},
+			}
+			Ω(frontend.AddToParser(p)).Should(HaveOccurred())
 		})
 	})
 })

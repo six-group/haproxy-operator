@@ -6,7 +6,7 @@ import (
 	"github.com/haproxytech/client-native/v4/models"
 	parser "github.com/haproxytech/config-parser/v4"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // ResolverSpec defines the desired state of Resolver
@@ -50,8 +50,8 @@ type Nameserver struct {
 func (n *Nameserver) Model() (models.Nameserver, error) {
 	model := models.Nameserver{
 		Name:    n.Name,
-		Address: pointer.String(n.Address),
-		Port:    pointer.Int64(n.Port),
+		Address: ptr.To(n.Address),
+		Port:    ptr.To(n.Port),
 	}
 
 	return model, model.Validate(strfmt.Default)
@@ -108,8 +108,8 @@ func (r *Resolver) GetStatus() Status {
 func (r *Resolver) Model() (models.Resolver, error) {
 	model := models.Resolver{
 		Name:            r.Name,
-		ParseResolvConf: pointer.BoolDeref(r.Spec.ParseResolvConf, false),
-		ResolveRetries:  pointer.Int64Deref(r.Spec.ResolveRetries, 3),
+		ParseResolvConf: ptr.Deref(r.Spec.ParseResolvConf, false),
+		ResolveRetries:  ptr.Deref(r.Spec.ResolveRetries, 3),
 		TimeoutResolve:  1000,
 		TimeoutRetry:    1000,
 	}
@@ -120,22 +120,22 @@ func (r *Resolver) Model() (models.Resolver, error) {
 
 	if r.Spec.Hold != nil {
 		if r.Spec.Hold.Nx != nil {
-			model.HoldNx = pointer.Int64(r.Spec.Hold.Nx.Milliseconds())
+			model.HoldNx = ptr.To(r.Spec.Hold.Nx.Milliseconds())
 		}
 		if r.Spec.Hold.Obsolete != nil {
-			model.HoldObsolete = pointer.Int64(r.Spec.Hold.Obsolete.Milliseconds())
+			model.HoldObsolete = ptr.To(r.Spec.Hold.Obsolete.Milliseconds())
 		}
 		if r.Spec.Hold.Other != nil {
-			model.HoldOther = pointer.Int64(r.Spec.Hold.Other.Milliseconds())
+			model.HoldOther = ptr.To(r.Spec.Hold.Other.Milliseconds())
 		}
 		if r.Spec.Hold.Refused != nil {
-			model.HoldRefused = pointer.Int64(r.Spec.Hold.Refused.Milliseconds())
+			model.HoldRefused = ptr.To(r.Spec.Hold.Refused.Milliseconds())
 		}
 		if r.Spec.Hold.Timeout != nil {
-			model.HoldTimeout = pointer.Int64(r.Spec.Hold.Timeout.Milliseconds())
+			model.HoldTimeout = ptr.To(r.Spec.Hold.Timeout.Milliseconds())
 		}
 		if r.Spec.Hold.Valid != nil {
-			model.HoldValid = pointer.Int64(r.Spec.Hold.Valid.Milliseconds())
+			model.HoldValid = ptr.To(r.Spec.Hold.Valid.Milliseconds())
 		}
 	}
 

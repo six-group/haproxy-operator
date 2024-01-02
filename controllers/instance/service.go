@@ -11,7 +11,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -40,7 +40,7 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 		service.Spec.Ports = []corev1.ServicePort{}
 		for _, listen := range listens.Items {
 			for _, bind := range listen.Spec.Binds {
-				if pointer.BoolDeref(bind.Hidden, false) {
+				if ptr.Deref(bind.Hidden, false) {
 					continue
 				}
 
@@ -55,7 +55,7 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 
 		for _, frontend := range frontends.Items {
 			for _, bind := range frontend.Spec.Binds {
-				if pointer.BoolDeref(bind.Hidden, false) {
+				if ptr.Deref(bind.Hidden, false) {
 					continue
 				}
 
@@ -118,7 +118,7 @@ func (r *Reconciler) reconcileServiceEndpoints(ctx context.Context, instance *pr
 		for host, ip := range instance.Spec.Network.HostIPs {
 			addresses = append(addresses, corev1.EndpointAddress{
 				IP:       ip,
-				NodeName: pointer.String(host),
+				NodeName: ptr.To(host),
 			})
 		}
 		sort.Slice(addresses, func(i, j int) bool {
