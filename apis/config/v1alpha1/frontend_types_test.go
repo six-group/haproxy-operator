@@ -2,12 +2,13 @@ package v1alpha1_test
 
 import (
 	"fmt"
+	"time"
+
 	parser "github.com/haproxytech/config-parser/v4"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 var simpleFrontend = `
