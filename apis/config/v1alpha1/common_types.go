@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/haproxytech/client-native/v4/configuration"
-	"github.com/haproxytech/client-native/v4/models"
-	parser "github.com/haproxytech/config-parser/v4"
+	"github.com/haproxytech/client-native/v5/configuration"
+	"github.com/haproxytech/client-native/v5/models"
+	parser "github.com/haproxytech/config-parser/v5"
 	"github.com/six-group/haproxy-operator/pkg/defaults"
 	"github.com/six-group/haproxy-operator/pkg/hash"
 	corev1 "k8s.io/api/core/v1"

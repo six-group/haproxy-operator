@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	parser "github.com/haproxytech/config-parser/v4"
+	parser "github.com/haproxytech/config-parser/v5"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
