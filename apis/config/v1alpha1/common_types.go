@@ -415,6 +415,7 @@ func (s *ServerTemplate) Model() (models.ServerTemplate, error) {
 
 	if s.SSL != nil && s.SSL.Enabled {
 		model.Ssl = models.ServerParamsSslEnabled
+		model.Verify = s.SSL.Verify
 
 		if s.SSL.Certificate != nil {
 			model.SslCertificate = s.SSL.Certificate.FilePath()

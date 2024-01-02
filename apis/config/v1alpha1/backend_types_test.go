@@ -1,6 +1,8 @@
 package v1alpha1_test
 
 import (
+	"fmt"
+	"k8s.io/utils/ptr"
 	"time"
 
 	parser "github.com/haproxytech/config-parser/v4"
@@ -194,7 +196,7 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("cookie 098f6bcd4621d373cade4e832627b4f6 domain domain1 domain .openshift attr SameSite=None httponly indirect maxidle 120 maxlife 45 nocache postonly preserve rewrite secure\n"))
 		})
-		It("an error should appear for selecting more than one cookie mode", func() {
+		It("should return an error for selecting more than one cookie mode", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "set_cookie"},
 				Spec: configv1alpha1.BackendSpec{
@@ -319,7 +321,7 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("http-request redirect scheme https unless is_https\n"))
 		})
-		It("an error should appear for selecting more than one redirect type", func() {
+		It("should return an error for selecting more than one redirect type", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
 				Spec: configv1alpha1.BackendSpec{
@@ -414,7 +416,7 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("server server1 localhost:80 send-proxy-v2-ssl\n"))
 		})
-		It("an error should appear for selecting more than one proxy protocol", func() {
+		It("should return an error for selecting more than one proxy protocol", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
 				Spec: configv1alpha1.BackendSpec{
@@ -532,6 +534,133 @@ var _ = Describe("Backend", Label("type"), func() {
 				},
 			}
 			Ω(backend.AddToParser(p)).Should(HaveOccurred())
+		})
+		It("should set timeouts", func() {
+			timeouts := map[string]metav1.Duration{
+				"check":           metav1.Duration{Duration: 5 * time.Second},
+				"connect":         metav1.Duration{Duration: 10 * time.Second},
+				"http-keep-alive": metav1.Duration{Duration: 15 * time.Second},
+				"http-request":    metav1.Duration{Duration: 20 * time.Second},
+				"queue":           metav1.Duration{Duration: 25 * time.Second},
+				"server":          metav1.Duration{Duration: 30 * time.Second},
+				"tunnel":          metav1.Duration{Duration: 35 * time.Second},
+			}
+
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					BaseSpec: configv1alpha1.BaseSpec{
+						Timeouts: timeouts,
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+
+			for name, duration := range timeouts {
+				Ω(p.String()).Should(ContainSubstring(fmt.Sprintf("timeout %s %d\n", name, duration.Duration.Milliseconds())))
+			}
+		})
+		It("should not set invalid timeouts", func() {
+			timeouts := map[string]metav1.Duration{
+				"client":      metav1.Duration{Duration: 5 * time.Second},
+				"tunnel-idle": metav1.Duration{Duration: 10 * time.Second},
+			}
+
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					BaseSpec: configv1alpha1.BaseSpec{
+						Timeouts: timeouts,
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).Should(HaveOccurred())
+		})
+		It("should set server SSL config for server template", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					ServerTemplates: []configv1alpha1.ServerTemplate{
+						{
+							ServerParams: configv1alpha1.ServerParams{
+								SSL: &configv1alpha1.SSL{
+									Enabled:    true,
+									MinVersion: "TLSv1.3",
+									Verify:     "required",
+									CACertificate: &configv1alpha1.SSLCertificate{
+										Name: "my-ca",
+									},
+									Certificate: &configv1alpha1.SSLCertificate{
+										Name: "my-cert",
+									},
+									SNI:  "test.svc.cluster.local",
+									Alpn: []string{"h2", "http/1.1"},
+								},
+							},
+							FQDN:   "test.com",
+							Port:   9443,
+							Prefix: "test_",
+						},
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("server-template test_ 0 test.com:9443 ssl ca-file /usr/local/etc/haproxy/my-ca.crt crt /usr/local/etc/haproxy/my-cert.crt sni test.svc.cluster.local ssl-min-ver TLSv1.3 verify required\n"))
+		})
+		It("should set sendProxy with proxy protocol v2 and options for server templates", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
+				Spec: configv1alpha1.BackendSpec{
+					ServerTemplates: []configv1alpha1.ServerTemplate{
+						{
+							ServerParams: configv1alpha1.ServerParams{
+								SendProxyV2: &configv1alpha1.ProxyProtocol{
+									V2: &configv1alpha1.ProxyProtocolV2{
+										Enabled: true,
+										Options: &configv1alpha1.ProxyProtocolV2Options{
+											CertCn:   true,
+											CertSig:  true,
+											UniqueID: true,
+											Ssl:      true,
+										},
+									},
+								},
+							},
+							FQDN:   "test.com",
+							Port:   9443,
+							Prefix: "test_",
+						},
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("server-template test_ 0 test.com:9443 send-proxy-v2 proxy-v2-options ssl,cert-cn,cert-sig,unique-id\n"))
+		})
+		It("should set tcp request rule", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
+				Spec: configv1alpha1.BackendSpec{
+					BaseSpec: configv1alpha1.BaseSpec{
+						TCPRequest: []configv1alpha1.TCPRequestRule{
+							{
+								Type:    "inspect-delay",
+								Timeout: ptr.To(metav1.Duration{Duration: 5 * time.Second}),
+							},
+							{
+								Type:   "content",
+								Action: ptr.To("accept"),
+								Rule: configv1alpha1.Rule{
+									ConditionType: "if",
+									Condition:     "{ req_ssl_hello_type 1 }",
+								},
+							},
+						},
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("tcp-request inspect-delay 5000\n"))
+			Ω(p.String()).Should(ContainSubstring("tcp-request content accept if { req_ssl_hello_type 1 }\n"))
 		})
 	})
 })
