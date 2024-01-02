@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/haproxytech/client-native/v4/configuration"
-	"github.com/haproxytech/client-native/v4/models"
-	parser "github.com/haproxytech/config-parser/v4"
+	"github.com/haproxytech/client-native/v5/configuration"
+	"github.com/haproxytech/client-native/v5/models"
+	parser "github.com/haproxytech/config-parser/v5"
 	"github.com/six-group/haproxy-operator/pkg/hash"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"

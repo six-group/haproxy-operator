@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	haproxy "github.com/haproxytech/client-native/v4/configuration/options"
-	parser "github.com/haproxytech/config-parser/v4"
+	haproxy "github.com/haproxytech/client-native/v5/configuration/options"
+	parser "github.com/haproxytech/config-parser/v5"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
 	"github.com/six-group/haproxy-operator/pkg/defaults"

@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	parser "github.com/haproxytech/config-parser/v4"
+	parser "github.com/haproxytech/config-parser/v5"
 	"go.uber.org/multierr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
