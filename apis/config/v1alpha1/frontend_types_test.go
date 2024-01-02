@@ -63,9 +63,9 @@ var _ = Describe("Frontend", Label("type"), func() {
 		})
 		It("should set timeouts", func() {
 			timeouts := map[string]metav1.Duration{
-				"client":          metav1.Duration{Duration: 5 * time.Second},
-				"http-keep-alive": metav1.Duration{Duration: 10 * time.Second},
-				"http-request":    metav1.Duration{Duration: 15 * time.Second},
+				"client":          {Duration: 5 * time.Second},
+				"http-keep-alive": {Duration: 10 * time.Second},
+				"http-request":    {Duration: 15 * time.Second},
 			}
 
 			frontend := &configv1alpha1.Frontend{
@@ -84,8 +84,8 @@ var _ = Describe("Frontend", Label("type"), func() {
 		})
 		It("should not set invalid timeouts", func() {
 			timeouts := map[string]metav1.Duration{
-				"server": metav1.Duration{Duration: 5 * time.Second},
-				"tunnel": metav1.Duration{Duration: 10 * time.Second},
+				"server": {Duration: 5 * time.Second},
+				"tunnel": {Duration: 10 * time.Second},
 			}
 
 			frontend := &configv1alpha1.Frontend{

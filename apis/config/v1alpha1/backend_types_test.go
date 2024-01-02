@@ -2,8 +2,9 @@ package v1alpha1_test
 
 import (
 	"fmt"
-	"k8s.io/utils/ptr"
 	"time"
+
+	"k8s.io/utils/ptr"
 
 	parser "github.com/haproxytech/config-parser/v4"
 	. "github.com/onsi/ginkgo/v2"
@@ -536,13 +537,13 @@ var _ = Describe("Backend", Label("type"), func() {
 		})
 		It("should set timeouts", func() {
 			timeouts := map[string]metav1.Duration{
-				"check":           metav1.Duration{Duration: 5 * time.Second},
-				"connect":         metav1.Duration{Duration: 10 * time.Second},
-				"http-keep-alive": metav1.Duration{Duration: 15 * time.Second},
-				"http-request":    metav1.Duration{Duration: 20 * time.Second},
-				"queue":           metav1.Duration{Duration: 25 * time.Second},
-				"server":          metav1.Duration{Duration: 30 * time.Second},
-				"tunnel":          metav1.Duration{Duration: 35 * time.Second},
+				"check":           {Duration: 5 * time.Second},
+				"connect":         {Duration: 10 * time.Second},
+				"http-keep-alive": {Duration: 15 * time.Second},
+				"http-request":    {Duration: 20 * time.Second},
+				"queue":           {Duration: 25 * time.Second},
+				"server":          {Duration: 30 * time.Second},
+				"tunnel":          {Duration: 35 * time.Second},
 			}
 
 			backend := &configv1alpha1.Backend{
@@ -561,8 +562,8 @@ var _ = Describe("Backend", Label("type"), func() {
 		})
 		It("should not set invalid timeouts", func() {
 			timeouts := map[string]metav1.Duration{
-				"client":      metav1.Duration{Duration: 5 * time.Second},
-				"tunnel-idle": metav1.Duration{Duration: 10 * time.Second},
+				"client":      {Duration: 5 * time.Second},
+				"tunnel-idle": {Duration: 10 * time.Second},
 			}
 
 			backend := &configv1alpha1.Backend{
