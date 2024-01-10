@@ -981,6 +981,36 @@ spec:
                           type: string
                       type: object
                     type: array
+                  replacePath:
+                    description: ReplacePath matches the value of the path using a
+                      regex and completely replaces it with the specified format.
+                      The replacement does not modify the scheme, the authority and
+                      the query-string.
+                    items:
+                      properties:
+                        condition:
+                          description: Condition is a condition composed of ACLs.
+                          type: string
+                        conditionType:
+                          description: ConditionType specifies the type of the condition
+                            matching ('if' or 'unless')
+                          enum:
+                          - if
+                          - unless
+                          type: string
+                        matchRegex:
+                          description: MatchRegex is a string pattern used to identify
+                            the paths that need to be replaced.
+                          type: string
+                        replaceFmt:
+                          description: ReplaceFmt defines the format string used to
+                            replace the values that match the pattern.
+                          type: string
+                      required:
+                      - matchRegex
+                      - replaceFmt
+                      type: object
+                    type: array
                   return:
                     description: Return stops the evaluation of the rules and immediately
                       returns a response.
@@ -1004,7 +1034,7 @@ spec:
                             type: string
                           type:
                             description: Type specifies the content-type of the HTTP
-                              REsponse.
+                              response.
                             type: string
                           value:
                             description: Value specifying the file or the string to

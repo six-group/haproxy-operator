@@ -416,6 +416,7 @@ _Appears in:_
 | `setPath` _[HTTPPathRule](#httppathrule) array_ | SetPath sets request path |
 | `addHeader` _[HTTPHeaderRule](#httpheaderrule) array_ | AddHeader appends HTTP header fields |
 | `redirect` _[Redirect](#redirect) array_ | Redirect performs an HTTP redirection based on a redirect rule. |
+| `replacePath` _[ReplacePath](#replacepath) array_ | ReplacePath matches the value of the path using a regex and completely replaces it with the specified format. The replacement does not modify the scheme, the authority and the query-string. |
 | `deny` _[Deny](#deny)_ | Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error. Optionally the status code specified as an argument to deny_status. |
 | `denyStatus` _[int64](#int64)_ | DenyStatus is the HTTP status code. |
 | `return` _[HTTPReturn](#httpreturn)_ | Return stops the evaluation of the rules and immediately returns a response. |
@@ -649,6 +650,21 @@ _Appears in:_
 | `selector` _[LabelSelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#labelselector-v1-meta)_ | LabelSelector to select multiple backends |
 
 
+#### ReplacePath
+
+
+
+
+
+_Appears in:_
+- [HTTPRequestRules](#httprequestrules)
+
+| Field | Description |
+| --- | --- |
+| `matchRegex` _string_ | MatchRegex is a string pattern used to identify the paths that need to be replaced. |
+| `replaceFmt` _string_ | ReplaceFmt defines the format string used to replace the values that match the pattern. |
+
+
 #### Resolver
 
 
@@ -696,6 +712,7 @@ _Appears in:_
 - [HTTPHeaderRule](#httpheaderrule)
 - [HTTPPathRule](#httppathrule)
 - [Redirect](#redirect)
+- [ReplacePath](#replacepath)
 - [TCPRequestRule](#tcprequestrule)
 
 
