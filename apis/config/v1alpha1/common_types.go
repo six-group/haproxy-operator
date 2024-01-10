@@ -783,12 +783,12 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 
 	for idx, header := range h.ReplacePath {
 		model = append(model, &models.HTTPRequestRule{
-			Type:       "replace-path",
-			Index:      ptr.To(int64(idx)),
-			PathMatch:  header.MatchRegex,
-			PathFmt:    header.ReplaceFmt,
-			Cond:       header.ConditionType,
-			CondTest:   header.Condition,
+			Type:      "replace-path",
+			Index:     ptr.To(int64(idx)),
+			PathMatch: header.MatchRegex,
+			PathFmt:   header.ReplaceFmt,
+			Cond:      header.ConditionType,
+			CondTest:  header.Condition,
 		})
 	}
 

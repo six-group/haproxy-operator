@@ -144,7 +144,7 @@ var _ = Describe("Backend", Label("type"), func() {
 				Spec: configv1alpha1.BackendSpec{
 					BaseSpec: configv1alpha1.BaseSpec{
 						HTTPRequest: &configv1alpha1.HTTPRequestRules{
-							ReplacePath:[]configv1alpha1.ReplacePath{
+							ReplacePath: []configv1alpha1.ReplacePath{
 								{
 									MatchRegex: "(.*)",
 									ReplaceFmt: "/foo\\1",
