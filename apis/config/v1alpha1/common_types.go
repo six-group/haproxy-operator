@@ -729,6 +729,10 @@ type HTTPRequestRules struct {
 	// Redirect performs an HTTP redirection based on a redirect rule.
 	// +optional
 	Redirect []Redirect `json:"redirect,omitempty"`
+	// ReplacePath matches the value of the path using a regex and completely replaces it with the specified format.
+	// The replacement does not modify the scheme, the authority and the query-string.
+	// +optional
+	ReplacePath []ReplacePath `json:"replacePath,omitempty"`
 	// Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error.
 	// Optionally the status code specified as an argument to deny_status.
 	// +optional
@@ -774,6 +778,17 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 			HdrFormat: header.Value.String(),
 			Cond:      header.ConditionType,
 			CondTest:  header.Condition,
+		})
+	}
+
+	for idx, header := range h.ReplacePath {
+		model = append(model, &models.HTTPRequestRule{
+			Type:       "replace-path",
+			Index:      ptr.To(int64(idx)),
+			PathMatch:  header.MatchRegex,
+			PathFmt:    header.ReplaceFmt,
+			Cond:       header.ConditionType,
+			CondTest:   header.Condition,
 		})
 	}
 
@@ -869,7 +884,7 @@ type HTTPReturn struct {
 }
 
 type HTTPReturnContent struct {
-	// Type specifies the content-type of the HTTP REsponse.
+	// Type specifies the content-type of the HTTP response.
 	Type string `json:"type"`
 	// ContentFormat defines the format of the Content. Can be one an errorfile or a string.
 	// +kubebuilder:validation:Enum=default-errorfile;errorfile;errorfiles;file;lf-file;string;lf-string
@@ -891,6 +906,7 @@ type HTTPPathRule struct {
 	// Value specifies the path value
 	Value string `json:"format,omitempty"`
 }
+
 type HTTPHeaderValue struct {
 	// Env variable with the header value
 	Env *corev1.EnvVar `json:"env,omitempty"`
@@ -898,6 +914,14 @@ type HTTPHeaderValue struct {
 	Str *string `json:"str,omitempty"`
 	// Format specifies the format of the header value (implicit default is '%s')
 	Format *string `json:"format,omitempty"`
+}
+
+type ReplacePath struct {
+	Rule `json:",inline"`
+	// MatchRegex is a string pattern used to identify the paths that need to be replaced.
+	MatchRegex string `json:"matchRegex"`
+	// ReplaceFmt defines the format string used to replace the values that match the pattern.
+	ReplaceFmt string `json:"replaceFmt"`
 }
 
 func (h *HTTPHeaderValue) String() string {

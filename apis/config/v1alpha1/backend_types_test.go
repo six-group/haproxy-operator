@@ -83,7 +83,6 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("hash-type consistent djb2 avalanche"))
 		})
-
 		It("should set ssl parameters", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
@@ -117,7 +116,6 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt cookie 1c3c2192e2912699ccd31119b162666a inter 5000 verify required verifyhost routername.namespace.svc weight 256"))
 		})
-
 		It("should set option http-request deny", func() {
 			var notFound int64 = 404
 			backend := &configv1alpha1.Backend{
@@ -140,7 +138,34 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("http-request deny deny_status 404 if { var(my-ip) -m ip 127.0.0.0/8 10.0.0.0/8 }\n"))
 		})
-
+		It("should set option http-request replace-path", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
+				Spec: configv1alpha1.BackendSpec{
+					BaseSpec: configv1alpha1.BaseSpec{
+						HTTPRequest: &configv1alpha1.HTTPRequestRules{
+							ReplacePath:[]configv1alpha1.ReplacePath{
+								{
+									MatchRegex: "(.*)",
+									ReplaceFmt: "/foo\\1",
+								},
+								{
+									Rule: configv1alpha1.Rule{
+										ConditionType: "if",
+										Condition:     "{ url_beg /foo/ }",
+									},
+									MatchRegex: "/foo/(.*)",
+									ReplaceFmt: "/\\1",
+								},
+							},
+						},
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("http-request replace-path (.*) /foo\\1\n"))
+			Ω(p.String()).Should(ContainSubstring("http-request replace-path /foo/(.*) /\\1 if { url_beg /foo/ }\n"))
+		})
 		It("should set option http-pretend-keepalive", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
@@ -153,7 +178,6 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("option http-pretend-keepalive\n"))
 		})
-
 		It("should set option forwardfor", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
