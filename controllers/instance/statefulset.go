@@ -95,7 +95,6 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 							ImagePullPolicy: instance.Spec.ImagePullPolicy,
 							Env: []corev1.EnvVar{
 								{Name: "HAPROXY_SOCKET", Value: "/var/lib/haproxy/run/haproxy.sock"},
-								{Name: "WATCH_PATH", Value: "/usr/local/etc/haproxy"},
 							},
 							VolumeMounts: []corev1.VolumeMount{
 								{
