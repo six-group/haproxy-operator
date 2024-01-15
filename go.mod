@@ -7,7 +7,7 @@ require (
 	github.com/go-openapi/strfmt v0.22.0
 	github.com/haproxytech/client-native/v5 v5.1.2
 	github.com/haproxytech/config-parser/v5 v5.1.0
-	github.com/onsi/ginkgo/v2 v2.13.2
+	github.com/onsi/ginkgo/v2 v2.14.0
 	github.com/onsi/gomega v1.30.0
 	github.com/openshift/api v0.0.0-20231117205818-971e4ba78c9a // latest commit of branch https://github.com/openshift/api/tree/release-4.14
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.71.0
