@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	haproxy "github.com/haproxytech/client-native/v5/configuration/options"
@@ -357,6 +358,7 @@ func (r *Reconciler) generateBackendMappingFiles(ctx context.Context, instance *
 					mappings = append(mappings, fmt.Sprintf("^%s$ %s", strings.TrimPrefix(strings.TrimSuffix(backend.Spec.HostRegex, "$"), "^"), backend.Name))
 				}
 
+				sort.Strings(mappings)
 				files[rules.Backend.RegexMapping.FilePath()] = strings.Join(mappings, "\n")
 			}
 		}
@@ -409,6 +411,7 @@ func (r *Reconciler) generateACLValuesFiles(_ context.Context, listens *configv1
 	for _, frontend := range frontends.Items {
 		for _, acl := range frontend.Spec.ACL {
 			if len(acl.Values) > defaults.MaxLineArgs-3 {
+				sort.Strings(acl.Values)
 				files[acl.FilePath()] = strings.Join(acl.Values, "\n")
 			}
 		}
@@ -417,6 +420,7 @@ func (r *Reconciler) generateACLValuesFiles(_ context.Context, listens *configv1
 	for _, backend := range backends.Items {
 		for _, acl := range backend.Spec.ACL {
 			if len(acl.Values) > defaults.MaxLineArgs-3 {
+				sort.Strings(acl.Values)
 				files[acl.FilePath()] = strings.Join(acl.Values, "\n")
 			}
 		}
@@ -425,6 +429,7 @@ func (r *Reconciler) generateACLValuesFiles(_ context.Context, listens *configv1
 	for _, listen := range listens.Items {
 		for _, acl := range listen.Spec.ACL {
 			if len(acl.Values) > defaults.MaxLineArgs-3 {
+				sort.Strings(acl.Values)
 				files[acl.FilePath()] = strings.Join(acl.Values, "\n")
 			}
 		}
@@ -566,6 +571,7 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 					mappings = append(mappings, strings.Join([]string{element.Certificate.FilePath(), alpn, element.SNIFilter, "\n"}, " "))
 				}
 
+				sort.Strings(mappings)
 				files[bind.SSLCertificateList.FilePath()] = strings.Join(mappings, "")
 			}
 		}
@@ -596,6 +602,7 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 					mappings = append(mappings, strings.Join([]string{element.Certificate.FilePath(), alpn, element.SNIFilter, "\n"}, " "))
 				}
 
+				sort.Strings(mappings)
 				files[bind.SSLCertificateList.FilePath()] = strings.Join(mappings, "")
 			}
 		}
