@@ -238,12 +238,12 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 		if err != nil {
 			return global, err
 		}
-		ptr, err := configuration.ParseGlobalSection(p)
+		ptrr, err := configuration.ParseGlobalSection(p)
 		if err != nil {
 			return global, err
 		}
-		if ptr != nil {
-			global = *ptr
+		if ptrr != nil {
+			global = *ptrr
 		}
 	}
 

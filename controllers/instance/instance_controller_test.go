@@ -444,15 +444,18 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				"backend foo-back2\n  server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256\n\n" +
 				"backend foo-listen\n  server routeName routeName.routeNamespace.svc.cluster.local:8443 check ssl alpn http/1.1,h2 init-addr none inter 500 resolvers dns-routeNamespace verify required verifyhost routeName.routeName.svc weight 256\n"))
 
-			Ω(secret.Data["cert_list.map"]).Should(Equal([]byte("/usr/local/etc/haproxy/route.name4.crt [alpn h2,http/1.0] route.host4 \n" +
+			Ω(string(secret.Data["cert_list.map"])).Should(Equal(
 				"/usr/local/etc/haproxy/route.name.crt  route.host \n" +
-				"/usr/local/etc/haproxy/route.name2.crt [alpn h2,http/1.0] route.host2 \n" +
-				"/usr/local/etc/haproxy/route.name.tcp.crt [alpn h2,http/1.0] route.host.tcp \n")))
+					"/usr/local/etc/haproxy/route.name.tcp.crt [alpn h2,http/1.0] route.host.tcp \n" +
+					"/usr/local/etc/haproxy/route.name2.crt [alpn h2,http/1.0] route.host2 \n" +
+					"/usr/local/etc/haproxy/route.name4.crt [alpn h2,http/1.0] route.host4 \n",
+			),
+			)
 
-			Ω(secret.Data["route.name.crt"]).Should(Equal([]byte("Key\n\nCertificate\n\nCAcertificate")))
-			Ω(secret.Data["route.name2.crt"]).Should(Equal([]byte("Key2\n\nCertificate2\n\nCAcertificate2")))
-			Ω(secret.Data["route.name.tcp.crt"]).Should(Equal([]byte("Key2\n\nCertificate2\n\nCAcertificate2")))
-			Ω(secret.Data["route.name4.crt"]).Should(Equal([]byte("Key\n\nCertificate\n\nCAcertificate")))
+			Ω(string(secret.Data["route.name.crt"])).Should(Equal("Key\n\nCertificate\n\nCAcertificate"))
+			Ω(string(secret.Data["route.name2.crt"])).Should(Equal("Key2\n\nCertificate2\n\nCAcertificate2"))
+			Ω(string(secret.Data["route.name.tcp.crt"])).Should(Equal("Key2\n\nCertificate2\n\nCAcertificate2"))
+			Ω(string(secret.Data["route.name4.crt"])).Should(Equal("Key\n\nCertificate\n\nCAcertificate"))
 		})
 	})
 })
