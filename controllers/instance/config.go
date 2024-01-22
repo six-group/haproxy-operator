@@ -119,7 +119,6 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 
 	nameKindMap := make(map[string]string)
 
-	nameKindMap[instance.Name] = instance.Kind
 	if err := instance.AddToParser(p); err != nil {
 		return "", err
 	}

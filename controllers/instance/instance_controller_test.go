@@ -381,8 +381,10 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 		})
 
 		It("same resource names error", func() {
-			proxy.Name = "foo"
+			backend.Kind = "Backend"
 			backend.Name = "foo"
+			
+			frontend.Kind = "Frontend"
 			frontend.Name = "foo"
 
 			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
@@ -396,11 +398,11 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			Ω(cli.Get(ctx, client.ObjectKeyFromObject(proxy), proxy)).ShouldNot(HaveOccurred())
 			Ω(proxy.Status.Phase).Should(Equal(proxyv1alpha1.InstancePhaseInternalError))
-			Ω(proxy.Status.Error).Should(Equal("name foo already used by resource of kind Instance"))
+			Ω(proxy.Status.Error).Should(Equal("name foo already used by resource of kind Frontend"))
 
-			frontRes := &configv1alpha1.Frontend{}
-			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: frontend.Name}, frontRes)).ShouldNot(HaveOccurred())
-			Ω(frontRes.Status.Error).Should(Equal(proxy.Status.Error))
+			backendRes := &configv1alpha1.Backend{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: backend.Name}, backendRes)).ShouldNot(HaveOccurred())
+			Ω(backendRes.Status.Error).Should(Equal(proxy.Status.Error))
 		})
 
 		It("should set status to pending if there is no listens", func() {
