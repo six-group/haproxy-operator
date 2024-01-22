@@ -383,7 +383,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 		It("same resource names error", func() {
 			backend.Kind = "Backend"
 			backend.Name = "foo"
-			
+
 			frontend.Kind = "Frontend"
 			frontend.Name = "foo"
 
