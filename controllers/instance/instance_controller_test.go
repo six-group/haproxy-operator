@@ -27,14 +27,14 @@ import (
 var _ = Describe("Reconcile", Label("controller"), func() {
 	Context("Reconcile", func() {
 		var (
-			scheme                                                                        *runtime.Scheme
-			ctx                                                                           context.Context
-			proxy                                                                         *proxyv1alpha1.Instance
-			frontend, frontendCustomCerts, frontendCustomCerts2, frontendCustomCertsEmpty *configv1alpha1.Frontend
-			backend, backend2                                                             *configv1alpha1.Backend
-			listen                                                                        *configv1alpha1.Listen
-			resolver                                                                      *configv1alpha1.Resolver
-			initObjs                                                                      []client.Object
+			scheme                                                                                                      *runtime.Scheme
+			ctx                                                                                                         context.Context
+			proxy                                                                                                       *proxyv1alpha1.Instance
+			frontend, frontendCustomCerts, frontendCustomCerts2, frontendCustomCertsEmpty, frontendWithBackendSwitching *configv1alpha1.Frontend
+			backend, backend2                                                                                           *configv1alpha1.Backend
+			listen                                                                                                      *configv1alpha1.Listen
+			resolver                                                                                                    *configv1alpha1.Resolver
+			initObjs                                                                                                    []client.Object
 		)
 
 		customCert := "Certificate"
@@ -174,6 +174,46 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				},
 			}
 
+			be := configv1alpha1.BackendReference{
+				RegexMapping: &configv1alpha1.RegexBackendMapping{
+					Name:      "be-https-passthrough",
+					Parameter: "req.ssl_sni,lower",
+					LabelSelector: metav1.LabelSelector{
+						MatchLabels: labels,
+					},
+				},
+			}
+			frontendWithBackendSwitching = &configv1alpha1.Frontend{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "fe-https-with-backend-switching",
+					Namespace: "foo",
+					Labels:    labels,
+				},
+				Spec: configv1alpha1.FrontendSpec{
+					Binds: []configv1alpha1.Bind{
+						{
+							Address:     "unix@/var/lib/haproxy/run/local.sock",
+							Port:        9443,
+							Name:        "https",
+							AcceptProxy: ptr.To(true),
+							Hidden:      ptr.To(true),
+							SSL: &configv1alpha1.SSL{
+								Enabled: true,
+							},
+						},
+					},
+					BackendSwitching: []configv1alpha1.BackendSwitchingRule{
+						{
+							Rule: configv1alpha1.Rule{
+								ConditionType: "if",
+								Condition:     be.RegexMapping.FoundCondition(),
+							},
+							Backend: be,
+						},
+					},
+				},
+			}
+
 			backend = &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo-back",
@@ -181,6 +221,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					Labels:    labels,
 				},
 				Spec: configv1alpha1.BackendSpec{
+					HostRegex: "aaaa\\.com/\\.?(:[0-9]+)?(/.*)?",
 					HostCertificate: &configv1alpha1.CertificateListElement{
 						Certificate: configv1alpha1.SSLCertificate{
 							Name:  "route.name",
@@ -224,6 +265,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					Labels:    labels,
 				},
 				Spec: configv1alpha1.BackendSpec{
+					HostRegex: "zzzz\\.com/\\.?(:[0-9]+)?(/.*)?",
 					HostCertificate: &configv1alpha1.CertificateListElement{
 						Certificate: configv1alpha1.SSLCertificate{
 							Name:  "route.name2",
@@ -458,6 +500,25 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(string(secret.Data["route.name2.crt"])).Should(Equal("Key2\n\nCertificate2\n\nCAcertificate2"))
 			Ω(string(secret.Data["route.name.tcp.crt"])).Should(Equal("Key2\n\nCertificate2\n\nCAcertificate2"))
 			Ω(string(secret.Data["route.name4.crt"])).Should(Equal("Key\n\nCertificate\n\nCAcertificate"))
+		})
+		It("should create backend mapping", func() {
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(append(initObjs, frontendWithBackendSwitching)...).WithStatusSubresource(append(initObjs, frontendWithBackendSwitching)...).Build()
+			r := instance.Reconciler{
+				Client: cli,
+				Scheme: scheme,
+			}
+			result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Name: proxy.Name, Namespace: proxy.Namespace}})
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(result).ShouldNot(BeNil())
+
+			Ω(cli.Get(ctx, client.ObjectKeyFromObject(proxy), proxy)).ShouldNot(HaveOccurred())
+			fmt.Println(proxy.Status)
+			Ω(proxy.Status.Phase).Should(Equal(proxyv1alpha1.InstancePhaseRunning))
+			Ω(proxy.Status.Error).Should(BeEmpty())
+
+			secret := &corev1.Secret{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
+			Ω(string(secret.Data["be-https-passthrough.map"])).Should(Equal("^zzzz\\.com/\\.?(:[0-9]+)?(/.*)?$ foo-back2\n^aaaa\\.com/\\.?(:[0-9]+)?(/.*)?$ foo-back"))
 		})
 	})
 })

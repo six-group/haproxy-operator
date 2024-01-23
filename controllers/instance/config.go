@@ -357,7 +357,7 @@ func (r *Reconciler) generateBackendMappingFiles(ctx context.Context, instance *
 					mappings = append(mappings, fmt.Sprintf("^%s$ %s", strings.TrimPrefix(strings.TrimSuffix(backend.Spec.HostRegex, "$"), "^"), backend.Name))
 				}
 
-				sort.Strings(mappings)
+				sort.Sort(sort.Reverse(sort.StringSlice(mappings)))
 				files[rules.Backend.RegexMapping.FilePath()] = strings.Join(mappings, "\n")
 			}
 		}
