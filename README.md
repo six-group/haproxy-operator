@@ -7,7 +7,7 @@
 # HAProxy Operator
 HAProxy Operator is a Kubernetes-native solution designed to automate the deployment, configuration, and management of HAProxy instances using Custom Resources to abstract the key components such as backends, frontends, and listens.
 
-## Instalation
+## Installation
 ### Helm
 ```console
 helm repo add haproxy-operator https://six-group.github.io/haproxy-operator
