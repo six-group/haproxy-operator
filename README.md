@@ -15,6 +15,68 @@ helm install haproxy-operator six-group/haproxy-operator
 ```
 
 ## Usage
+### Getting Started
+This example will guide you through the process of setting up a basic HAProxy instance, configuring a frontend for receiving traffic, inspecting the generated HAProxy configuration, and making a sample request to demonstrate its functionality.
+
+1. Create a simple instance of the HAProxy by applying the following YAML manifest:
+    ```yaml
+    apiVersion: proxy.haproxy.com/v1alpha1
+    kind: Instance
+    metadata:
+      name: example
+      namespace: default
+    spec:
+      configuration:
+        defaults: {}
+        global: {}
+        selector: 
+          matchLabels:
+            proxy.haproxy.com/instance: example
+      network:
+        service:
+          enabled: true
+    ```
+
+2. To define the port at which HAProxy should receive traffic, create a basic frontend configuration by applying the following YAML manifest:
+    ```yaml
+    apiVersion: config.haproxy.com/v1alpha1
+    kind: Frontend
+    metadata:
+      name: example
+      namespace: default
+      labels:
+        proxy.haproxy.com/instance: example
+    spec:
+      mode: http
+      binds:
+        - name: hello-world
+          port: 8080
+      defaultBackend: {}
+    ```
+
+3. Check the generated `haproxy.cfg` stored in the `Secret` `example-haproxy-config`:
+    ```
+    defaults unnamed_defaults_1
+      mode http
+      timeout connect 5000
+      timeout client 5000
+      timeout server 10000
+
+    frontend example
+      mode http
+      bind :8080 name hello-world
+    ```
+
+4. The HAProxy pod is now listening on port 8080 exposed by a `Service` called `example-haproxy`. If you make a request using `curl` executed from a pod within the same namespace, you’ll get back a response:
+    ```bash
+    $ curl http://example-haproxy:8080
+    <html><body><h1>503 Service Unavailable</h1>
+    No server is available to handle this request.
+    </body></html>
+    ```
+    Granted, there’s no reply from a server since we haven't configured any backend servers yet. Nevertheless, you can see that HAProxy is functional.
+
+For a more in-depth understanding of the HAProxy Operator and to explore complex use cases, refer to the upcoming sections in this documentation. These sections will provide detailed explanations, advanced examples, and configuration options to help you tailor the HAProxy solution to your specific requirements.
 
 ### HAProxy Instance (proxy.haproxy.com/v1alpha1)
 
