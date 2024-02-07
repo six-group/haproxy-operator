@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -188,6 +189,7 @@ type ACL struct {
 }
 
 func (a *ACL) Model() (models.ACL, error) {
+	sort.Strings(a.Values)
 	values := strings.Join(a.Values, " ")
 
 	if len(a.Values) > defaults.MaxLineArgs-3 {
