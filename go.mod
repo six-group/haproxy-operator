@@ -12,7 +12,7 @@ require (
 	github.com/openshift/api v0.0.0-20231117205818-971e4ba78c9a // latest commit of branch https://github.com/openshift/api/tree/release-4.14
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.71.2
 	go.uber.org/multierr v1.11.0
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	k8s.io/api v0.29.0
 	k8s.io/apimachinery v0.29.0
 	k8s.io/client-go v0.29.0
