@@ -264,6 +264,8 @@ _Appears in:_
 | Field | Description |
 | --- | --- |
 | `enabled` _boolean_ | Enabled enables deny http request |
+| `denyStatus` _[int64](#int64)_ | DenyStatus is the HTTP status code. |
+
 
 
 #### ErrorFile
@@ -418,7 +420,6 @@ _Appears in:_
 | `redirect` _[Redirect](#redirect) array_ | Redirect performs an HTTP redirection based on a redirect rule. |
 | `replacePath` _[ReplacePath](#replacepath) array_ | ReplacePath matches the value of the path using a regex and completely replaces it with the specified format. The replacement does not modify the scheme, the authority and the query-string. |
 | `deny` _[Deny](#deny)_ | Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error. Optionally the status code specified as an argument to deny_status. |
-| `denyStatus` _[int64](#int64)_ | DenyStatus is the HTTP status code. |
 | `return` _[HTTPReturn](#httpreturn)_ | Return stops the evaluation of the rules and immediately returns a response. |
 
 
