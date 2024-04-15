@@ -123,14 +123,16 @@ var _ = Describe("Backend", Label("type"), func() {
 				Spec: configv1alpha1.BackendSpec{
 					BaseSpec: configv1alpha1.BaseSpec{
 						HTTPRequest: &configv1alpha1.HTTPRequestRules{
-							Deny: &configv1alpha1.Deny{
-								Rule: configv1alpha1.Rule{
-									ConditionType: "if",
-									Condition:     "{ var(my-ip) -m ip 127.0.0.0/8 10.0.0.0/8 }",
+							Deny: []configv1alpha1.Deny{
+								{
+									Rule: configv1alpha1.Rule{
+										ConditionType: "if",
+										Condition:     "{ var(my-ip) -m ip 127.0.0.0/8 10.0.0.0/8 }",
+									},
+									Enabled:    true,
+									DenyStatus: &notFound,
 								},
-								Enabled: true,
 							},
-							DenyStatus: &notFound,
 						},
 					},
 				},

@@ -519,7 +519,7 @@ func (in *RouteSpec) DeepCopyInto(out *RouteSpec) {
 	if in.TLS != nil {
 		in, out := &in.TLS, &out.TLS
 		*out = new(routev1.TLSConfig)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 }
 

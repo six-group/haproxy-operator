@@ -512,7 +512,6 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(result).ShouldNot(BeNil())
 
 			Ω(cli.Get(ctx, client.ObjectKeyFromObject(proxy), proxy)).ShouldNot(HaveOccurred())
-			fmt.Println(proxy.Status)
 			Ω(proxy.Status.Phase).Should(Equal(proxyv1alpha1.InstancePhaseRunning))
 			Ω(proxy.Status.Error).Should(BeEmpty())
 

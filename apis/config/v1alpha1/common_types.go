@@ -738,12 +738,7 @@ type HTTPRequestRules struct {
 	// Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error.
 	// Optionally the status code specified as an argument to deny_status.
 	// +optional
-	Deny *Deny `json:"deny,omitempty"`
-	// DenyStatus is the HTTP status code.
-	// +kubebuilder:validation:Minimum=200
-	// +kubebuilder:validation:Maximum=599
-	// +optional
-	DenyStatus *int64 `json:"denyStatus,omitempty"`
+	Deny []Deny `json:"deny,omitempty"`
 	// Return stops the evaluation of the rules and immediately returns a response.
 	Return *HTTPReturn `json:"return,omitempty"`
 }
@@ -794,14 +789,16 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		})
 	}
 
-	if h.Deny != nil && h.Deny.Enabled {
-		model = append(model, &models.HTTPRequestRule{
-			DenyStatus: h.DenyStatus,
-			Index:      ptr.To(int64(0)),
-			Type:       "deny",
-			Cond:       h.Deny.ConditionType,
-			CondTest:   h.Deny.Condition,
-		})
+	for idx, deny := range h.Deny {
+		if deny.Enabled {
+			model = append(model, &models.HTTPRequestRule{
+				DenyStatus: deny.DenyStatus,
+				Index:      ptr.To(int64(idx)),
+				Type:       "deny",
+				Cond:       deny.ConditionType,
+				CondTest:   deny.Condition,
+			})
+		}
 	}
 
 	for idx, redirect := range h.Redirect {
@@ -973,6 +970,11 @@ type Deny struct {
 	Rule `json:",inline"`
 	// Enabled enables deny http request
 	Enabled bool `json:"enabled"`
+	// DenyStatus is the HTTP status code.
+	// +kubebuilder:validation:Minimum=200
+	// +kubebuilder:validation:Maximum=599
+	// +optional
+	DenyStatus *int64 `json:"denyStatus,omitempty"`
 }
 
 type Redirect struct {
