@@ -75,6 +75,11 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 			return err
 		}
 
+		envVars := []corev1.EnvVar{{Name: "HAPROXY_SOCKET", Value: "/var/lib/haproxy/run/haproxy.sock"}}
+		for k, v := range instance.Spec.Env {
+			envVars = append(envVars, corev1.EnvVar{Name: k, Value: v})
+		}
+
 		statefulset.Spec = appsv1.StatefulSetSpec{
 			Replicas: &instance.Spec.Replicas,
 			Selector: &metav1.LabelSelector{
@@ -93,9 +98,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 							Name:            "haproxy",
 							Image:           utils.StringOrDefault(instance.Spec.Image, "haproxy:latest"),
 							ImagePullPolicy: instance.Spec.ImagePullPolicy,
-							Env: []corev1.EnvVar{
-								{Name: "HAPROXY_SOCKET", Value: "/var/lib/haproxy/run/haproxy.sock"},
-							},
+							Env:             envVars,
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "haproxy-run",

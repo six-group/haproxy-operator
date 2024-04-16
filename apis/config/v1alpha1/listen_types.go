@@ -38,6 +38,12 @@ type ListenSpec struct {
 	// HostCertificate specifies a certificate for that host used in the crt-list of a frontend
 	// +optional
 	HostCertificate *CertificateListElement `json:"hostCertificate,omitempty"`
+	// HTTPCheck Enables HTTP protocol to check on the servers health
+	// +optional
+	HTTPCheck *HTTPChk `json:"httpCheck,omitempty"`
+	// TCPCheck Perform health checks using tcp-check send/expect sequences
+	// +optional
+	TCPCheck *bool `json:"tcpCheck,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -100,6 +106,8 @@ func (l *Listen) ToBackend() *Backend {
 			HashType:        l.Spec.HashType,
 			Cookie:          l.Spec.Cookie,
 			HostCertificate: l.Spec.HostCertificate,
+			HTTPChk:         l.Spec.HTTPCheck,
+			TCPCheck:        l.Spec.TCPCheck,
 		},
 	}
 

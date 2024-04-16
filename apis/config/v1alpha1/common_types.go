@@ -356,6 +356,9 @@ type ServerParams struct {
 	// SNI was used to connect to the server.
 	// +optional
 	VerifyHost string `json:"verifyHost,omitempty"`
+	// CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL
+	// +optional
+	CheckSNI string `json:"checkSNI,omitempty"`
 	// Cookie sets the cookie value assigned to the server.
 	// +optional
 	Cookie bool `json:"cookie,omitempty"`
@@ -506,6 +509,7 @@ func (s *Server) Model() (models.Server, error) {
 			Weight:     s.Weight,
 			InitAddr:   s.InitAddr,
 			Verifyhost: s.VerifyHost,
+			CheckSni:   s.CheckSNI,
 		},
 		Name:    s.Name,
 		Address: s.Address,
@@ -1153,4 +1157,14 @@ type ProxyProtocolV2Options struct {
 	// This unique-id is primarily meant for "mode tcp". It can lead to unexpected results in "mode http".
 	// +optional
 	UniqueID bool `json:"uniqueID"`
+}
+
+type HTTPChk struct {
+	// URI
+	URI string `json:"uri,omitempty"`
+	// Method http method
+	// +optional
+	// Enum: [HEAD PUT POST GET TRACE PATCH DELETE CONNECT OPTIONS]
+	// +kubebuilder:validation:Enum=HEAD;PUT;POST;GET;TRACE;PATCH;DELETE;CONNECT;OPTIONS;
+	Method string `json:"method,omitempty"`
 }

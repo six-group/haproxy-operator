@@ -42,6 +42,12 @@ type BackendSpec struct {
 	// Cookie enables cookie-based persistence in a backend.
 	// +optional
 	Cookie *Cookie `json:"cookie,omitempty"`
+	// HTTPChk Enables HTTP protocol to check on the servers health
+	// +optional
+	HTTPChk *HTTPChk `json:"httpchk,omitempty"`
+	// TCPCheck Perform health checks using tcp-check send/expect sequences
+	// +optional
+	TCPCheck *bool `json:"tcpCheck,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -89,6 +95,16 @@ func (b *Backend) Model() (models.Backend, error) {
 			Header:  b.Spec.Forwardfor.Header,
 			Ifnone:  b.Spec.Forwardfor.Ifnone,
 		}
+	}
+
+	if b.Spec.HTTPChk != nil {
+		model.AdvCheck = models.BackendAdvCheckHttpchk
+		model.HttpchkParams = &models.HttpchkParams{
+			URI:    b.Spec.HTTPChk.URI,
+			Method: b.Spec.HTTPChk.Method,
+		}
+	} else if b.Spec.TCPCheck != nil && *b.Spec.TCPCheck {
+		model.AdvCheck = models.BackendAdvCheckTCPDashCheck
 	}
 
 	if b.Spec.HTTPPretendKeepalive != nil && *b.Spec.HTTPPretendKeepalive {

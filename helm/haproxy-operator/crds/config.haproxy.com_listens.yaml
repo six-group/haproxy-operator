@@ -715,6 +715,28 @@ spec:
                 - certificate
                 - sniFilter
                 type: object
+              httpCheck:
+                description: HTTPCheck Enables HTTP protocol to check on the servers
+                  health
+                properties:
+                  method:
+                    description: 'Method http method Enum: [HEAD PUT POST GET TRACE
+                      PATCH DELETE CONNECT OPTIONS]'
+                    enum:
+                    - HEAD
+                    - PUT
+                    - POST
+                    - GET
+                    - TRACE
+                    - PATCH
+                    - DELETE
+                    - CONNECT
+                    - OPTIONS
+                    type: string
+                  uri:
+                    description: URI
+                    type: string
+                type: object
               httpPretendKeepalive:
                 description: HTTPPretendKeepalive will keep the connection alive.
                   It is recommended not to enable this option by default.
@@ -1334,6 +1356,10 @@ spec:
                       required:
                       - enabled
                       type: object
+                    checkSNI:
+                      description: CheckSNI This option allows you to specify the
+                        SNI to be used when doing health checks over SSL
+                      type: string
                     cookie:
                       description: Cookie sets the cookie value assigned to the server.
                       type: boolean
@@ -1679,6 +1705,10 @@ spec:
                       required:
                       - enabled
                       type: object
+                    checkSNI:
+                      description: CheckSNI This option allows you to specify the
+                        SNI to be used when doing health checks over SSL
+                      type: string
                     cookie:
                       description: Cookie sets the cookie value assigned to the server.
                       type: boolean
@@ -1907,6 +1937,10 @@ spec:
                   - port
                   type: object
                 type: array
+              tcpCheck:
+                description: TCPCheck Perform health checks using tcp-check send/expect
+                  sequences
+                type: boolean
               tcpRequest:
                 description: TCPRequest rules perform an action on an incoming connection
                   depending on a layer 4 condition.

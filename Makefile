@@ -1,4 +1,4 @@
-test: generate doc manifests golint helm-test unit-test
+test: generate manifests docs golint helm-test unit-test
 
 manifests: controller-gen
 	$(CONTROLLER_GEN) crd rbac:roleName=manager-role webhook paths="./.../..." output:crd:artifacts:config=config/crd/bases
@@ -7,7 +7,8 @@ manifests: controller-gen
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack\\boilerplate.go.txt" paths="./.../..."
 
-doc:
+.PHONY: docs
+docs:
 	go run github.com/elastic/crd-ref-docs@v0.0.10 --config docs/config.yaml --renderer=markdown --output-path docs/api-reference.md
 
 golint: colanci-lint-bin
