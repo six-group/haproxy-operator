@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"k8s.io/utils/ptr"
-
 	parser "github.com/haproxytech/config-parser/v5"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 var simpleBackend = `
@@ -121,22 +120,26 @@ var _ = Describe("Backend", Label("type"), func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
 				Spec: configv1alpha1.BackendSpec{
+					HTTPChk: &configv1alpha1.HTTPChk{URI: "a", Method: "PUT"},
 					BaseSpec: configv1alpha1.BaseSpec{
 						HTTPRequest: &configv1alpha1.HTTPRequestRules{
-							Deny: &configv1alpha1.Deny{
-								Rule: configv1alpha1.Rule{
-									ConditionType: "if",
-									Condition:     "{ var(my-ip) -m ip 127.0.0.0/8 10.0.0.0/8 }",
+							Deny: []configv1alpha1.Deny{
+								{
+									Rule: configv1alpha1.Rule{
+										ConditionType: "if",
+										Condition:     "{ var(my-ip) -m ip 127.0.0.0/8 10.0.0.0/8 }",
+									},
+									Enabled:    true,
+									DenyStatus: &notFound,
 								},
-								Enabled: true,
 							},
-							DenyStatus: &notFound,
 						},
 					},
 				},
 			}
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("http-request deny deny_status 404 if { var(my-ip) -m ip 127.0.0.0/8 10.0.0.0/8 }\n"))
+			Ω(p.String()).Should(ContainSubstring("option httpchk PUT a\n"))
 		})
 		It("should set option http-request replace-path", func() {
 			backend := &configv1alpha1.Backend{

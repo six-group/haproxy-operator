@@ -77,6 +77,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 						},
 					},
 					Labels: labels,
+					Env:    labels,
 				},
 			}
 
@@ -420,6 +421,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
 			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["app.kubernetes.io/name"]).Should(Equal(proxy.Name + "-haproxy"))
 			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["label-test"]).Should(Equal("ok"))
+			Ω(statefulSet.Spec.Template.Spec.Containers[0].Env).Should(HaveLen(2))
 		})
 
 		It("same resource names error", func() {
@@ -512,7 +514,6 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(result).ShouldNot(BeNil())
 
 			Ω(cli.Get(ctx, client.ObjectKeyFromObject(proxy), proxy)).ShouldNot(HaveOccurred())
-			fmt.Println(proxy.Status)
 			Ω(proxy.Status.Phase).Should(Equal(proxyv1alpha1.InstancePhaseRunning))
 			Ω(proxy.Status.Error).Should(BeEmpty())
 

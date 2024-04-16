@@ -57,6 +57,10 @@ type InstanceSpec struct {
 	// +nullable
 	// Labels additional labels for the ha-proxy pods
 	Labels map[string]string `json:"labels,omitempty"`
+	// +optional
+	// +nullable
+	// Env additional environment variables
+	Env map[string]string `json:"env,omitempty"`
 }
 
 type Placement struct {

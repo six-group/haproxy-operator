@@ -356,6 +356,9 @@ type ServerParams struct {
 	// SNI was used to connect to the server.
 	// +optional
 	VerifyHost string `json:"verifyHost,omitempty"`
+	// CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL
+	// +optional
+	CheckSNI string `json:"checkSNI,omitempty"`
 	// Cookie sets the cookie value assigned to the server.
 	// +optional
 	Cookie bool `json:"cookie,omitempty"`
@@ -506,6 +509,7 @@ func (s *Server) Model() (models.Server, error) {
 			Weight:     s.Weight,
 			InitAddr:   s.InitAddr,
 			Verifyhost: s.VerifyHost,
+			CheckSni:   s.CheckSNI,
 		},
 		Name:    s.Name,
 		Address: s.Address,
@@ -738,12 +742,7 @@ type HTTPRequestRules struct {
 	// Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error.
 	// Optionally the status code specified as an argument to deny_status.
 	// +optional
-	Deny *Deny `json:"deny,omitempty"`
-	// DenyStatus is the HTTP status code.
-	// +kubebuilder:validation:Minimum=200
-	// +kubebuilder:validation:Maximum=599
-	// +optional
-	DenyStatus *int64 `json:"denyStatus,omitempty"`
+	Deny []Deny `json:"deny,omitempty"`
 	// Return stops the evaluation of the rules and immediately returns a response.
 	Return *HTTPReturn `json:"return,omitempty"`
 }
@@ -794,14 +793,16 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		})
 	}
 
-	if h.Deny != nil && h.Deny.Enabled {
-		model = append(model, &models.HTTPRequestRule{
-			DenyStatus: h.DenyStatus,
-			Index:      ptr.To(int64(0)),
-			Type:       "deny",
-			Cond:       h.Deny.ConditionType,
-			CondTest:   h.Deny.Condition,
-		})
+	for idx, deny := range h.Deny {
+		if deny.Enabled {
+			model = append(model, &models.HTTPRequestRule{
+				DenyStatus: deny.DenyStatus,
+				Index:      ptr.To(int64(idx)),
+				Type:       "deny",
+				Cond:       deny.ConditionType,
+				CondTest:   deny.Condition,
+			})
+		}
 	}
 
 	for idx, redirect := range h.Redirect {
@@ -973,6 +974,11 @@ type Deny struct {
 	Rule `json:",inline"`
 	// Enabled enables deny http request
 	Enabled bool `json:"enabled"`
+	// DenyStatus is the HTTP status code.
+	// +kubebuilder:validation:Minimum=200
+	// +kubebuilder:validation:Maximum=599
+	// +optional
+	DenyStatus *int64 `json:"denyStatus,omitempty"`
 }
 
 type Redirect struct {
@@ -1151,4 +1157,14 @@ type ProxyProtocolV2Options struct {
 	// This unique-id is primarily meant for "mode tcp". It can lead to unexpected results in "mode http".
 	// +optional
 	UniqueID bool `json:"uniqueID"`
+}
+
+type HTTPChk struct {
+	// URI
+	URI string `json:"uri,omitempty"`
+	// Method http method
+	// +optional
+	// Enum: [HEAD PUT POST GET TRACE PATCH DELETE CONNECT OPTIONS]
+	// +kubebuilder:validation:Enum=HEAD;PUT;POST;GET;TRACE;PATCH;DELETE;CONNECT;OPTIONS;
+	Method string `json:"method,omitempty"`
 }
