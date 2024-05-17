@@ -380,6 +380,11 @@ func (in *InstanceSpec) DeepCopyInto(out *InstanceSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.ImagePullSecrets != nil {
+		in, out := &in.ImagePullSecrets, &out.ImagePullSecrets
+		*out = make([]v1.LocalObjectReference, len(*in))
+		copy(*out, *in)
+	}
 	if in.AllowPrivilegedPorts != nil {
 		in, out := &in.AllowPrivilegedPorts, &out.AllowPrivilegedPorts
 		*out = new(bool)
