@@ -93,6 +93,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: instance.Spec.ServiceAccountName,
+					ImagePullSecrets:   instance.Spec.ImagePullSecrets,
 					Containers: []corev1.Container{
 						{
 							Name:            "haproxy",
