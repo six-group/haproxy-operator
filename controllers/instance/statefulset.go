@@ -277,21 +277,17 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 
 func getResources(instance *proxyv1alpha1.Instance) corev1.ResourceRequirements {
 	resources := corev1.ResourceRequirements{}
-	if instance.Spec.Resources.Requests != nil {
-		resources.Requests = instance.Spec.Resources.Requests
-	} else {
+	if instance.Spec.Resources == nil {
 		resources.Requests = corev1.ResourceList{
 			corev1.ResourceMemory: resource.MustParse(MemoryRequest),
 			corev1.ResourceCPU:    resource.MustParse(CPURequest),
 		}
-	}
-	if instance.Spec.Resources.Limits != nil {
-		resources.Requests = instance.Spec.Resources.Limits
-	} else {
 		resources.Limits = corev1.ResourceList{
 			corev1.ResourceMemory: resource.MustParse(MemoryLimit),
 			corev1.ResourceCPU:    resource.MustParse(CPULimit),
 		}
+	} else {
+		resources = *instance.Spec.Resources
 	}
 	return resources
 }

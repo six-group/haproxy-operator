@@ -34,7 +34,7 @@ type InstanceSpec struct {
 	Image string `json:"image"`
 	// Resources defines the resource requirements for the HAProxy pods.
 	// +optional
-	Resources corev1.ResourceRequirements `json:"resources"`
+	Resources *corev1.ResourceRequirements `json:"resources"`
 	// Sidecars additional sidecar containers
 	// +optional
 	Sidecars []corev1.Container `json:"sidecars,omitempty"`
