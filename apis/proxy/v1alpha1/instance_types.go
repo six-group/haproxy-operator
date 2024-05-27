@@ -32,6 +32,9 @@ type InstanceSpec struct {
 	// Image specifies the HaProxy image including th tag.
 	// +kubebuilder:default="haproxy:latest"
 	Image string `json:"image"`
+	// Resources defines the resource requirements for the HAProxy pods.
+	// +optional
+	Resources *corev1.ResourceRequirements `json:"resources"`
 	// Sidecars additional sidecar containers
 	// +optional
 	Sidecars []corev1.Container `json:"sidecars,omitempty"`

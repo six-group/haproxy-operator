@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.12.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: frontends.config.haproxy.com
 spec:
   group: config.haproxy.com
@@ -27,14 +27,19 @@ spec:
         description: Frontend is the Schema for the frontends API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -42,15 +47,16 @@ spec:
             description: FrontendSpec defines the desired state of Frontend
             properties:
               acl:
-                description: ACL (Access Control Lists) provides a flexible solution
-                  to perform content switching and generally to take decisions based
-                  on content extracted from the request, the response or any environmental
-                  status
+                description: |-
+                  ACL (Access Control Lists) provides a flexible solution to perform
+                  content switching and generally to take decisions based on content extracted
+                  from the request, the response or any environmental status
                 items:
                   properties:
                     criterion:
-                      description: Criterion is the name of a sample fetch method,
-                        or one of its ACL specific declinations.
+                      description: |-
+                        Criterion is the name of a sample fetch method, or one of its ACL
+                        specific declinations.
                       pattern: ^[^\s]+$
                       type: string
                     name:
@@ -97,26 +103,25 @@ spec:
                                   description: matchExpressions is a list of label
                                     selector requirements. The requirements are ANDed.
                                   items:
-                                    description: A label selector requirement is a
-                                      selector that contains values, a key, and an
-                                      operator that relates the key and values.
+                                    description: |-
+                                      A label selector requirement is a selector that contains values, a key, and an operator that
+                                      relates the key and values.
                                     properties:
                                       key:
                                         description: key is the label key that the
                                           selector applies to.
                                         type: string
                                       operator:
-                                        description: operator represents a key's relationship
-                                          to a set of values. Valid operators are
-                                          In, NotIn, Exists and DoesNotExist.
+                                        description: |-
+                                          operator represents a key's relationship to a set of values.
+                                          Valid operators are In, NotIn, Exists and DoesNotExist.
                                         type: string
                                       values:
-                                        description: values is an array of string
-                                          values. If the operator is In or NotIn,
-                                          the values array must be non-empty. If the
-                                          operator is Exists or DoesNotExist, the
-                                          values array must be empty. This array is
-                                          replaced during a strategic merge patch.
+                                        description: |-
+                                          values is an array of string values. If the operator is In or NotIn,
+                                          the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                          the values array must be empty. This array is replaced during a strategic
+                                          merge patch.
                                         items:
                                           type: string
                                         type: array
@@ -128,12 +133,10 @@ spec:
                                 matchLabels:
                                   additionalProperties:
                                     type: string
-                                  description: matchLabels is a map of {key,value}
-                                    pairs. A single {key,value} in the matchLabels
-                                    map is equivalent to an element of matchExpressions,
-                                    whose key field is "key", the operator is "In",
-                                    and the values array contains only "value". The
-                                    requirements are ANDed.
+                                  description: |-
+                                    matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                                    map is equivalent to an element of matchExpressions, whose key field is "key", the
+                                    operator is "In", and the values array contains only "value". The requirements are ANDed.
                                   type: object
                               type: object
                               x-kubernetes-map-type: atomic
@@ -161,9 +164,9 @@ spec:
                 items:
                   properties:
                     acceptProxy:
-                      description: AcceptProxy enforces the use of the PROXY protocol
-                        over any connection accepted by any of the sockets declared
-                        on the same line.
+                      description: |-
+                        AcceptProxy enforces the use of the PROXY protocol over any connection accepted by any of
+                        the sockets declared on the same line.
                       type: boolean
                     address:
                       description: Address can be a host name, an IPv4 address, an
@@ -194,8 +197,9 @@ spec:
                       description: SSL configures OpenSSL
                       properties:
                         alpn:
-                          description: Alpn enables the TLS ALPN extension and advertises
-                            the specified protocol list as supported on top of ALPN.
+                          description: |-
+                            Alpn enables the TLS ALPN extension and advertises the specified protocol
+                            list as supported on top of ALPN.
                           items:
                             type: string
                           type: array
@@ -218,10 +222,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -240,10 +244,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -259,8 +263,8 @@ spec:
                           - name
                           type: object
                         certificate:
-                          description: Certificate configures a PEM based Certificate
-                            file containing both the required certificates and any
+                          description: |-
+                            Certificate configures a PEM based Certificate file containing both the required certificates and any
                             associated private keys.
                           properties:
                             name:
@@ -278,10 +282,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -300,10 +304,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -319,16 +323,17 @@ spec:
                           - name
                           type: object
                         enabled:
-                          description: Enabled enables SSL deciphering on connections
-                            instantiated from this listener. A certificate is necessary.
-                            All contents in the buffers will appear in clear text,
-                            so that ACLs and HTTP processing will only have access
-                            to deciphered contents. SSLv3 is disabled per default,
-                            set MinVersion to SSLv3 to enable it.
+                          description: |-
+                            Enabled enables SSL deciphering on connections instantiated from this listener. A
+                            certificate is necessary. All contents in the buffers will
+                            appear in clear text, so that ACLs and HTTP processing will only have access
+                            to deciphered contents. SSLv3 is disabled per default, set MinVersion to SSLv3
+                            to enable it.
                           type: boolean
                         minVersion:
-                          description: MinVersion enforces use of the specified version
-                            or upper on SSL connections instantiated from this listener.
+                          description: |-
+                            MinVersion enforces use of the specified version or upper on SSL connections
+                            instantiated from this listener.
                           enum:
                           - SSLv3
                           - TLSv1.0
@@ -337,21 +342,20 @@ spec:
                           - TLSv1.3
                           type: string
                         sni:
-                          description: SNI parameter evaluates the sample fetch expression,
-                            converts it to a string and uses the result as the host
-                            name sent in the SNI TLS extension to the server.
+                          description: |-
+                            SNI parameter evaluates the sample fetch expression, converts it to a
+                            string and uses the result as the host name sent in the SNI TLS extension to
+                            the server.
                           type: string
                         verify:
-                          description: Verify is only available when support for OpenSSL
-                            was built in. If set to 'none', client certificate is
-                            not requested. This is the default. In other cases, a
-                            client certificate is requested. If the client does not
-                            provide a certificate after the request and if 'Verify'
-                            is set to 'required', then the handshake is aborted, while
-                            it would have succeeded if set to 'optional'. The verification
-                            of the certificate provided by the client using CAs from
-                            CACertificate. On verify failure the handshake abortes,
-                            regardless of the 'verify' option.
+                          description: |-
+                            Verify is only available when support for OpenSSL was built in. If set
+                            to 'none', client certificate is not requested. This is the default. In other
+                            cases, a client certificate is requested. If the client does not provide a
+                            certificate after the request and if 'Verify' is set to 'required', then the
+                            handshake is aborted, while it would have succeeded if set to 'optional'. The verification
+                            of the certificate provided by the client using CAs from CACertificate.
+                            On verify failure the handshake abortes, regardless of the 'verify' option.
                           enum:
                           - none
                           - optional
@@ -361,9 +365,10 @@ spec:
                       - enabled
                       type: object
                     sslCertificateList:
-                      description: This setting is only available when support for
-                        OpenSSL was built in. It designates a list of PEM file with
-                        an optional ssl configuration and a SNI filter per certificate.
+                      description: |-
+                        This setting is only available when support for OpenSSL was built in. It
+                        designates a list of PEM file with an optional ssl configuration and a SNI
+                        filter per certificate.
                       properties:
                         elements:
                           description: Elements is a list of SSL configuration and
@@ -372,16 +377,16 @@ spec:
                           items:
                             properties:
                               alpn:
-                                description: Alpn enables the TLS ALPN extension and
-                                  advertises the specified protocol list as supported
-                                  on top of ALPN.
+                                description: |-
+                                  Alpn enables the TLS ALPN extension and advertises the specified protocol
+                                  list as supported on top of ALPN.
                                 items:
                                   type: string
                                 type: array
                               certificate:
-                                description: Certificate that will be presented to
-                                  clients who provide a valid TLSServerNameIndication
-                                  field matching the SNIFilter.
+                                description: |-
+                                  Certificate that will be presented to clients who provide a valid
+                                  TLSServerNameIndication field matching the SNIFilter.
                                 properties:
                                   name:
                                     type: string
@@ -398,10 +403,10 @@ spec:
                                               description: The key to select.
                                               type: string
                                             name:
-                                              description: 'Name of the referent.
+                                              description: |-
+                                                Name of the referent.
                                                 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                                TODO: Add other useful fields. apiVersion,
-                                                kind, uid?'
+                                                TODO: Add other useful fields. apiVersion, kind, uid?
                                               type: string
                                             optional:
                                               description: Specify whether the ConfigMap
@@ -421,10 +426,10 @@ spec:
                                                 key.
                                               type: string
                                             name:
-                                              description: 'Name of the referent.
+                                              description: |-
+                                                Name of the referent.
                                                 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                                TODO: Add other useful fields. apiVersion,
-                                                kind, uid?'
+                                                TODO: Add other useful fields. apiVersion, kind, uid?
                                               type: string
                                             optional:
                                               description: Specify whether the Secret
@@ -459,8 +464,8 @@ spec:
                               description: matchExpressions is a list of label selector
                                 requirements. The requirements are ANDed.
                               items:
-                                description: A label selector requirement is a selector
-                                  that contains values, a key, and an operator that
+                                description: |-
+                                  A label selector requirement is a selector that contains values, a key, and an operator that
                                   relates the key and values.
                                 properties:
                                   key:
@@ -468,17 +473,16 @@ spec:
                                       applies to.
                                     type: string
                                   operator:
-                                    description: operator represents a key's relationship
-                                      to a set of values. Valid operators are In,
-                                      NotIn, Exists and DoesNotExist.
+                                    description: |-
+                                      operator represents a key's relationship to a set of values.
+                                      Valid operators are In, NotIn, Exists and DoesNotExist.
                                     type: string
                                   values:
-                                    description: values is an array of string values.
-                                      If the operator is In or NotIn, the values array
-                                      must be non-empty. If the operator is Exists
-                                      or DoesNotExist, the values array must be empty.
-                                      This array is replaced during a strategic merge
-                                      patch.
+                                    description: |-
+                                      values is an array of string values. If the operator is In or NotIn,
+                                      the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                      the values array must be empty. This array is replaced during a strategic
+                                      merge patch.
                                     items:
                                       type: string
                                     type: array
@@ -490,11 +494,10 @@ spec:
                             matchLabels:
                               additionalProperties:
                                 type: string
-                              description: matchLabels is a map of {key,value} pairs.
-                                A single {key,value} in the matchLabels map is equivalent
-                                to an element of matchExpressions, whose key field
-                                is "key", the operator is "In", and the values array
-                                contains only "value". The requirements are ANDed.
+                              description: |-
+                                matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                                map is equivalent to an element of matchExpressions, whose key field is "key", the
+                                operator is "In", and the values array contains only "value". The requirements are ANDed.
                               type: object
                           type: object
                           x-kubernetes-map-type: atomic
@@ -502,14 +505,13 @@ spec:
                       - name
                       type: object
                     transparent:
-                      description: Transparent is an optional keyword which is supported
-                        only on certain Linux kernels. It indicates that the addresses
-                        will be bound even if they do not belong to the local machine,
-                        and that packets targeting any of these addresses will be
-                        intercepted just as if the addresses were locally configured.
-                        This normally requires that IP forwarding is enabled. Caution!
-                        do not use this with the default address '*', as it would
-                        redirect any traffic for the specified port.
+                      description: |-
+                        Transparent is an optional keyword which is supported only on certain Linux kernels. It
+                        indicates that the addresses will be bound even if they do not belong to the
+                        local machine, and that packets targeting any of these addresses will be
+                        intercepted just as if the addresses were locally configured. This normally
+                        requires that IP forwarding is enabled. Caution! do not use this with the
+                        default address '*', as it would redirect any traffic for the specified port.
                       type: boolean
                   required:
                   - name
@@ -522,8 +524,10 @@ spec:
                   been matched.
                 properties:
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    description: |-
+                      Name of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
@@ -570,9 +574,10 @@ spec:
                                   description: The key to select.
                                   type: string
                                 name:
-                                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                    TODO: Add other useful fields. apiVersion, kind,
-                                    uid?'
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
                                   type: string
                                 optional:
                                   description: Specify whether the ConfigMap or its
@@ -644,17 +649,16 @@ spec:
                                     be a C_IDENTIFIER.
                                   type: string
                                 value:
-                                  description: 'Variable references $(VAR_NAME) are
-                                    expanded using the previously defined environment
-                                    variables in the container and any service environment
-                                    variables. If a variable cannot be resolved, the
-                                    reference in the input string will be unchanged.
-                                    Double $$ are reduced to a single $, which allows
-                                    for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
-                                    will produce the string literal "$(VAR_NAME)".
-                                    Escaped references will never be expanded, regardless
-                                    of whether the variable exists or not. Defaults
-                                    to "".'
+                                  description: |-
+                                    Variable references $(VAR_NAME) are expanded
+                                    using the previously defined environment variables in the container and
+                                    any service environment variables. If a variable cannot be resolved,
+                                    the reference in the input string will be unchanged. Double $$ are reduced
+                                    to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e.
+                                    "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)".
+                                    Escaped references will never be expanded, regardless of whether the variable
+                                    exists or not.
+                                    Defaults to "".
                                   type: string
                                 valueFrom:
                                   description: Source for the environment variable's
@@ -667,10 +671,10 @@ spec:
                                           description: The key to select.
                                           type: string
                                         name:
-                                          description: 'Name of the referent. More
-                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                            TODO: Add other useful fields. apiVersion,
-                                            kind, uid?'
+                                          description: |-
+                                            Name of the referent.
+                                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion, kind, uid?
                                           type: string
                                         optional:
                                           description: Specify whether the ConfigMap
@@ -681,11 +685,9 @@ spec:
                                       type: object
                                       x-kubernetes-map-type: atomic
                                     fieldRef:
-                                      description: 'Selects a field of the pod: supports
-                                        metadata.name, metadata.namespace, `metadata.labels[''<KEY>'']`,
-                                        `metadata.annotations[''<KEY>'']`, spec.nodeName,
-                                        spec.serviceAccountName, status.hostIP, status.podIP,
-                                        status.podIPs.'
+                                      description: |-
+                                        Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`,
+                                        spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
                                       properties:
                                         apiVersion:
                                           description: Version of the schema the FieldPath
@@ -700,11 +702,9 @@ spec:
                                       type: object
                                       x-kubernetes-map-type: atomic
                                     resourceFieldRef:
-                                      description: 'Selects a resource of the container:
-                                        only resources limits and requests (limits.cpu,
-                                        limits.memory, limits.ephemeral-storage, requests.cpu,
-                                        requests.memory and requests.ephemeral-storage)
-                                        are currently supported.'
+                                      description: |-
+                                        Selects a resource of the container: only resources limits and requests
+                                        (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
                                       properties:
                                         containerName:
                                           description: 'Container name: required for
@@ -735,10 +735,10 @@ spec:
                                             from.  Must be a valid secret key.
                                           type: string
                                         name:
-                                          description: 'Name of the referent. More
-                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                            TODO: Add other useful fields. apiVersion,
-                                            kind, uid?'
+                                          description: |-
+                                            Name of the referent.
+                                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion, kind, uid?
                                           type: string
                                         optional:
                                           description: Specify whether the Secret
@@ -766,9 +766,9 @@ spec:
                       type: object
                     type: array
                   deny:
-                    description: Deny stops the evaluation of the rules and immediately
-                      rejects the request and emits an HTTP 403 error. Optionally
-                      the status code specified as an argument to deny_status.
+                    description: |-
+                      Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error.
+                      Optionally the status code specified as an argument to deny_status.
                     items:
                       properties:
                         condition:
@@ -824,10 +824,9 @@ spec:
                           description: Value to redirect
                           properties:
                             ClearCookie:
-                              description: ClearCookie is to instruct the browser
-                                to delete the cookie. It will be added with NAME (and
-                                optionally "="). To add "=" type any string in the
-                                value field
+                              description: |-
+                                ClearCookie is to instruct the browser to delete the cookie. It will be added with NAME (and optionally "=").
+                                To add "=" type any string in the value field
                               properties:
                                 name:
                                   description: Name
@@ -876,10 +875,9 @@ spec:
                       type: object
                     type: array
                   replacePath:
-                    description: ReplacePath matches the value of the path using a
-                      regex and completely replaces it with the specified format.
-                      The replacement does not modify the scheme, the authority and
-                      the query-string.
+                    description: |-
+                      ReplacePath matches the value of the path using a regex and completely replaces it with the specified format.
+                      The replacement does not modify the scheme, the authority and the query-string.
                     items:
                       properties:
                         condition:
@@ -976,17 +974,16 @@ spec:
                                     be a C_IDENTIFIER.
                                   type: string
                                 value:
-                                  description: 'Variable references $(VAR_NAME) are
-                                    expanded using the previously defined environment
-                                    variables in the container and any service environment
-                                    variables. If a variable cannot be resolved, the
-                                    reference in the input string will be unchanged.
-                                    Double $$ are reduced to a single $, which allows
-                                    for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
-                                    will produce the string literal "$(VAR_NAME)".
-                                    Escaped references will never be expanded, regardless
-                                    of whether the variable exists or not. Defaults
-                                    to "".'
+                                  description: |-
+                                    Variable references $(VAR_NAME) are expanded
+                                    using the previously defined environment variables in the container and
+                                    any service environment variables. If a variable cannot be resolved,
+                                    the reference in the input string will be unchanged. Double $$ are reduced
+                                    to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e.
+                                    "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)".
+                                    Escaped references will never be expanded, regardless of whether the variable
+                                    exists or not.
+                                    Defaults to "".
                                   type: string
                                 valueFrom:
                                   description: Source for the environment variable's
@@ -999,10 +996,10 @@ spec:
                                           description: The key to select.
                                           type: string
                                         name:
-                                          description: 'Name of the referent. More
-                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                            TODO: Add other useful fields. apiVersion,
-                                            kind, uid?'
+                                          description: |-
+                                            Name of the referent.
+                                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion, kind, uid?
                                           type: string
                                         optional:
                                           description: Specify whether the ConfigMap
@@ -1013,11 +1010,9 @@ spec:
                                       type: object
                                       x-kubernetes-map-type: atomic
                                     fieldRef:
-                                      description: 'Selects a field of the pod: supports
-                                        metadata.name, metadata.namespace, `metadata.labels[''<KEY>'']`,
-                                        `metadata.annotations[''<KEY>'']`, spec.nodeName,
-                                        spec.serviceAccountName, status.hostIP, status.podIP,
-                                        status.podIPs.'
+                                      description: |-
+                                        Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`,
+                                        spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
                                       properties:
                                         apiVersion:
                                           description: Version of the schema the FieldPath
@@ -1032,11 +1027,9 @@ spec:
                                       type: object
                                       x-kubernetes-map-type: atomic
                                     resourceFieldRef:
-                                      description: 'Selects a resource of the container:
-                                        only resources limits and requests (limits.cpu,
-                                        limits.memory, limits.ephemeral-storage, requests.cpu,
-                                        requests.memory and requests.ephemeral-storage)
-                                        are currently supported.'
+                                      description: |-
+                                        Selects a resource of the container: only resources limits and requests
+                                        (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
                                       properties:
                                         containerName:
                                           description: 'Container name: required for
@@ -1067,10 +1060,10 @@ spec:
                                             from.  Must be a valid secret key.
                                           type: string
                                         name:
-                                          description: 'Name of the referent. More
-                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                            TODO: Add other useful fields. apiVersion,
-                                            kind, uid?'
+                                          description: |-
+                                            Name of the referent.
+                                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion, kind, uid?
                                           type: string
                                         optional:
                                           description: Specify whether the Secret
@@ -1185,10 +1178,10 @@ spec:
               timeouts:
                 additionalProperties:
                   type: string
-                description: 'Timeouts: check, connect, http-keep-alive, http-request,
-                  queue, server, tunnel. The timeout value specified in milliseconds
-                  by default, but can be in any other unit if the number is suffixed
-                  by the unit. More info: https://cbonte.github.io/haproxy-dconv/2.6/configuration.html'
+                description: |-
+                  Timeouts: check, connect, http-keep-alive, http-request, queue, server, tunnel.
+                  The timeout value specified in milliseconds by default, but can be in any other unit if the number is suffixed by the unit.
+                  More info: https://cbonte.github.io/haproxy-dconv/2.6/configuration.html
                 type: object
             required:
             - binds
@@ -1215,5 +1208,3 @@ spec:
         type: object
     served: true
     storage: true
-    subresources:
-      status: {}

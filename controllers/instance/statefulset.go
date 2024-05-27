@@ -12,6 +12,7 @@ import (
 	"github.com/six-group/haproxy-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -44,6 +45,13 @@ then
 fi
 
 `
+
+const (
+	MemoryRequest = "256Mi"
+	CPURequest    = "100m"
+	MemoryLimit   = "512Mi"
+	CPULimit      = "2000m"
+)
 
 type initScriptData struct {
 	Host string
@@ -100,6 +108,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 							Image:           utils.StringOrDefault(instance.Spec.Image, "haproxy:latest"),
 							ImagePullPolicy: instance.Spec.ImagePullPolicy,
 							Env:             envVars,
+							Resources:       getResources(instance),
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "haproxy-run",
@@ -264,6 +273,23 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 	}
 
 	return nil
+}
+
+func getResources(instance *proxyv1alpha1.Instance) corev1.ResourceRequirements {
+	resources := corev1.ResourceRequirements{}
+	if instance.Spec.Resources == nil {
+		resources.Requests = corev1.ResourceList{
+			corev1.ResourceMemory: resource.MustParse(MemoryRequest),
+			corev1.ResourceCPU:    resource.MustParse(CPURequest),
+		}
+		resources.Limits = corev1.ResourceList{
+			corev1.ResourceMemory: resource.MustParse(MemoryLimit),
+			corev1.ResourceCPU:    resource.MustParse(CPULimit),
+		}
+	} else {
+		resources = *instance.Spec.Resources
+	}
+	return resources
 }
 
 func hasLocalLoggingTarget(instance *proxyv1alpha1.Instance) bool {
