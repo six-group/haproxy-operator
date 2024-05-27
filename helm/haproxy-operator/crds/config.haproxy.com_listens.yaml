@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.12.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: listens.config.haproxy.com
 spec:
   group: config.haproxy.com
@@ -27,14 +27,19 @@ spec:
         description: Listen is the Schema for the frontends API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -42,15 +47,16 @@ spec:
             description: ListenSpec defines the desired state of Listen
             properties:
               acl:
-                description: ACL (Access Control Lists) provides a flexible solution
-                  to perform content switching and generally to take decisions based
-                  on content extracted from the request, the response or any environmental
-                  status
+                description: |-
+                  ACL (Access Control Lists) provides a flexible solution to perform
+                  content switching and generally to take decisions based on content extracted
+                  from the request, the response or any environmental status
                 items:
                   properties:
                     criterion:
-                      description: Criterion is the name of a sample fetch method,
-                        or one of its ACL specific declinations.
+                      description: |-
+                        Criterion is the name of a sample fetch method, or one of its ACL
+                        specific declinations.
                       pattern: ^[^\s]+$
                       type: string
                     name:
@@ -97,9 +103,9 @@ spec:
                 items:
                   properties:
                     acceptProxy:
-                      description: AcceptProxy enforces the use of the PROXY protocol
-                        over any connection accepted by any of the sockets declared
-                        on the same line.
+                      description: |-
+                        AcceptProxy enforces the use of the PROXY protocol over any connection accepted by any of
+                        the sockets declared on the same line.
                       type: boolean
                     address:
                       description: Address can be a host name, an IPv4 address, an
@@ -130,8 +136,9 @@ spec:
                       description: SSL configures OpenSSL
                       properties:
                         alpn:
-                          description: Alpn enables the TLS ALPN extension and advertises
-                            the specified protocol list as supported on top of ALPN.
+                          description: |-
+                            Alpn enables the TLS ALPN extension and advertises the specified protocol
+                            list as supported on top of ALPN.
                           items:
                             type: string
                           type: array
@@ -154,10 +161,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -176,10 +183,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -195,8 +202,8 @@ spec:
                           - name
                           type: object
                         certificate:
-                          description: Certificate configures a PEM based Certificate
-                            file containing both the required certificates and any
+                          description: |-
+                            Certificate configures a PEM based Certificate file containing both the required certificates and any
                             associated private keys.
                           properties:
                             name:
@@ -214,10 +221,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -236,10 +243,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -255,16 +262,17 @@ spec:
                           - name
                           type: object
                         enabled:
-                          description: Enabled enables SSL deciphering on connections
-                            instantiated from this listener. A certificate is necessary.
-                            All contents in the buffers will appear in clear text,
-                            so that ACLs and HTTP processing will only have access
-                            to deciphered contents. SSLv3 is disabled per default,
-                            set MinVersion to SSLv3 to enable it.
+                          description: |-
+                            Enabled enables SSL deciphering on connections instantiated from this listener. A
+                            certificate is necessary. All contents in the buffers will
+                            appear in clear text, so that ACLs and HTTP processing will only have access
+                            to deciphered contents. SSLv3 is disabled per default, set MinVersion to SSLv3
+                            to enable it.
                           type: boolean
                         minVersion:
-                          description: MinVersion enforces use of the specified version
-                            or upper on SSL connections instantiated from this listener.
+                          description: |-
+                            MinVersion enforces use of the specified version or upper on SSL connections
+                            instantiated from this listener.
                           enum:
                           - SSLv3
                           - TLSv1.0
@@ -273,21 +281,20 @@ spec:
                           - TLSv1.3
                           type: string
                         sni:
-                          description: SNI parameter evaluates the sample fetch expression,
-                            converts it to a string and uses the result as the host
-                            name sent in the SNI TLS extension to the server.
+                          description: |-
+                            SNI parameter evaluates the sample fetch expression, converts it to a
+                            string and uses the result as the host name sent in the SNI TLS extension to
+                            the server.
                           type: string
                         verify:
-                          description: Verify is only available when support for OpenSSL
-                            was built in. If set to 'none', client certificate is
-                            not requested. This is the default. In other cases, a
-                            client certificate is requested. If the client does not
-                            provide a certificate after the request and if 'Verify'
-                            is set to 'required', then the handshake is aborted, while
-                            it would have succeeded if set to 'optional'. The verification
-                            of the certificate provided by the client using CAs from
-                            CACertificate. On verify failure the handshake abortes,
-                            regardless of the 'verify' option.
+                          description: |-
+                            Verify is only available when support for OpenSSL was built in. If set
+                            to 'none', client certificate is not requested. This is the default. In other
+                            cases, a client certificate is requested. If the client does not provide a
+                            certificate after the request and if 'Verify' is set to 'required', then the
+                            handshake is aborted, while it would have succeeded if set to 'optional'. The verification
+                            of the certificate provided by the client using CAs from CACertificate.
+                            On verify failure the handshake abortes, regardless of the 'verify' option.
                           enum:
                           - none
                           - optional
@@ -297,9 +304,10 @@ spec:
                       - enabled
                       type: object
                     sslCertificateList:
-                      description: This setting is only available when support for
-                        OpenSSL was built in. It designates a list of PEM file with
-                        an optional ssl configuration and a SNI filter per certificate.
+                      description: |-
+                        This setting is only available when support for OpenSSL was built in. It
+                        designates a list of PEM file with an optional ssl configuration and a SNI
+                        filter per certificate.
                       properties:
                         elements:
                           description: Elements is a list of SSL configuration and
@@ -308,16 +316,16 @@ spec:
                           items:
                             properties:
                               alpn:
-                                description: Alpn enables the TLS ALPN extension and
-                                  advertises the specified protocol list as supported
-                                  on top of ALPN.
+                                description: |-
+                                  Alpn enables the TLS ALPN extension and advertises the specified protocol
+                                  list as supported on top of ALPN.
                                 items:
                                   type: string
                                 type: array
                               certificate:
-                                description: Certificate that will be presented to
-                                  clients who provide a valid TLSServerNameIndication
-                                  field matching the SNIFilter.
+                                description: |-
+                                  Certificate that will be presented to clients who provide a valid
+                                  TLSServerNameIndication field matching the SNIFilter.
                                 properties:
                                   name:
                                     type: string
@@ -334,10 +342,10 @@ spec:
                                               description: The key to select.
                                               type: string
                                             name:
-                                              description: 'Name of the referent.
+                                              description: |-
+                                                Name of the referent.
                                                 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                                TODO: Add other useful fields. apiVersion,
-                                                kind, uid?'
+                                                TODO: Add other useful fields. apiVersion, kind, uid?
                                               type: string
                                             optional:
                                               description: Specify whether the ConfigMap
@@ -357,10 +365,10 @@ spec:
                                                 key.
                                               type: string
                                             name:
-                                              description: 'Name of the referent.
+                                              description: |-
+                                                Name of the referent.
                                                 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                                TODO: Add other useful fields. apiVersion,
-                                                kind, uid?'
+                                                TODO: Add other useful fields. apiVersion, kind, uid?
                                               type: string
                                             optional:
                                               description: Specify whether the Secret
@@ -395,8 +403,8 @@ spec:
                               description: matchExpressions is a list of label selector
                                 requirements. The requirements are ANDed.
                               items:
-                                description: A label selector requirement is a selector
-                                  that contains values, a key, and an operator that
+                                description: |-
+                                  A label selector requirement is a selector that contains values, a key, and an operator that
                                   relates the key and values.
                                 properties:
                                   key:
@@ -404,17 +412,16 @@ spec:
                                       applies to.
                                     type: string
                                   operator:
-                                    description: operator represents a key's relationship
-                                      to a set of values. Valid operators are In,
-                                      NotIn, Exists and DoesNotExist.
+                                    description: |-
+                                      operator represents a key's relationship to a set of values.
+                                      Valid operators are In, NotIn, Exists and DoesNotExist.
                                     type: string
                                   values:
-                                    description: values is an array of string values.
-                                      If the operator is In or NotIn, the values array
-                                      must be non-empty. If the operator is Exists
-                                      or DoesNotExist, the values array must be empty.
-                                      This array is replaced during a strategic merge
-                                      patch.
+                                    description: |-
+                                      values is an array of string values. If the operator is In or NotIn,
+                                      the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                      the values array must be empty. This array is replaced during a strategic
+                                      merge patch.
                                     items:
                                       type: string
                                     type: array
@@ -426,11 +433,10 @@ spec:
                             matchLabels:
                               additionalProperties:
                                 type: string
-                              description: matchLabels is a map of {key,value} pairs.
-                                A single {key,value} in the matchLabels map is equivalent
-                                to an element of matchExpressions, whose key field
-                                is "key", the operator is "In", and the values array
-                                contains only "value". The requirements are ANDed.
+                              description: |-
+                                matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                                map is equivalent to an element of matchExpressions, whose key field is "key", the
+                                operator is "In", and the values array contains only "value". The requirements are ANDed.
                               type: object
                           type: object
                           x-kubernetes-map-type: atomic
@@ -438,14 +444,13 @@ spec:
                       - name
                       type: object
                     transparent:
-                      description: Transparent is an optional keyword which is supported
-                        only on certain Linux kernels. It indicates that the addresses
-                        will be bound even if they do not belong to the local machine,
-                        and that packets targeting any of these addresses will be
-                        intercepted just as if the addresses were locally configured.
-                        This normally requires that IP forwarding is enabled. Caution!
-                        do not use this with the default address '*', as it would
-                        redirect any traffic for the specified port.
+                      description: |-
+                        Transparent is an optional keyword which is supported only on certain Linux kernels. It
+                        indicates that the addresses will be bound even if they do not belong to the
+                        local machine, and that packets targeting any of these addresses will be
+                        intercepted just as if the addresses were locally configured. This normally
+                        requires that IP forwarding is enabled. Caution! do not use this with the
+                        default address '*', as it would redirect any traffic for the specified port.
                       type: boolean
                   required:
                   - name
@@ -454,8 +459,9 @@ spec:
                 minItems: 1
                 type: array
               checkTimeout:
-                description: CheckTimeout sets an additional check timeout, but only
-                  after a connection has been already established.
+                description: |-
+                  CheckTimeout sets an additional check timeout, but only after a connection has been already
+                  established.
                 type: string
               cookie:
                 description: Cookie enables cookie-based persistence in a backend.
@@ -467,26 +473,26 @@ spec:
                       type: string
                     type: array
                   domain:
-                    description: Domain specify the domain at which a cookie is inserted.
-                      You can specify several domain names by invoking this option
-                      multiple times.
+                    description: |-
+                      Domain specify the domain at which a cookie is inserted. You can specify
+                      several domain names by invoking this option multiple times.
                     items:
                       type: string
                     type: array
                   dynamic:
-                    description: Dynamic activates dynamic cookies, when used, a session
-                      cookie is dynamically created for each server, based on the
-                      IP and port of the server, and a secret key.
+                    description: |-
+                      Dynamic activates dynamic cookies, when used, a session cookie is dynamically created for each server,
+                      based on the IP and port of the server, and a secret key.
                     type: boolean
                   httpOnly:
-                    description: HTTPOnly add an "HttpOnly" cookie attribute when
-                      a cookie is inserted. It doesn't share the cookie with non-HTTP
-                      components.
+                    description: |-
+                      HTTPOnly add an "HttpOnly" cookie attribute when a cookie is inserted.
+                      It doesn't share the cookie with non-HTTP components.
                     type: boolean
                   indirect:
-                    description: Indirect no cookie will be emitted to a client which
-                      already has a valid one for the server which has processed the
-                      request.
+                    description: |-
+                      Indirect no cookie will be emitted to a client which already has a valid one
+                      for the server which has processed the request.
                     type: boolean
                   maxIdle:
                     description: MaxIdle cookies are ignored after some idle time.
@@ -505,9 +511,9 @@ spec:
                           in server responses.
                         type: boolean
                       prefix:
-                        description: Prefix is needed in some specific environments
-                          where the client does not support more than one single cookie
-                          and the application already needs it.
+                        description: |-
+                          Prefix is needed in some specific environments where the client does not support
+                          more than one single cookie and the application already needs it.
                         type: boolean
                       rewrite:
                         description: Rewrite the cookie will be provided by the server.
@@ -522,21 +528,24 @@ spec:
                       or inserted in order to bring persistence.
                     type: string
                   noCache:
-                    description: NoCache recommended in conjunction with the insert
-                      mode when there is a cache between the client and HAProx
+                    description: |-
+                      NoCache recommended in conjunction with the insert mode when there is a cache
+                      between the client and HAProx
                     type: boolean
                   postOnly:
                     description: PostOnly ensures that cookie insertion will only
                       be performed on responses to POST requests.
                     type: boolean
                   preserve:
-                    description: Preserve only be used with "insert" and/or "indirect".
-                      It allows the server to emit the persistence cookie itself.
+                    description: |-
+                      Preserve only be used with "insert" and/or "indirect". It allows the server
+                      to emit the persistence cookie itself.
                     type: boolean
                   secure:
-                    description: Secure add a "Secure" cookie attribute when a cookie
-                      is inserted. The user agent never emits this cookie over non-secure
-                      channels. The cookie will be presented only over SSL/TLS connections.
+                    description: |-
+                      Secure add a "Secure" cookie attribute when a cookie is inserted. The user agent
+                      never emits this cookie over non-secure channels. The cookie will be presented
+                      only over SSL/TLS connections.
                     type: boolean
                 type: object
               errorFiles:
@@ -582,9 +591,10 @@ spec:
                                   description: The key to select.
                                   type: string
                                 name:
-                                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                    TODO: Add other useful fields. apiVersion, kind,
-                                    uid?'
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
                                   type: string
                                 optional:
                                   description: Specify whether the ConfigMap or its
@@ -646,14 +656,16 @@ spec:
                   used in the crt-list of a frontend
                 properties:
                   alpn:
-                    description: Alpn enables the TLS ALPN extension and advertises
-                      the specified protocol list as supported on top of ALPN.
+                    description: |-
+                      Alpn enables the TLS ALPN extension and advertises the specified protocol
+                      list as supported on top of ALPN.
                     items:
                       type: string
                     type: array
                   certificate:
-                    description: Certificate that will be presented to clients who
-                      provide a valid TLSServerNameIndication field matching the SNIFilter.
+                    description: |-
+                      Certificate that will be presented to clients who provide a valid
+                      TLSServerNameIndication field matching the SNIFilter.
                     properties:
                       name:
                         type: string
@@ -669,9 +681,10 @@ spec:
                                   description: The key to select.
                                   type: string
                                 name:
-                                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                    TODO: Add other useful fields. apiVersion, kind,
-                                    uid?'
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
                                   type: string
                                 optional:
                                   description: Specify whether the ConfigMap or its
@@ -690,9 +703,10 @@ spec:
                                     be a valid secret key.
                                   type: string
                                 name:
-                                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                    TODO: Add other useful fields. apiVersion, kind,
-                                    uid?'
+                                  description: |-
+                                    Name of the referent.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind, uid?
                                   type: string
                                 optional:
                                   description: Specify whether the Secret or its key
@@ -720,8 +734,9 @@ spec:
                   health
                 properties:
                   method:
-                    description: 'Method http method Enum: [HEAD PUT POST GET TRACE
-                      PATCH DELETE CONNECT OPTIONS]'
+                    description: |-
+                      Method http method
+                      Enum: [HEAD PUT POST GET TRACE PATCH DELETE CONNECT OPTIONS]
                     enum:
                     - HEAD
                     - PUT
@@ -773,17 +788,16 @@ spec:
                                     be a C_IDENTIFIER.
                                   type: string
                                 value:
-                                  description: 'Variable references $(VAR_NAME) are
-                                    expanded using the previously defined environment
-                                    variables in the container and any service environment
-                                    variables. If a variable cannot be resolved, the
-                                    reference in the input string will be unchanged.
-                                    Double $$ are reduced to a single $, which allows
-                                    for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
-                                    will produce the string literal "$(VAR_NAME)".
-                                    Escaped references will never be expanded, regardless
-                                    of whether the variable exists or not. Defaults
-                                    to "".'
+                                  description: |-
+                                    Variable references $(VAR_NAME) are expanded
+                                    using the previously defined environment variables in the container and
+                                    any service environment variables. If a variable cannot be resolved,
+                                    the reference in the input string will be unchanged. Double $$ are reduced
+                                    to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e.
+                                    "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)".
+                                    Escaped references will never be expanded, regardless of whether the variable
+                                    exists or not.
+                                    Defaults to "".
                                   type: string
                                 valueFrom:
                                   description: Source for the environment variable's
@@ -796,10 +810,10 @@ spec:
                                           description: The key to select.
                                           type: string
                                         name:
-                                          description: 'Name of the referent. More
-                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                            TODO: Add other useful fields. apiVersion,
-                                            kind, uid?'
+                                          description: |-
+                                            Name of the referent.
+                                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion, kind, uid?
                                           type: string
                                         optional:
                                           description: Specify whether the ConfigMap
@@ -810,11 +824,9 @@ spec:
                                       type: object
                                       x-kubernetes-map-type: atomic
                                     fieldRef:
-                                      description: 'Selects a field of the pod: supports
-                                        metadata.name, metadata.namespace, `metadata.labels[''<KEY>'']`,
-                                        `metadata.annotations[''<KEY>'']`, spec.nodeName,
-                                        spec.serviceAccountName, status.hostIP, status.podIP,
-                                        status.podIPs.'
+                                      description: |-
+                                        Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`,
+                                        spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
                                       properties:
                                         apiVersion:
                                           description: Version of the schema the FieldPath
@@ -829,11 +841,9 @@ spec:
                                       type: object
                                       x-kubernetes-map-type: atomic
                                     resourceFieldRef:
-                                      description: 'Selects a resource of the container:
-                                        only resources limits and requests (limits.cpu,
-                                        limits.memory, limits.ephemeral-storage, requests.cpu,
-                                        requests.memory and requests.ephemeral-storage)
-                                        are currently supported.'
+                                      description: |-
+                                        Selects a resource of the container: only resources limits and requests
+                                        (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
                                       properties:
                                         containerName:
                                           description: 'Container name: required for
@@ -864,10 +874,10 @@ spec:
                                             from.  Must be a valid secret key.
                                           type: string
                                         name:
-                                          description: 'Name of the referent. More
-                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                            TODO: Add other useful fields. apiVersion,
-                                            kind, uid?'
+                                          description: |-
+                                            Name of the referent.
+                                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion, kind, uid?
                                           type: string
                                         optional:
                                           description: Specify whether the Secret
@@ -895,9 +905,9 @@ spec:
                       type: object
                     type: array
                   deny:
-                    description: Deny stops the evaluation of the rules and immediately
-                      rejects the request and emits an HTTP 403 error. Optionally
-                      the status code specified as an argument to deny_status.
+                    description: |-
+                      Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error.
+                      Optionally the status code specified as an argument to deny_status.
                     items:
                       properties:
                         condition:
@@ -953,10 +963,9 @@ spec:
                           description: Value to redirect
                           properties:
                             ClearCookie:
-                              description: ClearCookie is to instruct the browser
-                                to delete the cookie. It will be added with NAME (and
-                                optionally "="). To add "=" type any string in the
-                                value field
+                              description: |-
+                                ClearCookie is to instruct the browser to delete the cookie. It will be added with NAME (and optionally "=").
+                                To add "=" type any string in the value field
                               properties:
                                 name:
                                   description: Name
@@ -1005,10 +1014,9 @@ spec:
                       type: object
                     type: array
                   replacePath:
-                    description: ReplacePath matches the value of the path using a
-                      regex and completely replaces it with the specified format.
-                      The replacement does not modify the scheme, the authority and
-                      the query-string.
+                    description: |-
+                      ReplacePath matches the value of the path using a regex and completely replaces it with the specified format.
+                      The replacement does not modify the scheme, the authority and the query-string.
                     items:
                       properties:
                         condition:
@@ -1105,17 +1113,16 @@ spec:
                                     be a C_IDENTIFIER.
                                   type: string
                                 value:
-                                  description: 'Variable references $(VAR_NAME) are
-                                    expanded using the previously defined environment
-                                    variables in the container and any service environment
-                                    variables. If a variable cannot be resolved, the
-                                    reference in the input string will be unchanged.
-                                    Double $$ are reduced to a single $, which allows
-                                    for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
-                                    will produce the string literal "$(VAR_NAME)".
-                                    Escaped references will never be expanded, regardless
-                                    of whether the variable exists or not. Defaults
-                                    to "".'
+                                  description: |-
+                                    Variable references $(VAR_NAME) are expanded
+                                    using the previously defined environment variables in the container and
+                                    any service environment variables. If a variable cannot be resolved,
+                                    the reference in the input string will be unchanged. Double $$ are reduced
+                                    to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e.
+                                    "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)".
+                                    Escaped references will never be expanded, regardless of whether the variable
+                                    exists or not.
+                                    Defaults to "".
                                   type: string
                                 valueFrom:
                                   description: Source for the environment variable's
@@ -1128,10 +1135,10 @@ spec:
                                           description: The key to select.
                                           type: string
                                         name:
-                                          description: 'Name of the referent. More
-                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                            TODO: Add other useful fields. apiVersion,
-                                            kind, uid?'
+                                          description: |-
+                                            Name of the referent.
+                                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion, kind, uid?
                                           type: string
                                         optional:
                                           description: Specify whether the ConfigMap
@@ -1142,11 +1149,9 @@ spec:
                                       type: object
                                       x-kubernetes-map-type: atomic
                                     fieldRef:
-                                      description: 'Selects a field of the pod: supports
-                                        metadata.name, metadata.namespace, `metadata.labels[''<KEY>'']`,
-                                        `metadata.annotations[''<KEY>'']`, spec.nodeName,
-                                        spec.serviceAccountName, status.hostIP, status.podIP,
-                                        status.podIPs.'
+                                      description: |-
+                                        Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`,
+                                        spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
                                       properties:
                                         apiVersion:
                                           description: Version of the schema the FieldPath
@@ -1161,11 +1166,9 @@ spec:
                                       type: object
                                       x-kubernetes-map-type: atomic
                                     resourceFieldRef:
-                                      description: 'Selects a resource of the container:
-                                        only resources limits and requests (limits.cpu,
-                                        limits.memory, limits.ephemeral-storage, requests.cpu,
-                                        requests.memory and requests.ephemeral-storage)
-                                        are currently supported.'
+                                      description: |-
+                                        Selects a resource of the container: only resources limits and requests
+                                        (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
                                       properties:
                                         containerName:
                                           description: 'Container name: required for
@@ -1196,10 +1199,10 @@ spec:
                                             from.  Must be a valid secret key.
                                           type: string
                                         name:
-                                          description: 'Name of the referent. More
-                                            info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                            TODO: Add other useful fields. apiVersion,
-                                            kind, uid?'
+                                          description: |-
+                                            Name of the referent.
+                                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                            TODO: Add other useful fields. apiVersion, kind, uid?
                                           type: string
                                         optional:
                                           description: Specify whether the Secret
@@ -1308,11 +1311,9 @@ spec:
                                   description: SslCipher is the name of the used cipher.
                                   type: boolean
                                 uniqueID:
-                                  description: UniqueId sends a unique ID generated
-                                    using the frontend's "unique-id-format" within
-                                    the PROXYv2 header. This unique-id is primarily
-                                    meant for "mode tcp". It can lead to unexpected
-                                    results in "mode http".
+                                  description: |-
+                                    UniqueId sends a unique ID generated using the frontend's "unique-id-format" within the PROXYv2 header.
+                                    This unique-id is primarily meant for "mode tcp". It can lead to unexpected results in "mode http".
                                   type: boolean
                               type: object
                           type: object
@@ -1321,24 +1322,22 @@ spec:
                             of the PROXY protocol to the PROXY protocol header.
                           type: boolean
                         v2SSLCN:
-                          description: V2SSLCN parameter add the SSL information extension
-                            of the PROXY protocol to the PROXY protocol header and
-                            he SSL information extension along with the Common Name
-                            from the subject of the client certificate (if any), is
-                            added to the PROXY protocol header.
+                          description: |-
+                            V2SSLCN parameter add the SSL information extension of the PROXY protocol to the PROXY protocol header and he SSL information extension
+                            along with the Common Name from the subject of the client certificate (if any), is added to the PROXY protocol header.
                           type: boolean
                       type: object
                     check:
                       description: Check configures the health checks of the server.
                       properties:
                         enabled:
-                          description: Enable enables health checks on a server. If
-                            not set, no health checking is performed, and the server
-                            is always considered available.
+                          description: |-
+                            Enable enables health checks on a server. If not set, no health checking is performed, and the server is always
+                            considered available.
                           type: boolean
                         fall:
-                          description: Fall specifies the number of consecutive unsuccessful
-                            health checks after a server will be considered as dead.
+                          description: |-
+                            Fall specifies the number of consecutive unsuccessful health checks after a server will be considered as dead.
                             This value defaults to 3 if unspecified.
                           format: int64
                           type: integer
@@ -1348,8 +1347,8 @@ spec:
                             to 2000 ms.
                           type: string
                         rise:
-                          description: Rise specifies the number of consecutive successful
-                            health checks after a server will be considered as operational.
+                          description: |-
+                            Rise specifies the number of consecutive successful health checks after a server will be considered as operational.
                             This value defaults to 2 if unspecified.
                           format: int64
                           type: integer
@@ -1367,11 +1366,10 @@ spec:
                       description: FQDN for all the servers this template initializes.
                       type: string
                     initAddr:
-                      description: InitAddr indicates in what order the server address
-                        should be resolved upon startup if it uses an FQDN. Attempts
-                        are made to resolve the address by applying in turn each of
-                        the methods mentioned in the comma-delimited list. The first
-                        method which succeeds is used.
+                      description: |-
+                        InitAddr indicates in what order the server address should be resolved upon startup if it uses an FQDN.
+                        Attempts are made to resolve the address by applying in turn each of the methods mentioned in the comma-delimited
+                        list. The first method which succeeds is used.
                       type: string
                     num:
                       description: Num is the max number of servers as server name
@@ -1398,25 +1396,28 @@ spec:
                         current server hostname.
                       properties:
                         name:
-                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?
                           type: string
                       type: object
                       x-kubernetes-map-type: atomic
                     sendProxy:
-                      description: SendProxy enforces use of the PROXY protocol over
-                        any connection established to this server. The PROXY protocol
-                        informs the other end about the layer 3/4 addresses of the
-                        incoming connection, so that it can know the client address
-                        or the public address it accessed to, whatever the upper layer
-                        protocol.
+                      description: |-
+                        SendProxy enforces use of the PROXY protocol over any
+                        connection established to this server. The PROXY protocol informs the other
+                        end about the layer 3/4 addresses of the incoming connection, so that it can
+                        know the client address or the public address it accessed to, whatever the
+                        upper layer protocol.
                       type: boolean
                     ssl:
                       description: SSL configures OpenSSL
                       properties:
                         alpn:
-                          description: Alpn enables the TLS ALPN extension and advertises
-                            the specified protocol list as supported on top of ALPN.
+                          description: |-
+                            Alpn enables the TLS ALPN extension and advertises the specified protocol
+                            list as supported on top of ALPN.
                           items:
                             type: string
                           type: array
@@ -1439,10 +1440,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -1461,10 +1462,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -1480,8 +1481,8 @@ spec:
                           - name
                           type: object
                         certificate:
-                          description: Certificate configures a PEM based Certificate
-                            file containing both the required certificates and any
+                          description: |-
+                            Certificate configures a PEM based Certificate file containing both the required certificates and any
                             associated private keys.
                           properties:
                             name:
@@ -1499,10 +1500,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -1521,10 +1522,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -1540,16 +1541,17 @@ spec:
                           - name
                           type: object
                         enabled:
-                          description: Enabled enables SSL deciphering on connections
-                            instantiated from this listener. A certificate is necessary.
-                            All contents in the buffers will appear in clear text,
-                            so that ACLs and HTTP processing will only have access
-                            to deciphered contents. SSLv3 is disabled per default,
-                            set MinVersion to SSLv3 to enable it.
+                          description: |-
+                            Enabled enables SSL deciphering on connections instantiated from this listener. A
+                            certificate is necessary. All contents in the buffers will
+                            appear in clear text, so that ACLs and HTTP processing will only have access
+                            to deciphered contents. SSLv3 is disabled per default, set MinVersion to SSLv3
+                            to enable it.
                           type: boolean
                         minVersion:
-                          description: MinVersion enforces use of the specified version
-                            or upper on SSL connections instantiated from this listener.
+                          description: |-
+                            MinVersion enforces use of the specified version or upper on SSL connections
+                            instantiated from this listener.
                           enum:
                           - SSLv3
                           - TLSv1.0
@@ -1558,21 +1560,20 @@ spec:
                           - TLSv1.3
                           type: string
                         sni:
-                          description: SNI parameter evaluates the sample fetch expression,
-                            converts it to a string and uses the result as the host
-                            name sent in the SNI TLS extension to the server.
+                          description: |-
+                            SNI parameter evaluates the sample fetch expression, converts it to a
+                            string and uses the result as the host name sent in the SNI TLS extension to
+                            the server.
                           type: string
                         verify:
-                          description: Verify is only available when support for OpenSSL
-                            was built in. If set to 'none', client certificate is
-                            not requested. This is the default. In other cases, a
-                            client certificate is requested. If the client does not
-                            provide a certificate after the request and if 'Verify'
-                            is set to 'required', then the handshake is aborted, while
-                            it would have succeeded if set to 'optional'. The verification
-                            of the certificate provided by the client using CAs from
-                            CACertificate. On verify failure the handshake abortes,
-                            regardless of the 'verify' option.
+                          description: |-
+                            Verify is only available when support for OpenSSL was built in. If set
+                            to 'none', client certificate is not requested. This is the default. In other
+                            cases, a client certificate is requested. If the client does not provide a
+                            certificate after the request and if 'Verify' is set to 'required', then the
+                            handshake is aborted, while it would have succeeded if set to 'optional'. The verification
+                            of the certificate provided by the client using CAs from CACertificate.
+                            On verify failure the handshake abortes, regardless of the 'verify' option.
                           enum:
                           - none
                           - optional
@@ -1582,16 +1583,17 @@ spec:
                       - enabled
                       type: object
                     verifyHost:
-                      description: VerifyHost is only available when support for OpenSSL
-                        was built in, and only takes effect if pec.ssl.verify' is
-                        set to 'required'. This directive sets a default static hostname
-                        to check the server certificate against when no SNI was used
-                        to connect to the server.
+                      description: |-
+                        VerifyHost is only available when support for OpenSSL was built in, and
+                        only takes effect if pec.ssl.verify' is set to 'required'. This directive sets
+                        a default static hostname to check the server certificate against when no
+                        SNI was used to connect to the server.
                       type: string
                     weight:
-                      description: Weight parameter is used to adjust the server weight
-                        relative to other servers. All servers will receive a load
-                        proportional to their weight relative to the sum of all weights.
+                      description: |-
+                        Weight parameter is used to adjust the server weight relative to
+                        other servers. All servers will receive a load proportional to their weight
+                        relative to the sum of all weights.
                       format: int64
                       maximum: 256
                       minimum: 0
@@ -1652,11 +1654,9 @@ spec:
                                   description: SslCipher is the name of the used cipher.
                                   type: boolean
                                 uniqueID:
-                                  description: UniqueId sends a unique ID generated
-                                    using the frontend's "unique-id-format" within
-                                    the PROXYv2 header. This unique-id is primarily
-                                    meant for "mode tcp". It can lead to unexpected
-                                    results in "mode http".
+                                  description: |-
+                                    UniqueId sends a unique ID generated using the frontend's "unique-id-format" within the PROXYv2 header.
+                                    This unique-id is primarily meant for "mode tcp". It can lead to unexpected results in "mode http".
                                   type: boolean
                               type: object
                           type: object
@@ -1665,11 +1665,9 @@ spec:
                             of the PROXY protocol to the PROXY protocol header.
                           type: boolean
                         v2SSLCN:
-                          description: V2SSLCN parameter add the SSL information extension
-                            of the PROXY protocol to the PROXY protocol header and
-                            he SSL information extension along with the Common Name
-                            from the subject of the client certificate (if any), is
-                            added to the PROXY protocol header.
+                          description: |-
+                            V2SSLCN parameter add the SSL information extension of the PROXY protocol to the PROXY protocol header and he SSL information extension
+                            along with the Common Name from the subject of the client certificate (if any), is added to the PROXY protocol header.
                           type: boolean
                       type: object
                     address:
@@ -1681,13 +1679,13 @@ spec:
                       description: Check configures the health checks of the server.
                       properties:
                         enabled:
-                          description: Enable enables health checks on a server. If
-                            not set, no health checking is performed, and the server
-                            is always considered available.
+                          description: |-
+                            Enable enables health checks on a server. If not set, no health checking is performed, and the server is always
+                            considered available.
                           type: boolean
                         fall:
-                          description: Fall specifies the number of consecutive unsuccessful
-                            health checks after a server will be considered as dead.
+                          description: |-
+                            Fall specifies the number of consecutive unsuccessful health checks after a server will be considered as dead.
                             This value defaults to 3 if unspecified.
                           format: int64
                           type: integer
@@ -1697,8 +1695,8 @@ spec:
                             to 2000 ms.
                           type: string
                         rise:
-                          description: Rise specifies the number of consecutive successful
-                            health checks after a server will be considered as operational.
+                          description: |-
+                            Rise specifies the number of consecutive successful health checks after a server will be considered as operational.
                             This value defaults to 2 if unspecified.
                           format: int64
                           type: integer
@@ -1713,11 +1711,10 @@ spec:
                       description: Cookie sets the cookie value assigned to the server.
                       type: boolean
                     initAddr:
-                      description: InitAddr indicates in what order the server address
-                        should be resolved upon startup if it uses an FQDN. Attempts
-                        are made to resolve the address by applying in turn each of
-                        the methods mentioned in the comma-delimited list. The first
-                        method which succeeds is used.
+                      description: |-
+                        InitAddr indicates in what order the server address should be resolved upon startup if it uses an FQDN.
+                        Attempts are made to resolve the address by applying in turn each of the methods mentioned in the comma-delimited
+                        list. The first method which succeeds is used.
                       type: string
                     name:
                       description: Name of the server.
@@ -1733,25 +1730,28 @@ spec:
                         current server hostname.
                       properties:
                         name:
-                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?
                           type: string
                       type: object
                       x-kubernetes-map-type: atomic
                     sendProxy:
-                      description: SendProxy enforces use of the PROXY protocol over
-                        any connection established to this server. The PROXY protocol
-                        informs the other end about the layer 3/4 addresses of the
-                        incoming connection, so that it can know the client address
-                        or the public address it accessed to, whatever the upper layer
-                        protocol.
+                      description: |-
+                        SendProxy enforces use of the PROXY protocol over any
+                        connection established to this server. The PROXY protocol informs the other
+                        end about the layer 3/4 addresses of the incoming connection, so that it can
+                        know the client address or the public address it accessed to, whatever the
+                        upper layer protocol.
                       type: boolean
                     ssl:
                       description: SSL configures OpenSSL
                       properties:
                         alpn:
-                          description: Alpn enables the TLS ALPN extension and advertises
-                            the specified protocol list as supported on top of ALPN.
+                          description: |-
+                            Alpn enables the TLS ALPN extension and advertises the specified protocol
+                            list as supported on top of ALPN.
                           items:
                             type: string
                           type: array
@@ -1774,10 +1774,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -1796,10 +1796,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -1815,8 +1815,8 @@ spec:
                           - name
                           type: object
                         certificate:
-                          description: Certificate configures a PEM based Certificate
-                            file containing both the required certificates and any
+                          description: |-
+                            Certificate configures a PEM based Certificate file containing both the required certificates and any
                             associated private keys.
                           properties:
                             name:
@@ -1834,10 +1834,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -1856,10 +1856,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -1875,16 +1875,17 @@ spec:
                           - name
                           type: object
                         enabled:
-                          description: Enabled enables SSL deciphering on connections
-                            instantiated from this listener. A certificate is necessary.
-                            All contents in the buffers will appear in clear text,
-                            so that ACLs and HTTP processing will only have access
-                            to deciphered contents. SSLv3 is disabled per default,
-                            set MinVersion to SSLv3 to enable it.
+                          description: |-
+                            Enabled enables SSL deciphering on connections instantiated from this listener. A
+                            certificate is necessary. All contents in the buffers will
+                            appear in clear text, so that ACLs and HTTP processing will only have access
+                            to deciphered contents. SSLv3 is disabled per default, set MinVersion to SSLv3
+                            to enable it.
                           type: boolean
                         minVersion:
-                          description: MinVersion enforces use of the specified version
-                            or upper on SSL connections instantiated from this listener.
+                          description: |-
+                            MinVersion enforces use of the specified version or upper on SSL connections
+                            instantiated from this listener.
                           enum:
                           - SSLv3
                           - TLSv1.0
@@ -1893,21 +1894,20 @@ spec:
                           - TLSv1.3
                           type: string
                         sni:
-                          description: SNI parameter evaluates the sample fetch expression,
-                            converts it to a string and uses the result as the host
-                            name sent in the SNI TLS extension to the server.
+                          description: |-
+                            SNI parameter evaluates the sample fetch expression, converts it to a
+                            string and uses the result as the host name sent in the SNI TLS extension to
+                            the server.
                           type: string
                         verify:
-                          description: Verify is only available when support for OpenSSL
-                            was built in. If set to 'none', client certificate is
-                            not requested. This is the default. In other cases, a
-                            client certificate is requested. If the client does not
-                            provide a certificate after the request and if 'Verify'
-                            is set to 'required', then the handshake is aborted, while
-                            it would have succeeded if set to 'optional'. The verification
-                            of the certificate provided by the client using CAs from
-                            CACertificate. On verify failure the handshake abortes,
-                            regardless of the 'verify' option.
+                          description: |-
+                            Verify is only available when support for OpenSSL was built in. If set
+                            to 'none', client certificate is not requested. This is the default. In other
+                            cases, a client certificate is requested. If the client does not provide a
+                            certificate after the request and if 'Verify' is set to 'required', then the
+                            handshake is aborted, while it would have succeeded if set to 'optional'. The verification
+                            of the certificate provided by the client using CAs from CACertificate.
+                            On verify failure the handshake abortes, regardless of the 'verify' option.
                           enum:
                           - none
                           - optional
@@ -1917,16 +1917,17 @@ spec:
                       - enabled
                       type: object
                     verifyHost:
-                      description: VerifyHost is only available when support for OpenSSL
-                        was built in, and only takes effect if pec.ssl.verify' is
-                        set to 'required'. This directive sets a default static hostname
-                        to check the server certificate against when no SNI was used
-                        to connect to the server.
+                      description: |-
+                        VerifyHost is only available when support for OpenSSL was built in, and
+                        only takes effect if pec.ssl.verify' is set to 'required'. This directive sets
+                        a default static hostname to check the server certificate against when no
+                        SNI was used to connect to the server.
                       type: string
                     weight:
-                      description: Weight parameter is used to adjust the server weight
-                        relative to other servers. All servers will receive a load
-                        proportional to their weight relative to the sum of all weights.
+                      description: |-
+                        Weight parameter is used to adjust the server weight relative to
+                        other servers. All servers will receive a load proportional to their weight
+                        relative to the sum of all weights.
                       format: int64
                       maximum: 256
                       minimum: 0
@@ -2001,10 +2002,10 @@ spec:
               timeouts:
                 additionalProperties:
                   type: string
-                description: 'Timeouts: check, connect, http-keep-alive, http-request,
-                  queue, server, tunnel. The timeout value specified in milliseconds
-                  by default, but can be in any other unit if the number is suffixed
-                  by the unit. More info: https://cbonte.github.io/haproxy-dconv/2.6/configuration.html'
+                description: |-
+                  Timeouts: check, connect, http-keep-alive, http-request, queue, server, tunnel.
+                  The timeout value specified in milliseconds by default, but can be in any other unit if the number is suffixed by the unit.
+                  More info: https://cbonte.github.io/haproxy-dconv/2.6/configuration.html
                 type: object
             required:
             - binds
@@ -2030,5 +2031,3 @@ spec:
         type: object
     served: true
     storage: true
-    subresources:
-      status: {}
