@@ -32,6 +32,9 @@ type BaseSpec struct {
 	// +kubebuilder:default=http
 	// +kubebuilder:validation:Enum=http;tcp
 	Mode string `json:"mode"`
+	// HTTPResponse rules define a set of rules which apply to layer 7 processing.
+	// +optional
+	HTTPResponse *HTTPResponseRules `json:"httpResponse,omitempty"`
 	// HTTPRequest rules define a set of rules which apply to layer 7 processing.
 	// +optional
 	HTTPRequest *HTTPRequestRules `json:"httpRequest,omitempty"`
@@ -101,6 +104,25 @@ func (b *BaseSpec) AddToParser(p parser.Parser, sectionType parser.Section, sect
 					return err
 				}
 				err = p.Insert(sectionType, sectionName, "http-request", data, idx)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	if b.HTTPResponse != nil {
+		rules, err := b.HTTPResponse.Model()
+		if err != nil {
+			return err
+		}
+		for idx, rule := range rules {
+			if rule != nil {
+				data, err := configuration.SerializeHTTPResponseRule(*rule)
+				if err != nil {
+					return err
+				}
+				err = p.Insert(sectionType, sectionName, "http-response", data, idx)
 				if err != nil {
 					return err
 				}
@@ -873,6 +895,28 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 
 	for i := 0; i < len(model); i++ {
 		model[i].Index = ptr.To(int64(i))
+	}
+
+	return model, model.Validate(strfmt.Default)
+}
+
+type HTTPResponseRules struct {
+	// SetHeader sets HTTP header fields
+	SetHeader []HTTPHeaderRule `json:"setHeader,omitempty"`
+}
+
+func (h *HTTPResponseRules) Model() (models.HTTPResponseRules, error) {
+	model := models.HTTPResponseRules{}
+
+	for idx, header := range h.SetHeader {
+		model = append(model, &models.HTTPResponseRule{
+			Type:      "set-header",
+			Index:     ptr.To(int64(idx)),
+			HdrName:   header.Name,
+			HdrFormat: header.Value.String(),
+			Cond:      header.ConditionType,
+			CondTest:  header.Condition,
+		})
 	}
 
 	return model, model.Validate(strfmt.Default)

@@ -52,6 +52,20 @@ var _ = Describe("Listen", Label("type"), func() {
 				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
 				Spec: configv1alpha1.ListenSpec{
 					BaseSpec: configv1alpha1.BaseSpec{
+						HTTPResponse: &configv1alpha1.HTTPResponseRules{
+							SetHeader: []configv1alpha1.HTTPHeaderRule{
+								{
+									Rule: configv1alpha1.Rule{
+										ConditionType: "if",
+										Condition:     "!{ ssl_fc }",
+									},
+									Name: "Strict-Transport-Security",
+									Value: configv1alpha1.HTTPHeaderValue{
+										Str: ptr.To("max-age=16000000; includeSubDomains; preload;"),
+									},
+								},
+							},
+						},
 						HTTPRequest: &configv1alpha1.HTTPRequestRules{
 							SetHeader: []configv1alpha1.HTTPHeaderRule{
 								{
@@ -119,6 +133,7 @@ var _ = Describe("Listen", Label("type"), func() {
 			Ω(p.String()).Should(ContainSubstring("http-request add-header X-Forwarded-Proto https"))
 			Ω(p.String()).Should(ContainSubstring("http-request add-header X-Forwarded-Proto-Version \"${PROTO_VERSION}\""))
 			Ω(p.String()).Should(ContainSubstring("http-request set-path /metrics if !{ ssl_fc }"))
+			Ω(p.String()).Should(ContainSubstring("http-response set-header Strict-Transport-Security max-age=16000000; includeSubDomains; preload; if !{ ssl_fc }"))
 		})
 		It("should create binds", func() {
 			listen := &configv1alpha1.Listen{

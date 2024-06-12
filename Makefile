@@ -40,4 +40,4 @@ endef
 
 GINKGO = ./bin/ginkgo
 ginkgo-bin:
-	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo@v2.15.0)
+	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo@v2.19.0)
