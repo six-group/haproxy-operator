@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 var simpleFrontend = `
@@ -97,6 +98,27 @@ var _ = Describe("Frontend", Label("type"), func() {
 				},
 			}
 			Ω(frontend.AddToParser(p)).Should(HaveOccurred())
+		})
+		It("should set http response", func() {
+			frontend := &configv1alpha1.Frontend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.FrontendSpec{
+					BaseSpec: configv1alpha1.BaseSpec{
+						HTTPResponse: &configv1alpha1.HTTPResponseRules{
+							SetHeader: []configv1alpha1.HTTPHeaderRule{
+								{
+									Name: "Strict-Transport-Security",
+									Value: configv1alpha1.HTTPHeaderValue{
+										Str: ptr.To("max-age=16000000; includeSubDomains; preload;"),
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			Ω(frontend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("http-response set-header Strict-Transport-Security max-age=16000000; includeSubDomains; preload;"))
 		})
 	})
 })

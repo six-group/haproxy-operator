@@ -114,7 +114,7 @@ type Metrics struct {
 	// RelabelConfigs to apply to samples before scraping.
 	// More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
 	// +optional
-	RelabelConfigs []*monitoringv1.RelabelConfig `json:"relabelings,omitempty"`
+	RelabelConfigs []monitoringv1.RelabelConfig `json:"relabelings,omitempty"`
 	// Interval at which metrics should be scraped
 	// If not specified Prometheus' global scrape interval is used.
 	// +optional
