@@ -5,7 +5,7 @@ go 1.22.4
 require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-openapi/strfmt v0.23.0
-	github.com/haproxytech/client-native/v5 v5.1.9
+	github.com/haproxytech/client-native/v5 v5.1.10
 	github.com/haproxytech/config-parser/v5 v5.1.4
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
