@@ -7,8 +7,8 @@ require (
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/haproxytech/client-native/v5 v5.1.9
 	github.com/haproxytech/config-parser/v5 v5.1.4
-	github.com/onsi/ginkgo/v2 v2.19.0
-	github.com/onsi/gomega v1.33.1
+	github.com/onsi/ginkgo/v2 v2.19.1
+	github.com/onsi/gomega v1.34.0
 	github.com/openshift/api v0.0.0-20240611134040-5c2b46e4709a // latest commit of branch https://github.com/openshift/api/tree/release-4.18
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.75.1
 	go.uber.org/multierr v1.11.0
@@ -80,7 +80,7 @@ require (
 	golang.org/x/tools v0.23.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
