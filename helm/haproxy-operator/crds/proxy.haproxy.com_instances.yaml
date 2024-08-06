@@ -808,8 +808,7 @@ spec:
                         type: boolean
                       type:
                         default: ClusterIP
-                        description: Type will define the service type, defaults to
-                          ClusterIP
+                        description: Type will define the service type
                         enum:
                         - ClusterIP
                         - NodePort
