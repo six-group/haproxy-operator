@@ -807,9 +807,13 @@ spec:
                         description: Enabled will toggle the creation of a Service.
                         type: boolean
                       type:
-                        default: corev1.ServiceTypeClusterIP
+                        default: ClusterIP
                         description: Type will define the service type, defaults to
                           ClusterIP
+                        enum:
+                        - ClusterIP
+                        - NodePort
+                        - LoadBalancer
                         type: string
                     required:
                     - enabled
