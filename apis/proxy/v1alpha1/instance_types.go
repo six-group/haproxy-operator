@@ -104,7 +104,7 @@ type ServiceSpec struct {
 	// +optional
 	// +kubebuilder:validation:Enum=ClusterIP;NodePort;LoadBalancer
 	// +kubebuilder:default=ClusterIP
-	Type *corev1.ServiceType `json:"type"`
+	Type *corev1.ServiceType `json:"type,omitempty"`
 }
 
 type Metrics struct {
