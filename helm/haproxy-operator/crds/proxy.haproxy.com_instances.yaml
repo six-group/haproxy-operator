@@ -806,6 +806,14 @@ spec:
                       enabled:
                         description: Enabled will toggle the creation of a Service.
                         type: boolean
+                      type:
+                        default: ClusterIP
+                        description: Type will define the Service Type.
+                        enum:
+                        - ClusterIP
+                        - NodePort
+                        - LoadBalancer
+                        type: string
                     required:
                     - enabled
                     type: object
