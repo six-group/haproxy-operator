@@ -102,7 +102,8 @@ type ServiceSpec struct {
 	Enabled bool `json:"enabled"`
 	// Type will define the service type, defaults to ClusterIP
 	// +optional
-	// +kubebuilder:default="corev1.ServiceTypeClusterIP"
+	// +kubebuilder:validation:Enum=ClusterIP;NodePort;LoadBalancer
+	// +kubebuilder:default=ClusterIP
 	Type *corev1.ServiceType `json:"type"`
 }
 
