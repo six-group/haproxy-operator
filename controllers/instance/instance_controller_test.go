@@ -59,7 +59,6 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			dur, _ := time.ParseDuration("30s")
 
-			lb := corev1.ServiceTypeLoadBalancer
 			proxy = &proxyv1alpha1.Instance{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "bar-foo",
@@ -83,7 +82,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					Network: proxyv1alpha1.Network{
 						Service: proxyv1alpha1.ServiceSpec{
 							Enabled: true,
-							Type:    &lb,
+							Type:    ptr.To(corev1.ServiceTypeLoadBalancer),
 						},
 					},
 				},
