@@ -806,6 +806,11 @@ spec:
                       enabled:
                         description: Enabled will toggle the creation of a Service.
                         type: boolean
+                      type:
+                        default: corev1.ServiceTypeClusterIP
+                        description: Type will define the service type, defaults to
+                          ClusterIP
+                        type: string
                     required:
                     - enabled
                     type: object

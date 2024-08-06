@@ -100,6 +100,10 @@ type RouteSpec struct {
 type ServiceSpec struct {
 	// Enabled will toggle the creation of a Service.
 	Enabled bool `json:"enabled"`
+	// Type will define the service type, defaults to ClusterIP
+	// +optional
+	// +kubebuilder:default="corev1.ServiceTypeClusterIP"
+	Type *corev1.ServiceType `json:"type"`
 }
 
 type Metrics struct {
