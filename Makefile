@@ -1,6 +1,6 @@
 test: generate manifests docs golint helm-test unit-test
 
-PATHS ?= "./..."
+PATHS ?= "./.../..."
 manifests: controller-gen
 	$(CONTROLLER_GEN) crd rbac:roleName=manager-role webhook paths=${PATHS} output:crd:artifacts:config=config/crd/bases
 	cp config/crd/bases/*.haproxy.com*.yaml helm/haproxy-operator/crds/
