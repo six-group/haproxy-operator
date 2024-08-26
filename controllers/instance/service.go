@@ -26,6 +26,10 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 		},
 	}
 
+	if serviceType := instance.Spec.Network.Service.Type; serviceType != nil {
+		service.Spec.Type = *serviceType
+	}
+
 	result, err := controllerutil.CreateOrUpdate(ctx, r.Client, service, func() error {
 		if err := controllerutil.SetOwnerReference(instance, service, r.Scheme); err != nil {
 			return err

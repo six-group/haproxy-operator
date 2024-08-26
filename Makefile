@@ -1,11 +1,12 @@
 test: generate manifests docs golint helm-test unit-test
 
+PATHS ?= "./.../..."
 manifests: controller-gen
-	$(CONTROLLER_GEN) crd rbac:roleName=manager-role webhook paths="./.../..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) crd rbac:roleName=manager-role webhook paths=${PATHS} output:crd:artifacts:config=config/crd/bases
 	cp config/crd/bases/*.haproxy.com*.yaml helm/haproxy-operator/crds/
 
 generate: controller-gen
-	$(CONTROLLER_GEN) object:headerFile="hack\\boilerplate.go.txt" paths="./.../..."
+	$(CONTROLLER_GEN) object:headerFile="hack\\boilerplate.go.txt" paths=${PATHS}
 
 .PHONY: docs
 docs:

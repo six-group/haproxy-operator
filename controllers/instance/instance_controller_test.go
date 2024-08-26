@@ -11,6 +11,7 @@ import (
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
 	"github.com/six-group/haproxy-operator/controllers/instance"
+	"github.com/six-group/haproxy-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -78,6 +79,12 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					},
 					Labels: labels,
 					Env:    labels,
+					Network: proxyv1alpha1.Network{
+						Service: proxyv1alpha1.ServiceSpec{
+							Enabled: true,
+							Type:    ptr.To(corev1.ServiceTypeLoadBalancer),
+						},
+					},
 				},
 			}
 
@@ -403,6 +410,10 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(cli.Get(ctx, client.ObjectKeyFromObject(proxy), proxy)).ShouldNot(HaveOccurred())
 			Ω(proxy.Status.Phase).Should(Equal(proxyv1alpha1.InstancePhaseRunning))
 			Ω(proxy.Status.Error).Should(BeEmpty())
+
+			service := &corev1.Service{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: utils.GetServiceName(proxy)}, service)).ShouldNot(HaveOccurred())
+			Ω(service.Spec.Type).Should(Equal(corev1.ServiceTypeLoadBalancer))
 
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
