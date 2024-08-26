@@ -119,6 +119,8 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 									MountPath: "/usr/local/etc/haproxy",
 								},
 							},
+							ReadinessProbe: instance.Spec.ReadinessProbe,
+							LivenessProbe:  instance.Spec.LivenessProbe,
 						},
 					},
 					Volumes: []corev1.Volume{

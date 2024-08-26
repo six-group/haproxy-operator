@@ -59,14 +59,22 @@ type InstanceSpec struct {
 	// +optional
 	// +nullable
 	Metrics *Metrics `json:"metrics,omitempty"`
-	// +optional
-	// +nullable
 	// Labels additional labels for the ha-proxy pods
-	Labels map[string]string `json:"labels,omitempty"`
 	// +optional
 	// +nullable
+	Labels map[string]string `json:"labels,omitempty"`
 	// Env additional environment variables
+	// +optional
+	// +nullable
 	Env map[string]string `json:"env,omitempty"`
+	// ReadinessProbe the readiness probe for the main container
+	// +optional
+	// +nullable
+	ReadinessProbe *corev1.Probe `json:"readinessProbe,omitempty"`
+	// LivenessProbe the liveness probe for the main container
+	// +optional
+	// +nullable
+	LivenessProbe *corev1.Probe `json:"livenessProbe,omitempty"`
 }
 
 type Placement struct {

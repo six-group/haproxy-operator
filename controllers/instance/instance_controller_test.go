@@ -3,6 +3,7 @@ package instance_test
 import (
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"strings"
 	"time"
 
@@ -531,6 +532,52 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
 			Ω(string(secret.Data["be-https-passthrough.map"])).Should(Equal("^zzzz\\.com/\\.?(:[0-9]+)?(/.*)?$ foo-back2\n^aaaa\\.com/\\.?(:[0-9]+)?(/.*)?$ foo-back"))
+		})
+		It("add probes", func() {
+			proxy.Spec.ReadinessProbe = &corev1.Probe{
+				ProbeHandler: corev1.ProbeHandler{
+					HTTPGet: &corev1.HTTPGetAction{
+						Path:   "/health",
+						Port:   intstr.IntOrString{IntVal: 3333},
+						Scheme: corev1.URISchemeHTTPS,
+					},
+				},
+				InitialDelaySeconds:           1,
+				TimeoutSeconds:                2,
+				PeriodSeconds:                 3,
+				SuccessThreshold:              4,
+				FailureThreshold:              5,
+				TerminationGracePeriodSeconds: ptr.To(int64(6)),
+			}
+
+			proxy.Spec.LivenessProbe = &corev1.Probe{
+				ProbeHandler: corev1.ProbeHandler{
+					Exec: &corev1.ExecAction{
+						Command: []string{"a", "b"},
+					},
+				},
+			}
+
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
+			r := instance.Reconciler{
+				Client: cli,
+				Scheme: scheme,
+			}
+			result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Name: proxy.Name, Namespace: proxy.Namespace}})
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(result).ShouldNot(BeNil())
+
+			Ω(cli.Get(ctx, client.ObjectKeyFromObject(proxy), proxy)).ShouldNot(HaveOccurred())
+			Ω(proxy.Status.Phase).Should(Equal(proxyv1alpha1.InstancePhaseRunning))
+			Ω(proxy.Status.Error).Should(BeEmpty())
+
+			statefulSet := &appsv1.StatefulSet{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
+			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet).ShouldNot(BeNil())
+			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.Exec).Should(BeNil())
+			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.GRPC).Should(BeNil())
+			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path).Should(Equal("/health"))
+			Ω(statefulSet.Spec.Template.Spec.Containers[0].LivenessProbe.Exec).ShouldNot(BeNil())
 		})
 	})
 })
