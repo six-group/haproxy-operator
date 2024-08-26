@@ -1163,6 +1163,26 @@ spec:
                       type: object
                     type: array
                 type: object
+              podDisruptionBudget:
+                description: PodDisruptionBudget defines pod disruptions options
+                nullable: true
+                properties:
+                  maxUnavailable:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: An eviction is allowed if at most “maxUnavailable“
+                      pods selected by “selector” are unavailable after the eviction
+                    x-kubernetes-int-or-string: true
+                  minAvailable:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: An eviction is allowed if at least “minAvailable“
+                      pods selected by “selector” will still be available after the
+                      eviction
+                    x-kubernetes-int-or-string: true
+                type: object
               readinessProbe:
                 description: ReadinessProbe the readiness probe for the main container
                 nullable: true

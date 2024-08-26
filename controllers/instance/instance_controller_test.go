@@ -3,7 +3,6 @@ package instance_test
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"strings"
 	"time"
 
@@ -15,9 +14,11 @@ import (
 	"github.com/six-group/haproxy-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/utils/ptr"
@@ -578,6 +579,24 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.GRPC).Should(BeNil())
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path).Should(Equal("/health"))
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].LivenessProbe.Exec).ShouldNot(BeNil())
+		})
+		It("add pdb", func() {
+			proxy.Spec.PodDisruptionBudget.MaxUnavailable = &intstr.IntOrString{IntVal: 2}
+			proxy.Spec.PodDisruptionBudget.MinAvailable = &intstr.IntOrString{IntVal: 3}
+
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
+			r := instance.Reconciler{
+				Client: cli,
+				Scheme: scheme,
+			}
+			result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Name: proxy.Name, Namespace: proxy.Namespace}})
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(result).ShouldNot(BeNil())
+
+			pdb := &policyv1.PodDisruptionBudget{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, pdb)).ShouldNot(HaveOccurred())
+			Ω(pdb.Spec.MaxUnavailable.IntVal).Should(BeEquivalentTo(2))
+			Ω(pdb.Spec.MinAvailable.StrVal).Should(BeEquivalentTo(3))
 		})
 	})
 })
