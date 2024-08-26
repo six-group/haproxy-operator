@@ -596,7 +596,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			pdb := &policyv1.PodDisruptionBudget{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, pdb)).ShouldNot(HaveOccurred())
 			Ω(pdb.Spec.MaxUnavailable.IntVal).Should(BeEquivalentTo(2))
-			Ω(pdb.Spec.MinAvailable.StrVal).Should(BeEquivalentTo(3))
+			Ω(pdb.Spec.MinAvailable.IntVal).Should(BeEquivalentTo(3))
 		})
 	})
 })
