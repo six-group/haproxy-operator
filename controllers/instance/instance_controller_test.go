@@ -30,14 +30,16 @@ import (
 var _ = Describe("Reconcile", Label("controller"), func() {
 	Context("Reconcile", func() {
 		var (
-			scheme                                                                                                      *runtime.Scheme
-			ctx                                                                                                         context.Context
-			proxy                                                                                                       *proxyv1alpha1.Instance
-			frontend, frontendCustomCerts, frontendCustomCerts2, frontendCustomCertsEmpty, frontendWithBackendSwitching *configv1alpha1.Frontend
-			backend, backend2                                                                                           *configv1alpha1.Backend
-			listen                                                                                                      *configv1alpha1.Listen
-			resolver                                                                                                    *configv1alpha1.Resolver
-			initObjs                                                                                                    []client.Object
+			scheme            *runtime.Scheme
+			ctx               context.Context
+			proxy             *proxyv1alpha1.Instance
+			backend, backend2 *configv1alpha1.Backend
+			listen            *configv1alpha1.Listen
+			resolver          *configv1alpha1.Resolver
+			initObjs          []client.Object
+
+			frontend, frontendCustomCerts, frontendCustomCerts2,
+			frontendCustomCertsEmpty, frontendWithBackendSwitching *configv1alpha1.Frontend
 		)
 
 		customCert := "Certificate"
@@ -78,6 +80,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							},
 							HardStopAfter: &dur,
 						},
+						LabelSelector: metav1.LabelSelector{MatchLabels: labels},
 					},
 					Labels: labels,
 					Env:    labels,
@@ -315,6 +318,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo-listen",
 					Namespace: "foo",
+					Labels:    labels,
 					OwnerReferences: []metav1.OwnerReference{
 						{
 							APIVersion: proxyv1alpha1.GroupVersion.String(),
@@ -396,7 +400,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				},
 			}
 
-			initObjs = []client.Object{proxy, frontend, frontendCustomCerts, frontendCustomCerts2, frontendCustomCertsEmpty, backend, backend2, listen, resolver}
+			initObjs = []client.Object{proxy, frontend, frontendCustomCerts, frontendCustomCerts2, frontendCustomCertsEmpty, backend, backend2, resolver}
 		})
 
 		It("should deploy haproxy instance", func() {
@@ -419,16 +423,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
-			Ω(string(secret.Data["haproxy.cfg"])).Should(Equal("\nglobal\n  hard-stop-after 30000\n  log /var/lib/rsyslog/rsyslog.sock local0\n  log-send-hostname\n\ndefaults unnamed_defaults_1\n\n" +
-				"resolvers bar-foo-res\n  hold nx 500\n  hold valid 1000\n  timeout resolve 1000\n  timeout retry 1000\n  parse-resolv-conf\n  resolve_retries 3\n\n" +
-				"frontend fe-https-tls-termination\n  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map\n\n" +
-				"frontend fe-https-tls-termination-empty\n  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy\n\n" +
-				"frontend fe-https-tls-termination2\n  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map\n\n" +
-				"frontend foo-front\n\n" +
-				"frontend foo-listen\n  bind ${BIND_ADDRESS}:20005 name tcp-20005 ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map\n  default_backend foo-listen\n\n" +
-				"backend foo-back\n  server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256\n\n" +
-				"backend foo-back2\n  server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256\n\n" +
-				"backend foo-listen\n  server routeName routeName.routeNamespace.svc.cluster.local:8443 check ssl alpn http/1.1,h2 init-addr none inter 500 resolvers dns-routeNamespace verify required verifyhost routeName.routeName.svc weight 256\n"))
+			Ω(string(secret.Data["haproxy.cfg"])).Should(Equal(haproxyConfig))
 
 			statefulSet := &appsv1.StatefulSet{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
@@ -477,7 +472,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(proxy.Status.Error).ShouldNot(BeEmpty())
 		})
 		It("should create custom certs", func() {
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(append(initObjs, listen)...).WithStatusSubresource(append(initObjs, listen)...).Build()
 			r := instance.Reconciler{
 				Client: cli,
 				Scheme: scheme,
@@ -492,16 +487,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
-			Ω(string(secret.Data["haproxy.cfg"])).Should(Equal("\nglobal\n  hard-stop-after 30000\n  log /var/lib/rsyslog/rsyslog.sock local0\n  log-send-hostname\n\ndefaults unnamed_defaults_1\n\n" +
-				"resolvers bar-foo-res\n  hold nx 500\n  hold valid 1000\n  timeout resolve 1000\n  timeout retry 1000\n  parse-resolv-conf\n  resolve_retries 3\n\n" +
-				"frontend fe-https-tls-termination\n  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map\n\n" +
-				"frontend fe-https-tls-termination-empty\n  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy\n\n" +
-				"frontend fe-https-tls-termination2\n  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map\n\n" +
-				"frontend foo-front\n\n" +
-				"frontend foo-listen\n  bind ${BIND_ADDRESS}:20005 name tcp-20005 ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map\n  default_backend foo-listen\n\n" +
-				"backend foo-back\n  server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256\n\n" +
-				"backend foo-back2\n  server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256\n\n" +
-				"backend foo-listen\n  server routeName routeName.routeNamespace.svc.cluster.local:8443 check ssl alpn http/1.1,h2 init-addr none inter 500 resolvers dns-routeNamespace verify required verifyhost routeName.routeName.svc weight 256\n"))
+			Ω(string(secret.Data["haproxy.cfg"])).Should(Equal(haproxyConfigCerts))
 
 			Ω(string(secret.Data["cert_list.map"])).Should(Equal(
 				"/usr/local/etc/haproxy/route.name.crt  route.host \n" +
@@ -597,6 +583,83 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, pdb)).ShouldNot(HaveOccurred())
 			Ω(pdb.Spec.MaxUnavailable.IntVal).Should(BeEquivalentTo(2))
 			Ω(pdb.Spec.MinAvailable.IntVal).Should(BeEquivalentTo(3))
+			Ω(pdb.Spec.Selector.MatchLabels).Should(HaveLen(1))
 		})
 	})
 })
+
+var (
+	haproxyConfig = `
+global
+  hard-stop-after 30000
+  log /var/lib/rsyslog/rsyslog.sock local0
+  log-send-hostname
+
+defaults unnamed_defaults_1
+
+resolvers bar-foo-res
+  hold nx 500
+  hold valid 1000
+  timeout resolve 1000
+  timeout retry 1000
+  parse-resolv-conf
+  resolve_retries 3
+
+frontend fe-https-tls-termination
+  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map
+
+frontend fe-https-tls-termination-empty
+  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy
+
+frontend fe-https-tls-termination2
+  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map
+
+frontend foo-front
+
+backend foo-back
+  server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256
+
+backend foo-back2
+  server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256
+`
+	haproxyConfigCerts = `
+global
+  hard-stop-after 30000
+  log /var/lib/rsyslog/rsyslog.sock local0
+  log-send-hostname
+
+defaults unnamed_defaults_1
+
+resolvers bar-foo-res
+  hold nx 500
+  hold valid 1000
+  timeout resolve 1000
+  timeout retry 1000
+  parse-resolv-conf
+  resolve_retries 3
+
+frontend fe-https-tls-termination
+  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map
+
+frontend fe-https-tls-termination-empty
+  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy
+
+frontend fe-https-tls-termination2
+  bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map
+
+frontend foo-front
+
+frontend foo-listen
+  bind ${BIND_ADDRESS}:20005 name tcp-20005 ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map
+  default_backend foo-listen
+
+backend foo-back
+  server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256
+
+backend foo-back2
+  server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256
+
+backend foo-listen
+  server routeName routeName.routeNamespace.svc.cluster.local:8443 check ssl alpn http/1.1,h2 init-addr none inter 500 resolvers dns-routeNamespace verify required verifyhost routeName.routeName.svc weight 256
+`
+)
