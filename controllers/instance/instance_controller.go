@@ -95,6 +95,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return reconcile.Result{}, r.handleError(ctx, instance, err)
 	}
 
+	if err := r.reconcilePDB(ctx, instance); err != nil {
+		return reconcile.Result{}, r.handleError(ctx, instance, err)
+	}
+
 	instance.Status = proxyv1alpha1.InstanceStatus{
 		Phase: proxyv1alpha1.InstancePhaseRunning,
 	}

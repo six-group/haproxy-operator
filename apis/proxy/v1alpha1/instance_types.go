@@ -17,6 +17,7 @@ import (
 	"go.uber.org/multierr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 )
 
@@ -59,14 +60,26 @@ type InstanceSpec struct {
 	// +optional
 	// +nullable
 	Metrics *Metrics `json:"metrics,omitempty"`
-	// +optional
-	// +nullable
 	// Labels additional labels for the ha-proxy pods
-	Labels map[string]string `json:"labels,omitempty"`
 	// +optional
 	// +nullable
+	Labels map[string]string `json:"labels,omitempty"`
 	// Env additional environment variables
+	// +optional
+	// +nullable
 	Env map[string]string `json:"env,omitempty"`
+	// ReadinessProbe the readiness probe for the main container
+	// +optional
+	// +nullable
+	ReadinessProbe *corev1.Probe `json:"readinessProbe,omitempty"`
+	// LivenessProbe the liveness probe for the main container
+	// +optional
+	// +nullable
+	LivenessProbe *corev1.Probe `json:"livenessProbe,omitempty"`
+	// PodDisruptionBudget defines pod disruptions options
+	// +optional
+	// +nullable
+	PodDisruptionBudget PodDisruptionBudget `json:"podDisruptionBudget,omitempty"`
 }
 
 type Placement struct {
@@ -77,6 +90,15 @@ type Placement struct {
 	// domains. Scheduler will schedule pods in a way which abides by the constraints.
 	// +optional
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty"`
+}
+
+type PodDisruptionBudget struct {
+	// An eviction is allowed if at least “minAvailable“ pods selected by “selector” will still be available after the eviction
+	// +optional
+	MinAvailable *intstr.IntOrString `json:"minAvailable,omitempty"`
+	// An eviction is allowed if at most “maxUnavailable“ pods selected by “selector” are unavailable after the eviction
+	// +optional
+	MaxUnavailable *intstr.IntOrString `json:"maxUnavailable,omitempty"`
 }
 
 type Network struct {
