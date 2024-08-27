@@ -88,3 +88,15 @@ rules:
       - watch
       - patch
       - update
+  - apiGroups:
+      - policy
+    resources:
+      - poddisruptionbudgets
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - patch
+      - update
+      - delete
