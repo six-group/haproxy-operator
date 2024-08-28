@@ -583,7 +583,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, pdb)).ShouldNot(HaveOccurred())
 			Ω(pdb.Spec.MaxUnavailable.IntVal).Should(BeEquivalentTo(2))
 			Ω(pdb.Spec.MinAvailable.IntVal).Should(BeEquivalentTo(3))
-			Ω(pdb.Spec.Selector.MatchLabels).Should(HaveLen(1))
+			Ω(pdb.Spec.Selector.MatchLabels).ShouldNot(BeEmpty())
 		})
 	})
 })

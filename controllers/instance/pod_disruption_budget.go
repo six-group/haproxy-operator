@@ -3,6 +3,7 @@ package instance
 import (
 	"context"
 	"fmt"
+	"github.com/six-group/haproxy-operator/pkg/utils"
 
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
 	policyv1 "k8s.io/api/policy/v1"
@@ -23,9 +24,8 @@ func (r *Reconciler) reconcilePDB(ctx context.Context, instance *proxyv1alpha1.I
 	}
 
 	if instance.Spec.PodDisruptionBudget.MaxUnavailable != nil || instance.Spec.PodDisruptionBudget.MinAvailable != nil {
-
 		result, err := controllerutil.CreateOrUpdate(ctx, r.Client, pdb, func() error {
-			pdb.Spec.Selector = &instance.Spec.Configuration.LabelSelector
+			pdb.Spec.Selector = metav1.SetAsLabelSelector(utils.GetPodLabels(instance))
 			pdb.Spec.MaxUnavailable = instance.Spec.PodDisruptionBudget.MaxUnavailable
 			pdb.Spec.MinAvailable = instance.Spec.PodDisruptionBudget.MinAvailable
 			return nil
