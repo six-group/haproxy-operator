@@ -3,6 +3,7 @@ package instance
 import (
 	"context"
 	"fmt"
+
 	"github.com/six-group/haproxy-operator/pkg/utils"
 
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
