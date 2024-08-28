@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/six-group/haproxy-operator/pkg/utils"
-
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
+	"github.com/six-group/haproxy-operator/pkg/utils"
 	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
