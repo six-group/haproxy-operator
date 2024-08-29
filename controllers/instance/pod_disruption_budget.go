@@ -23,6 +23,10 @@ func (r *Reconciler) reconcilePDB(ctx context.Context, instance *proxyv1alpha1.I
 		},
 	}
 
+	if err := controllerutil.SetOwnerReference(instance, pdb, r.Scheme); err != nil {
+		return err
+	}
+
 	if instance.Spec.PodDisruptionBudget.MaxUnavailable != nil || instance.Spec.PodDisruptionBudget.MinAvailable != nil {
 		result, err := controllerutil.CreateOrUpdate(ctx, r.Client, pdb, func() error {
 			pdb.Spec.Selector = metav1.SetAsLabelSelector(utils.GetPodLabels(instance))
