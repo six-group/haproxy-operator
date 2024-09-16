@@ -10,7 +10,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
 	github.com/openshift/api v0.0.0-20240611134040-5c2b46e4709a // latest commit of branch https://github.com/openshift/api/tree/release-4.18
-	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.76.0
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.76.2
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.27.0
 	k8s.io/api v0.30.3
