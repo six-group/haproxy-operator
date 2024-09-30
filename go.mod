@@ -6,7 +6,7 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/haproxytech/client-native/v5 v5.1.10
-	github.com/haproxytech/config-parser/v5 v5.1.4
+	github.com/haproxytech/config-parser/v5 v5.1.6
 	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
 	github.com/openshift/api v0.0.0-20240611134040-5c2b46e4709a // latest commit of branch https://github.com/openshift/api/tree/release-4.18
