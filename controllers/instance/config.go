@@ -2,6 +2,9 @@ package instance
 
 import (
 	"context"
+	// #nosec
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -21,37 +24,37 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func (r *Reconciler) reconcileConfig(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) error {
+func (r *Reconciler) reconcileConfig(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) (string, error) {
 	logger := log.FromContext(ctx)
 
 	config, err := r.generateHAPProxyConfiguration(ctx, instance, listens, frontends, backends, resolvers)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	certificates, err := r.generateCertificates(ctx, instance, listens, frontends, backends)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	envs, err := r.generateEnvs(ctx, instance, listens)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	mappings, err := r.generateBackendMappingFiles(ctx, instance, frontends)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	errorFiles, err := r.generateErrorFiles(ctx, instance, frontends, backends)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	customCerts, err := r.generateCustomCertificatesFile(ctx, instance, frontends, listens)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	aclValueFiles := r.generateACLValuesFiles(ctx, listens, frontends, backends)
@@ -102,13 +105,26 @@ func (r *Reconciler) reconcileConfig(ctx context.Context, instance *proxyv1alpha
 		return nil
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 	if result != controllerutil.OperationResultNone {
 		logger.Info(fmt.Sprintf("Object %s", result), "secret", configSecret.Name)
 	}
 
-	return nil
+	cs := generateChecksum(configSecret)
+
+	return cs, nil
+}
+
+// #nosec
+func generateChecksum(secret *corev1.Secret) string {
+	var b []byte
+	for k := range secret.Data {
+		b = append(b, secret.Data[k]...)
+	}
+
+	hash := md5.Sum(b)
+	return hex.EncodeToString(hash[:])
 }
 
 func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) (string, error) {

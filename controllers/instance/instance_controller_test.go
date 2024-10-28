@@ -560,11 +560,34 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			statefulSet := &appsv1.StatefulSet{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
+			Ω(statefulSet.Annotations).Should(BeEmpty())
+			Ω(statefulSet.Spec.Template.ObjectMeta.Annotations).Should(BeEmpty())
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet).ShouldNot(BeNil())
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.Exec).Should(BeNil())
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.GRPC).Should(BeNil())
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path).Should(Equal("/health"))
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].LivenessProbe.Exec).ShouldNot(BeNil())
+		})
+		It("add checksum", func() {
+			proxy.Spec.RolloutOnConfigChange = true
+
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
+			r := instance.Reconciler{
+				Client: cli,
+				Scheme: scheme,
+			}
+			result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Name: proxy.Name, Namespace: proxy.Namespace}})
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(result).ShouldNot(BeNil())
+
+			Ω(cli.Get(ctx, client.ObjectKeyFromObject(proxy), proxy)).ShouldNot(HaveOccurred())
+			Ω(proxy.Status.Phase).Should(Equal(proxyv1alpha1.InstancePhaseRunning))
+			Ω(proxy.Status.Error).Should(BeEmpty())
+
+			statefulSet := &appsv1.StatefulSet{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
+			Ω(statefulSet.Annotations).Should(BeEmpty())
+			Ω(statefulSet.Spec.Template.ObjectMeta.Annotations).Should(HaveKey("checksum/config"))
 		})
 		It("add pdb", func() {
 			proxy.Spec.PodDisruptionBudget.MaxUnavailable = &intstr.IntOrString{IntVal: 2}

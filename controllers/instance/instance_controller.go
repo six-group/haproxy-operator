@@ -69,7 +69,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return reconcile.Result{}, r.Status().Update(ctx, instance)
 	}
 
-	if err := r.reconcileConfig(ctx, instance, listens, frontends, backends, resolvers); err != nil {
+	var checksum string
+
+	if checksum, err = r.reconcileConfig(ctx, instance, listens, frontends, backends, resolvers); err != nil {
 		return reconcile.Result{}, r.handleError(ctx, instance, err)
 	}
 
@@ -91,7 +93,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}
 
-	if err := r.reconcileStatefulSet(ctx, instance); err != nil {
+	if err := r.reconcileStatefulSet(ctx, instance, checksum); err != nil {
 		return reconcile.Result{}, r.handleError(ctx, instance, err)
 	}
 
