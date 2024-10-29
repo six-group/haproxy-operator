@@ -73,7 +73,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				Client: cli,
 				Scheme: scheme,
 			}
-			err := r.reconcileStatefulSet(ctx, proxy)
+			err := r.reconcileStatefulSet(ctx, proxy, "checksumtest")
 			Ω(err).ShouldNot(HaveOccurred())
 
 			statefulSet := &appsv1.StatefulSet{}

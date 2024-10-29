@@ -59,7 +59,7 @@ type initScriptData struct {
 	File string
 }
 
-func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1alpha1.Instance) error {
+func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1alpha1.Instance, checksum string) error {
 	logger := log.FromContext(ctx)
 
 	statefulset := &appsv1.StatefulSet{
@@ -141,6 +141,10 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 					},
 				},
 			},
+		}
+
+		if instance.Spec.RolloutOnConfigChange {
+			statefulset.Spec.Template.ObjectMeta.Annotations["checksum/config"] = checksum
 		}
 
 		if hasLocalLoggingTarget(instance) {
