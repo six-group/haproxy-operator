@@ -31,6 +31,7 @@ type InstanceSpec struct {
 	// Configuration is used to bootstrap the global and defaults section of the HAProxy configuration.
 	Configuration Configuration `json:"configuration"`
 	// RolloutOnConfigChange enable rollout on config changes
+	// +optional
 	RolloutOnConfigChange bool `json:"rolloutOnConfigChange"`
 	// Image specifies the HaProxy image including th tag.
 	// +kubebuilder:default="haproxy:latest"

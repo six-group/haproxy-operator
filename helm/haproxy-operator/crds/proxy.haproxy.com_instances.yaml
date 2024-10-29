@@ -2837,7 +2837,6 @@ spec:
             - image
             - network
             - replicas
-            - rolloutOnConfigChange
             type: object
           status:
             description: InstanceStatus defines the observed state of Instance
