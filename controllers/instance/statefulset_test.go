@@ -86,7 +86,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				"then\n  i=0\n  while [ $(ip a show to '10.158.182.27' | wc -l) -eq 0 ]\n  do\n    ((i=i+1))\n    if [ \"$i\" -gt \"20\" ]\n" +
 				"      then echo 'timeout waiting for IP 10.158.182.27, aborting'\n      exit 1\n    fi\n    echo 'waiting for IP 10.158.182.27 to be assigned...'\n" +
 				"    sleep 5\n  done\n\n  echo 'IP 10.158.182.27 assignment verified, waiting 5 seconds before continuing...'\n\n" +
-				"  sleep 5\n\n  export BIND_ADDRESS=\"10.158.182.27\"\n  echo \"BIND_ADDRESS=${BIND_ADDRESS}\"\n  exit 0\nfi\n\nexit 1\n"))
+				"  sleep 5\n\n  echo -n \"BIND_ADDRESS=10.158.182.27\" > /var/lib/haproxy/run/env\n  cat /var/lib/haproxy/run/env\n  exit 0\nfi\n\nexit 1\n"))
 		})
 	})
 })

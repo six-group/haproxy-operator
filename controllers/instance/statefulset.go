@@ -39,8 +39,8 @@ then
 
   sleep 5
 
-  export BIND_ADDRESS="{{.IP}}"
-  echo "BIND_ADDRESS=${BIND_ADDRESS}"
+  echo -n "BIND_ADDRESS={{.IP}}" > {{.File}}
+  cat {{.File}}
   exit 0
 fi
 
@@ -56,6 +56,7 @@ const (
 type initScriptData struct {
 	Host string
 	IP   string
+	File string
 }
 
 func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1alpha1.Instance, checksum string) error {
@@ -218,6 +219,8 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		}
 
 		if len(instance.Spec.Network.HostIPs) > 0 {
+			file := "/var/lib/haproxy/run/env"
+
 			var hosts []string
 			for host := range instance.Spec.Network.HostIPs {
 				hosts = append(hosts, host)
@@ -229,6 +232,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 				data := initScriptData{
 					Host: host,
 					IP:   instance.Spec.Network.HostIPs[host],
+					File: file,
 				}
 
 				tmpl, err := template.New("initScript").Parse(initContainerScript)
@@ -257,6 +261,11 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 						MountPath: "/var/lib/haproxy/run",
 					},
 				},
+			})
+
+			statefulset.Spec.Template.Spec.Containers[0].Env = append(statefulset.Spec.Template.Spec.Containers[0].Env, corev1.EnvVar{
+				Name:  "ENV_FILE",
+				Value: file,
 			})
 		}
 
