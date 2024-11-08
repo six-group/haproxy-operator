@@ -12,6 +12,8 @@ import (
 	"github.com/six-group/haproxy-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
@@ -69,6 +71,18 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		},
 	}
 
+	var create bool
+	err := r.Get(ctx, client.ObjectKeyFromObject(statefulset), statefulset)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			create = true
+		} else {
+			return err
+		}
+	}
+
+	oldObj := statefulset.DeepCopy()
+
 	// FIXME OSCP-4269 workaround to change podManagementPolicy
 	_ = r.Get(ctx, client.ObjectKeyFromObject(statefulset), statefulset)
 	if statefulset.Spec.PodManagementPolicy == appsv1.OrderedReadyPodManagement {
@@ -76,206 +90,205 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		logger.Info("Delete stateful set to change podManagementPolicy")
 	}
 
-	// cannot avoid update triggered at startup
-	// too many properties are added by the system (spec.template etc)
-	result, err := controllerutil.CreateOrPatch(ctx, r.Client, statefulset, func() error {
-		if err := controllerutil.SetOwnerReference(instance, statefulset, r.Scheme); err != nil {
-			return err
-		}
-
-		envVars := []corev1.EnvVar{{Name: "HAPROXY_SOCKET", Value: "/var/lib/haproxy/run/haproxy.sock"}}
-		for k, v := range instance.Spec.Env {
-			envVars = append(envVars, corev1.EnvVar{Name: k, Value: v})
-		}
-
-		statefulset.Spec = appsv1.StatefulSetSpec{
-			Replicas: &instance.Spec.Replicas,
-			Selector: &metav1.LabelSelector{
-				MatchLabels: utils.GetAppSelectorLabels(instance),
-			},
-			PodManagementPolicy: appsv1.ParallelPodManagement,
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:      utils.GetPodLabels(instance),
-					Annotations: map[string]string{},
-				},
-				Spec: corev1.PodSpec{
-					ServiceAccountName: instance.Spec.ServiceAccountName,
-					ImagePullSecrets:   instance.Spec.ImagePullSecrets,
-					Containers: []corev1.Container{
-						{
-							Name:            "haproxy",
-							Image:           utils.StringOrDefault(instance.Spec.Image, "haproxy:latest"),
-							ImagePullPolicy: instance.Spec.ImagePullPolicy,
-							Env:             envVars,
-							Resources:       getResources(instance),
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "haproxy-run",
-									MountPath: "/var/lib/haproxy/run",
-								},
-								{
-									Name:      "haproxy-config",
-									MountPath: "/usr/local/etc/haproxy",
-								},
-							},
-							ReadinessProbe: instance.Spec.ReadinessProbe,
-							LivenessProbe:  instance.Spec.LivenessProbe,
-						},
-					},
-					Volumes: []corev1.Volume{
-						{
-							Name: "haproxy-run",
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
-						},
-						{
-							Name: "haproxy-config",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: utils.GetConfigSecretName(instance),
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		if instance.Spec.RolloutOnConfigChange {
-			statefulset.Spec.Template.ObjectMeta.Annotations["checksum/config"] = checksum
-		}
-
-		if hasLocalLoggingTarget(instance) {
-			volumes := []corev1.Volume{
-				{
-					Name: "rsyslog-config",
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName: utils.GetConfigSecretName(instance),
-							Items: []corev1.KeyToPath{
-								{
-									Key:  "rsyslog.conf",
-									Path: "rsyslog.conf",
-								},
-							},
-						},
-					},
-				},
-				{
-					Name: "rsyslog-run",
-					VolumeSource: corev1.VolumeSource{
-						EmptyDir: &corev1.EmptyDirVolumeSource{},
-					},
-				},
-			}
-			statefulset.Spec.Template.Spec.Volumes = append(statefulset.Spec.Template.Spec.Volumes, volumes...)
-
-			mount := corev1.VolumeMount{
-				Name:      "rsyslog-run",
-				MountPath: "/var/lib/rsyslog", // FIXME use filepath.Dir()
-			}
-			statefulset.Spec.Template.Spec.Containers[0].VolumeMounts = append(statefulset.Spec.Template.Spec.Containers[0].VolumeMounts, mount)
-
-			container := corev1.Container{
-				Name:            "logs",
-				Image:           utils.GetRsyslogImage(),
-				ImagePullPolicy: instance.Spec.ImagePullPolicy,
-				Command:         []string{"/sbin/rsyslogd", "-n", "-i", "/tmp/rsyslog.pid", "-f", "/etc/rsyslog/rsyslog.conf"},
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "rsyslog-run",
-						MountPath: "/var/lib/rsyslog", // FIXME use filepath.Dir()
-					},
-					{
-						Name:      "rsyslog-config",
-						MountPath: "/etc/rsyslog",
-					},
-				},
-			}
-			statefulset.Spec.Template.Spec.Containers = append(statefulset.Spec.Template.Spec.Containers, container)
-			statefulset.Spec.Template.Spec.Containers = append(statefulset.Spec.Template.Spec.Containers, instance.Spec.Sidecars...)
-		}
-
-		if instance.Spec.Network.HostNetwork {
-			statefulset.Spec.Template.Spec.HostNetwork = true
-			statefulset.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirstWithHostNet
-		}
-
-		if instance.Spec.Placement != nil {
-			statefulset.Spec.Template.Spec.NodeSelector = instance.Spec.Placement.NodeSelector
-			statefulset.Spec.Template.Spec.TopologySpreadConstraints = instance.Spec.Placement.TopologySpreadConstraints
-
-			for idx := range statefulset.Spec.Template.Spec.TopologySpreadConstraints {
-				statefulset.Spec.Template.Spec.TopologySpreadConstraints[idx].LabelSelector = statefulset.Spec.Selector
-			}
-		}
-
-		if ptr.Deref(instance.Spec.AllowPrivilegedPorts, false) {
-			statefulset.Spec.Template.Spec.Containers[0].SecurityContext = &corev1.SecurityContext{
-				Privileged: ptr.To(true),
-			}
-		}
-
-		if len(instance.Spec.Network.HostIPs) > 0 {
-			file := "/var/lib/haproxy/run/env"
-
-			var hosts []string
-			for host := range instance.Spec.Network.HostIPs {
-				hosts = append(hosts, host)
-			}
-			sort.Strings(hosts)
-
-			script := ""
-			for _, host := range hosts {
-				data := initScriptData{
-					Host: host,
-					IP:   instance.Spec.Network.HostIPs[host],
-					File: file,
-				}
-
-				tmpl, err := template.New("initScript").Parse(initContainerScript)
-				if err != nil {
-					return err
-				}
-				var s bytes.Buffer
-				err = tmpl.Execute(&s, data)
-				if err != nil {
-					return err
-				}
-
-				script += s.String()
-			}
-			script += "exit 1\n"
-
-			statefulset.Spec.Template.Spec.InitContainers = append(statefulset.Spec.Template.Spec.InitContainers, corev1.Container{
-				Name:            "setup-env",
-				Image:           utils.GetHelperImage(),
-				ImagePullPolicy: instance.Spec.ImagePullPolicy,
-				Command:         []string{"/bin/sh", "-c"},
-				Args:            []string{script},
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "haproxy-run",
-						MountPath: "/var/lib/haproxy/run",
-					},
-				},
-			})
-
-			statefulset.Spec.Template.Spec.Containers[0].Env = append(statefulset.Spec.Template.Spec.Containers[0].Env, corev1.EnvVar{
-				Name:  "ENV_FILE",
-				Value: file,
-			})
-		}
-
-		return nil
-	})
-	if err != nil {
+	if err := controllerutil.SetOwnerReference(instance, statefulset, r.Scheme); err != nil {
 		return err
 	}
-	if result != controllerutil.OperationResultNone {
-		logger.Info(fmt.Sprintf("Object %s", result), "statefulset", statefulset.Name)
+
+	envVars := []corev1.EnvVar{{Name: "HAPROXY_SOCKET", Value: "/var/lib/haproxy/run/haproxy.sock"}}
+	for k, v := range instance.Spec.Env {
+		envVars = append(envVars, corev1.EnvVar{Name: k, Value: v})
+	}
+
+	statefulset.Spec = appsv1.StatefulSetSpec{
+		Replicas: &instance.Spec.Replicas,
+		Selector: &metav1.LabelSelector{
+			MatchLabels: utils.GetAppSelectorLabels(instance),
+		},
+		PodManagementPolicy: appsv1.ParallelPodManagement,
+		Template: corev1.PodTemplateSpec{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels:      utils.GetPodLabels(instance),
+				Annotations: map[string]string{},
+			},
+			Spec: corev1.PodSpec{
+				ServiceAccountName: instance.Spec.ServiceAccountName,
+				ImagePullSecrets:   instance.Spec.ImagePullSecrets,
+				Containers: []corev1.Container{
+					{
+						Name:            "haproxy",
+						Image:           utils.StringOrDefault(instance.Spec.Image, "haproxy:latest"),
+						ImagePullPolicy: instance.Spec.ImagePullPolicy,
+						Env:             envVars,
+						Resources:       getResources(instance),
+						VolumeMounts: []corev1.VolumeMount{
+							{
+								Name:      "haproxy-run",
+								MountPath: "/var/lib/haproxy/run",
+							},
+							{
+								Name:      "haproxy-config",
+								MountPath: "/usr/local/etc/haproxy",
+							},
+						},
+						ReadinessProbe: instance.Spec.ReadinessProbe,
+						LivenessProbe:  instance.Spec.LivenessProbe,
+					},
+				},
+				Volumes: []corev1.Volume{
+					{
+						Name: "haproxy-run",
+						VolumeSource: corev1.VolumeSource{
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
+						},
+					},
+					{
+						Name: "haproxy-config",
+						VolumeSource: corev1.VolumeSource{
+							Secret: &corev1.SecretVolumeSource{
+								SecretName: utils.GetConfigSecretName(instance),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if instance.Spec.RolloutOnConfigChange {
+		statefulset.Spec.Template.ObjectMeta.Annotations["checksum/config"] = checksum
+	}
+
+	if hasLocalLoggingTarget(instance) {
+		volumes := []corev1.Volume{
+			{
+				Name: "rsyslog-config",
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: utils.GetConfigSecretName(instance),
+						Items: []corev1.KeyToPath{
+							{
+								Key:  "rsyslog.conf",
+								Path: "rsyslog.conf",
+							},
+						},
+					},
+				},
+			},
+			{
+				Name: "rsyslog-run",
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
+			},
+		}
+		statefulset.Spec.Template.Spec.Volumes = append(statefulset.Spec.Template.Spec.Volumes, volumes...)
+
+		mount := corev1.VolumeMount{
+			Name:      "rsyslog-run",
+			MountPath: "/var/lib/rsyslog", // FIXME use filepath.Dir()
+		}
+		statefulset.Spec.Template.Spec.Containers[0].VolumeMounts = append(statefulset.Spec.Template.Spec.Containers[0].VolumeMounts, mount)
+
+		container := corev1.Container{
+			Name:            "logs",
+			Image:           utils.GetRsyslogImage(),
+			ImagePullPolicy: instance.Spec.ImagePullPolicy,
+			Command:         []string{"/sbin/rsyslogd", "-n", "-i", "/tmp/rsyslog.pid", "-f", "/etc/rsyslog/rsyslog.conf"},
+			VolumeMounts: []corev1.VolumeMount{
+				{
+					Name:      "rsyslog-run",
+					MountPath: "/var/lib/rsyslog", // FIXME use filepath.Dir()
+				},
+				{
+					Name:      "rsyslog-config",
+					MountPath: "/etc/rsyslog",
+				},
+			},
+		}
+		statefulset.Spec.Template.Spec.Containers = append(statefulset.Spec.Template.Spec.Containers, container)
+		statefulset.Spec.Template.Spec.Containers = append(statefulset.Spec.Template.Spec.Containers, instance.Spec.Sidecars...)
+	}
+
+	if instance.Spec.Network.HostNetwork {
+		statefulset.Spec.Template.Spec.HostNetwork = true
+		statefulset.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirstWithHostNet
+	}
+
+	if instance.Spec.Placement != nil {
+		statefulset.Spec.Template.Spec.NodeSelector = instance.Spec.Placement.NodeSelector
+		statefulset.Spec.Template.Spec.TopologySpreadConstraints = instance.Spec.Placement.TopologySpreadConstraints
+
+		for idx := range statefulset.Spec.Template.Spec.TopologySpreadConstraints {
+			statefulset.Spec.Template.Spec.TopologySpreadConstraints[idx].LabelSelector = statefulset.Spec.Selector
+		}
+	}
+
+	if ptr.Deref(instance.Spec.AllowPrivilegedPorts, false) {
+		statefulset.Spec.Template.Spec.Containers[0].SecurityContext = &corev1.SecurityContext{
+			Privileged: ptr.To(true),
+		}
+	}
+
+	if len(instance.Spec.Network.HostIPs) > 0 {
+		file := "/var/lib/haproxy/run/env"
+
+		var hosts []string
+		for host := range instance.Spec.Network.HostIPs {
+			hosts = append(hosts, host)
+		}
+		sort.Strings(hosts)
+
+		script := ""
+		for _, host := range hosts {
+			data := initScriptData{
+				Host: host,
+				IP:   instance.Spec.Network.HostIPs[host],
+				File: file,
+			}
+
+			tmpl, err := template.New("initScript").Parse(initContainerScript)
+			if err != nil {
+				return err
+			}
+			var s bytes.Buffer
+			err = tmpl.Execute(&s, data)
+			if err != nil {
+				return err
+			}
+
+			script += s.String()
+		}
+		script += "exit 1\n"
+
+		statefulset.Spec.Template.Spec.InitContainers = append(statefulset.Spec.Template.Spec.InitContainers, corev1.Container{
+			Name:            "setup-env",
+			Image:           utils.GetHelperImage(),
+			ImagePullPolicy: instance.Spec.ImagePullPolicy,
+			Command:         []string{"/bin/sh", "-c"},
+			Args:            []string{script},
+			VolumeMounts: []corev1.VolumeMount{
+				{
+					Name:      "haproxy-run",
+					MountPath: "/var/lib/haproxy/run",
+				},
+			},
+		})
+
+		statefulset.Spec.Template.Spec.Containers[0].Env = append(statefulset.Spec.Template.Spec.Containers[0].Env, corev1.EnvVar{
+			Name:  "ENV_FILE",
+			Value: file,
+		})
+	}
+
+	if !equality.Semantic.DeepEqual(oldObj.Spec, statefulset.Spec) || !equality.Semantic.DeepEqual(oldObj.OwnerReferences, statefulset.OwnerReferences) {
+		if create {
+			err = r.Create(ctx, statefulset)
+			logger.Info("created", "statefulset", statefulset.Name)
+			return err
+		}
+		err = r.Update(ctx, statefulset)
+		logger.Info("updated", "statefulset", statefulset.Name)
+		return err
 	}
 
 	return nil
