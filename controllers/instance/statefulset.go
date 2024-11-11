@@ -99,6 +99,11 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		envVars = append(envVars, corev1.EnvVar{Name: k, Value: v})
 	}
 
+	imagePullPolicy := corev1.PullIfNotPresent
+	if instance.Spec.ImagePullPolicy != "" {
+		imagePullPolicy = instance.Spec.ImagePullPolicy
+	}
+
 	statefulset.Spec = appsv1.StatefulSetSpec{
 		Replicas: &instance.Spec.Replicas,
 		Selector: &metav1.LabelSelector{
@@ -117,7 +122,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 					{
 						Name:            "haproxy",
 						Image:           utils.StringOrDefault(instance.Spec.Image, "haproxy:latest"),
-						ImagePullPolicy: instance.Spec.ImagePullPolicy,
+						ImagePullPolicy: imagePullPolicy,
 						Env:             envVars,
 						Resources:       getResources(instance),
 						VolumeMounts: []corev1.VolumeMount{
@@ -145,7 +150,8 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 						Name: "haproxy-config",
 						VolumeSource: corev1.VolumeSource{
 							Secret: &corev1.SecretVolumeSource{
-								SecretName: utils.GetConfigSecretName(instance),
+								DefaultMode: ptr.To(int32(420)),
+								SecretName:  utils.GetConfigSecretName(instance),
 							},
 						},
 					},
@@ -164,7 +170,8 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 				Name: "rsyslog-config",
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
-						SecretName: utils.GetConfigSecretName(instance),
+						DefaultMode: ptr.To(int32(420)),
+						SecretName:  utils.GetConfigSecretName(instance),
 						Items: []corev1.KeyToPath{
 							{
 								Key:  "rsyslog.conf",
@@ -192,7 +199,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		container := corev1.Container{
 			Name:            "logs",
 			Image:           utils.GetRsyslogImage(),
-			ImagePullPolicy: instance.Spec.ImagePullPolicy,
+			ImagePullPolicy: imagePullPolicy,
 			Command:         []string{"/sbin/rsyslogd", "-n", "-i", "/tmp/rsyslog.pid", "-f", "/etc/rsyslog/rsyslog.conf"},
 			VolumeMounts: []corev1.VolumeMount{
 				{
@@ -263,7 +270,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		statefulset.Spec.Template.Spec.InitContainers = append(statefulset.Spec.Template.Spec.InitContainers, corev1.Container{
 			Name:            "setup-env",
 			Image:           utils.GetHelperImage(),
-			ImagePullPolicy: instance.Spec.ImagePullPolicy,
+			ImagePullPolicy: imagePullPolicy,
 			Command:         []string{"/bin/sh", "-c"},
 			Args:            []string{script},
 			VolumeMounts: []corev1.VolumeMount{
@@ -280,7 +287,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		})
 	}
 
-	if !equality.Semantic.DeepEqual(oldObj.Spec, statefulset.Spec) || !equality.Semantic.DeepEqual(oldObj.OwnerReferences, statefulset.OwnerReferences) {
+	if needsUpdate(oldObj, statefulset) {
 		if create {
 			err = r.Create(ctx, statefulset)
 			logger.Info("created", "statefulset", statefulset.Name)
@@ -292,6 +299,38 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 	}
 
 	return nil
+}
+
+func needsUpdate(old, new *appsv1.StatefulSet) bool {
+	oldCpy := old.DeepCopy()
+	newCpy := new.DeepCopy()
+
+	removeIrrelevantProperties(oldCpy)
+	removeIrrelevantProperties(newCpy)
+
+	return !equality.Semantic.DeepEqual(oldCpy.Spec, newCpy.Spec) || !equality.Semantic.DeepEqual(oldCpy.OwnerReferences, newCpy.OwnerReferences)
+}
+
+func removeIrrelevantProperties(ss *appsv1.StatefulSet) {
+	ss.Spec.UpdateStrategy = appsv1.StatefulSetUpdateStrategy{}
+	ss.Spec.RevisionHistoryLimit = nil
+	ss.Spec.PersistentVolumeClaimRetentionPolicy = nil
+
+	ss.Spec.Template.Spec.SchedulerName = ""
+	ss.Spec.Template.Spec.DeprecatedServiceAccount = ""
+	ss.Spec.Template.Spec.RestartPolicy = ""
+	ss.Spec.Template.Spec.TerminationGracePeriodSeconds = nil
+	ss.Spec.Template.Spec.SecurityContext = nil
+	ss.Spec.Template.Spec.SecurityContext = nil
+
+	for i := range ss.Spec.Template.Spec.InitContainers {
+		ss.Spec.Template.Spec.InitContainers[i].TerminationMessagePath = ""
+		ss.Spec.Template.Spec.InitContainers[i].TerminationMessagePolicy = ""
+	}
+	for i := range ss.Spec.Template.Spec.Containers {
+		ss.Spec.Template.Spec.Containers[i].TerminationMessagePath = ""
+		ss.Spec.Template.Spec.Containers[i].TerminationMessagePolicy = ""
+	}
 }
 
 func getResources(instance *proxyv1alpha1.Instance) corev1.ResourceRequirements {
