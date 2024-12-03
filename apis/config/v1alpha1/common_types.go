@@ -754,6 +754,8 @@ type HTTPRequestRules struct {
 	SetPath []HTTPPathRule `json:"setPath,omitempty"`
 	// AddHeader appends HTTP header fields
 	AddHeader []HTTPHeaderRule `json:"addHeader,omitempty"`
+	// DelHeader removes all HTTP header fields
+	DelHeader []HTTPDeleteHeaderRule `json:"delHeader,omitempty"`
 	// Redirect performs an HTTP redirection based on a redirect rule.
 	// +optional
 	Redirect []Redirect `json:"redirect,omitempty"`
@@ -799,6 +801,17 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 			Index:     ptr.To(int64(idx)),
 			HdrName:   header.Name,
 			HdrFormat: header.Value.String(),
+			Cond:      header.ConditionType,
+			CondTest:  header.Condition,
+		})
+	}
+
+	for idx, header := range h.DelHeader {
+		model = append(model, &models.HTTPRequestRule{
+			Type:      "del-header",
+			Index:     ptr.To(int64(idx)),
+			HdrName:   header.Name,
+			HdrMethod: header.Method,
 			Cond:      header.ConditionType,
 			CondTest:  header.Condition,
 		})
@@ -946,6 +959,15 @@ type HTTPHeaderRule struct {
 	Name string `json:"name"`
 	// Value specifies the header value
 	Value HTTPHeaderValue `json:"value"`
+}
+
+type HTTPDeleteHeaderRule struct {
+	Rule `json:",inline"`
+	// Name specifies the header name
+	Name string `json:"name"`
+	// Method is the matching applied on the header name
+	// +kubebuilder:validation:Enum=str;beg;end;sub;reg
+	Method string `json:"method"`
 }
 
 type HTTPPathRule struct {

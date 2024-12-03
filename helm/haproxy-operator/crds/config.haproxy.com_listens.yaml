@@ -961,6 +961,38 @@ spec:
                       - value
                       type: object
                     type: array
+                  delHeader:
+                    description: DelHeader removes all HTTP header fields
+                    items:
+                      properties:
+                        condition:
+                          description: Condition is a condition composed of ACLs.
+                          type: string
+                        conditionType:
+                          description: ConditionType specifies the type of the condition
+                            matching ('if' or 'unless')
+                          enum:
+                          - if
+                          - unless
+                          type: string
+                        method:
+                          description: Method is the matching applied on the header
+                            name
+                          enum:
+                          - str
+                          - beg
+                          - end
+                          - sub
+                          - reg
+                          type: string
+                        name:
+                          description: Name specifies the header name
+                          type: string
+                      required:
+                      - method
+                      - name
+                      type: object
+                    type: array
                   deny:
                     description: |-
                       Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error.
