@@ -2,6 +2,20 @@ apiVersion: v1
 entries:
   haproxy-operator:
   - apiVersion: v2
+    appVersion: v1.0.24
+    created: "2024-12-18T08:01:21.012361603Z"
+    description: Install HAProxy Operator
+    digest: 8c6d634361e561660a621ec41d6c447377894ffe0a241468f5cabb8b8368c7db
+    maintainers:
+    - name: snorwin
+    - name: m-terra
+    name: haproxy-operator
+    sources:
+    - https://github.com/six-group/haproxy-operator
+    urls:
+    - https://github.com/six-group/haproxy-operator/releases/download/haproxy-operator-1.0.24/haproxy-operator-1.0.24.tgz
+    version: 1.0.24
+  - apiVersion: v2
     appVersion: v1.0.23
     created: "2024-12-17T13:36:19.6705043Z"
     description: Install HAProxy Operator
@@ -337,4 +351,4 @@ entries:
     urls:
     - https://github.com/six-group/haproxy-operator/releases/download/haproxy-operator-1.0.0/haproxy-operator-1.0.0.tgz
     version: 1.0.0
-generated: "2024-12-17T13:36:19.670899968Z"
+generated: "2024-12-18T08:01:21.0125758Z"
