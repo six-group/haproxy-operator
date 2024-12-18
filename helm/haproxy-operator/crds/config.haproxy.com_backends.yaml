@@ -583,7 +583,6 @@ spec:
                           description: Name specifies the header name
                           type: string
                       required:
-                      - method
                       - name
                       type: object
                     type: array
