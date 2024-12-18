@@ -976,7 +976,8 @@ type HTTPDeleteHeaderRule struct {
 	Name string `json:"name"`
 	// Method is the matching applied on the header name
 	// +kubebuilder:validation:Enum=str;beg;end;sub;reg
-	Method string `json:"method"`
+	// +optional
+	Method string `json:"method,omitempty"`
 }
 
 type HTTPPathRule struct {
