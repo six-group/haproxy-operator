@@ -60,6 +60,15 @@ type BaseSpec struct {
 	// HTTPPretendKeepalive will keep the connection alive. It is recommended not to enable this option by default.
 	// +optional
 	HTTPPretendKeepalive *bool `json:"httpPretendKeepalive,omitempty"`
+	// HTTPLog enables HTTP log format which is the most complete and the best suited for HTTP proxies. It provides
+	// the same level of information as the TCP format with additional features which
+	// are specific to the HTTP protocol.
+	// +optional
+	HTTPLog *bool `json:"httpLog,omitempty"`
+	// TCPLog enables advanced logging of TCP connections with session state and timers. By default, the log output format
+	// is very poor, as it only contains the source and destination addresses, and the instance name.
+	// +optional
+	TCPLog *bool `json:"tcpLog,omitempty"`
 }
 
 func (b *BaseSpec) AddToParser(p parser.Parser, sectionType parser.Section, sectionName string) error {

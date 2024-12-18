@@ -387,6 +387,12 @@ spec:
                 description: HostRegex specifies a regular expression used for backend
                   switching rules.
                 type: string
+              httpLog:
+                description: |-
+                  HTTPLog enables HTTP log format which is the most complete and the best suited for HTTP proxies. It provides
+                  the same level of information as the TCP format with additional features which
+                  are specific to the HTTP protocol.
+                type: boolean
               httpPretendKeepalive:
                 description: HTTPPretendKeepalive will keep the connection alive.
                   It is recommended not to enable this option by default.
@@ -1860,6 +1866,11 @@ spec:
               tcpCheck:
                 description: TCPCheck Perform health checks using tcp-check send/expect
                   sequences
+                type: boolean
+              tcpLog:
+                description: |-
+                  TCPLog enables advanced logging of TCP connections with session state and timers. By default, the log output format
+                  is very poor, as it only contains the source and destination addresses, and the instance name.
                 type: boolean
               tcpRequest:
                 description: TCPRequest rules perform an action on an incoming connection

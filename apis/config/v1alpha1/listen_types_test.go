@@ -200,6 +200,18 @@ var _ = Describe("Listen", Label("type"), func() {
 			Ω(listen.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("option forwardfor"))
 		})
+		It("should set http log option", func() {
+			listen := &configv1alpha1.Listen{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.ListenSpec{
+					BaseSpec: configv1alpha1.BaseSpec{
+						HTTPLog: ptr.To(true),
+					},
+				},
+			}
+			Ω(listen.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("option httplog"))
+		})
 		It("should set option redispatch", func() {
 			listen := &configv1alpha1.Listen{
 				ObjectMeta: metav1.ObjectMeta{Name: "foo"},

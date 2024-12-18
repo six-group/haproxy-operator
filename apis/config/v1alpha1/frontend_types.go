@@ -24,15 +24,6 @@ type FrontendSpec struct {
 	BackendSwitching []BackendSwitchingRule `json:"backendSwitching,omitempty"`
 	// DefaultBackend to use when no 'use_backend' rule has been matched.
 	DefaultBackend corev1.LocalObjectReference `json:"defaultBackend"`
-	// HTTPLog enables HTTP log format which is the most complete and the best suited for HTTP proxies. It provides
-	// the same level of information as the TCP format with additional features which
-	// are specific to the HTTP protocol.
-	// +optional
-	HTTPLog *bool `json:"httpLog,omitempty"`
-	// TCPLog enables advanced logging of TCP connections with session state and timers. By default, the log output format
-	// is very poor, as it only contains the source and destination addresses, and the instance name.
-	// +optional
-	TCPLog *bool `json:"tcpLog,omitempty"`
 }
 
 type BackendSwitchingRule struct {
