@@ -52,7 +52,7 @@ jobs:
           VERSION=$(echo "${{github.event.release.tag_name }}" | sed 's/v//g')
           sed -i "s/^version:.*$/version: ${VERSION}/"        ./helm/haproxy-operator/Chart.yaml
           sed -i "s/^appVersion:.*$/appVersion: v${VERSION}/" ./helm/haproxy-operator/Chart.yaml
-      - uses: helm/chart-releaser-action@v1.6.0
+      - uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: helm
         env:
