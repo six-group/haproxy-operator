@@ -955,6 +955,12 @@ spec:
                   service:
                     description: Service defines the desired state for a Service.
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: Annotations to be added to Service.
+                        nullable: true
+                        type: object
                       enabled:
                         description: Enabled will toggle the creation of a Service.
                         type: boolean
