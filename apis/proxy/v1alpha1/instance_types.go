@@ -130,6 +130,10 @@ type ServiceSpec struct {
 	// +kubebuilder:validation:Enum=ClusterIP;NodePort;LoadBalancer
 	// +kubebuilder:default=ClusterIP
 	Type *corev1.ServiceType `json:"type,omitempty"`
+	// Annotations to be added to Service.
+	// +optional
+	// +nullable
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 type Metrics struct {

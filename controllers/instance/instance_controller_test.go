@@ -61,6 +61,10 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				"label-test": "ok",
 			}
 
+			annotations := map[string]string{
+				"service.beta.kubernetes.io/aws-load-balancer-scheme": "internet-facing",
+			}
+
 			dur, _ := time.ParseDuration("30s")
 
 			proxy = &proxyv1alpha1.Instance{
@@ -86,8 +90,9 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					Env:    labels,
 					Network: proxyv1alpha1.Network{
 						Service: proxyv1alpha1.ServiceSpec{
-							Enabled: true,
-							Type:    ptr.To(corev1.ServiceTypeLoadBalancer),
+							Enabled:     true,
+							Type:        ptr.To(corev1.ServiceTypeLoadBalancer),
+							Annotations: annotations,
 						},
 					},
 				},
@@ -420,6 +425,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			service := &corev1.Service{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: utils.GetServiceName(proxy)}, service)).ShouldNot(HaveOccurred())
 			Ω(service.Spec.Type).Should(Equal(corev1.ServiceTypeLoadBalancer))
+			Ω(service.Annotations["service.beta.kubernetes.io/aws-load-balancer-scheme"]).Should(Equal("internet-facing"))
 
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
