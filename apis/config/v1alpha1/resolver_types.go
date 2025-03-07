@@ -2,9 +2,10 @@ package v1alpha1
 
 import (
 	"github.com/go-openapi/strfmt"
-	"github.com/haproxytech/client-native/v5/configuration"
-	"github.com/haproxytech/client-native/v5/models"
-	parser "github.com/haproxytech/config-parser/v5"
+	parser "github.com/haproxytech/client-native/v6/config-parser"
+	"github.com/haproxytech/client-native/v6/configuration"
+	"github.com/haproxytech/client-native/v6/configuration/options"
+	"github.com/haproxytech/client-native/v6/models"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
@@ -107,11 +108,13 @@ func (r *Resolver) GetStatus() Status {
 
 func (r *Resolver) Model() (models.Resolver, error) {
 	model := models.Resolver{
-		Name:            r.Name,
-		ParseResolvConf: ptr.Deref(r.Spec.ParseResolvConf, false),
-		ResolveRetries:  ptr.Deref(r.Spec.ResolveRetries, 3),
-		TimeoutResolve:  1000,
-		TimeoutRetry:    1000,
+		ResolverBase: models.ResolverBase{
+			Name:            r.Name,
+			ParseResolvConf: ptr.Deref(r.Spec.ParseResolvConf, false),
+			ResolveRetries:  ptr.Deref(r.Spec.ResolveRetries, 3),
+			TimeoutResolve:  1000,
+			TimeoutRetry:    1000,
+		},
 	}
 
 	if r.Spec.AcceptedPayloadSize != nil {
@@ -163,7 +166,8 @@ func (r *Resolver) AddToParser(p parser.Parser) error {
 		return err
 	}
 
-	if err := configuration.SerializeResolverSection(p, &resolver); err != nil {
+	configOpts := &options.ConfigurationOptions{}
+	if err := configuration.SerializeResolverSection(p, &resolver, configOpts); err != nil {
 		return err
 	}
 

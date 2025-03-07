@@ -82,7 +82,22 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 								Facility:     "local0",
 								SendHostname: ptr.To(true),
 							},
+							TuneOptions: &proxyv1alpha1.GlobalTuneOptions{
+								Maxrewrite: ptr.To(int64(3000)),
+							},
+							TuneBufferOptions: &proxyv1alpha1.GlobalTuneBufferOptions{
+								Bufsize: ptr.To(int64(3000)),
+							},
 							HardStopAfter: &dur,
+							Ocsp: &proxyv1alpha1.GlobalOCSPConfiguration{
+								Mode:     true,
+								MaxDelay: ptr.To(int64(3600)),
+								MinDelay: ptr.To(int64(300)),
+								HTTPProxy: &proxyv1alpha1.OcspUpdateOptionsHttpproxy{
+									Address: "192.168.0.10",
+									Port:    ptr.To(int64(8000)),
+								},
+							},
 						},
 						LabelSelector: metav1.LabelSelector{MatchLabels: labels},
 					},
@@ -136,6 +151,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 										},
 										SNIFilter: "route.host4",
 										Alpn:      []string{"h2", "http/1.0"},
+										Ocsp:      true,
 									},
 								},
 							},
@@ -291,6 +307,11 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 						},
 						SNIFilter: "route.host2",
 						Alpn:      []string{"h2", "http/1.0"},
+						Ocsp:      true,
+						OcspFile: &configv1alpha1.OcspFile{
+							Name:  "route.name2",
+							Value: ptr.To(string("OCSP Response Data: ...")),
+						},
 					},
 					Servers: []configv1alpha1.Server{
 						{
@@ -334,18 +355,10 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					},
 				},
 				Spec: configv1alpha1.ListenSpec{
-					HostCertificate: &configv1alpha1.CertificateListElement{
-						Certificate: configv1alpha1.SSLCertificate{
-							Name:  "route.name.tcp",
-							Value: &pemCert2,
-						},
-						SNIFilter: "route.host.tcp",
-						Alpn:      []string{"h2", "http/1.0"},
-					},
 					Binds: []configv1alpha1.Bind{
 						{
 							Address:     "${BIND_ADDRESS}",
-							Port:        int64(20005),
+							Port:        int32(20005),
 							Name:        fmt.Sprintf("tcp-%d", 20005),
 							AcceptProxy: ptr.To(true),
 							Hidden:      ptr.To(true),
@@ -384,6 +397,19 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 									Name: fmt.Sprintf("dns-%s", "routeNamespace"),
 								},
 							},
+						},
+					},
+					HostCertificate: &configv1alpha1.CertificateListElement{
+						Certificate: configv1alpha1.SSLCertificate{
+							Name:  "route.name.tcp",
+							Value: &pemCert2,
+						},
+						SNIFilter: "route.host.tcp",
+						Alpn:      []string{"h2", "http/1.0"},
+						Ocsp:      true,
+						OcspFile: &configv1alpha1.OcspFile{
+							Name:  "route.name.tcp",
+							Value: ptr.To(string("OCSP Response Data: ...")),
 						},
 					},
 				},
@@ -494,19 +520,19 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
 			Ω(string(secret.Data["haproxy.cfg"])).Should(Equal(haproxyConfigCerts))
-
 			Ω(string(secret.Data["cert_list.map"])).Should(Equal(
 				"/usr/local/etc/haproxy/route.name.crt  route.host \n" +
-					"/usr/local/etc/haproxy/route.name.tcp.crt [alpn h2,http/1.0] route.host.tcp \n" +
-					"/usr/local/etc/haproxy/route.name2.crt [alpn h2,http/1.0] route.host2 \n" +
-					"/usr/local/etc/haproxy/route.name4.crt [alpn h2,http/1.0] route.host4 \n",
+					"/usr/local/etc/haproxy/route.name.tcp.crt [alpn h2,http/1.0 ocsp-update on ocsp /usr/local/etc/haproxy/route.name.tcp.ocsp] route.host.tcp \n" +
+					"/usr/local/etc/haproxy/route.name2.crt [alpn h2,http/1.0 ocsp-update on ocsp /usr/local/etc/haproxy/route.name2.ocsp] route.host2 \n" +
+					"/usr/local/etc/haproxy/route.name4.crt [alpn h2,http/1.0 ocsp-update on] route.host4 \n",
 			),
 			)
-
 			Ω(string(secret.Data["route.name.crt"])).Should(Equal("Key\n\nCertificate\n\nCAcertificate"))
 			Ω(string(secret.Data["route.name2.crt"])).Should(Equal("Key2\n\nCertificate2\n\nCAcertificate2"))
+			Ω(string(secret.Data["route.name2.ocsp"])).Should(Equal("OCSP Response Data: ..."))
 			Ω(string(secret.Data["route.name.tcp.crt"])).Should(Equal("Key2\n\nCertificate2\n\nCAcertificate2"))
 			Ω(string(secret.Data["route.name4.crt"])).Should(Equal("Key\n\nCertificate\n\nCAcertificate"))
+			Ω(string(secret.Data["route.name.tcp.ocsp"])).Should(Equal("OCSP Response Data: ..."))
 		})
 		It("should create backend mapping", func() {
 			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(append(initObjs, frontendWithBackendSwitching)...).WithStatusSubresource(append(initObjs, frontendWithBackendSwitching)...).Build()
@@ -620,9 +646,15 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 var (
 	haproxyConfig = `
 global
+  tune.bufsize 3000
+  tune.maxrewrite 3000
   hard-stop-after 30000
   log /var/lib/rsyslog/rsyslog.sock local0
   log-send-hostname
+  ocsp-update.httpproxy 192.168.0.10:8000
+  ocsp-update.mindelay 300
+  ocsp-update.maxdelay 3600
+  ocsp-update.mode on
 
 defaults unnamed_defaults_1
 
@@ -653,9 +685,15 @@ backend foo-back2
 `
 	haproxyConfigCerts = `
 global
+  tune.bufsize 3000
+  tune.maxrewrite 3000
   hard-stop-after 30000
   log /var/lib/rsyslog/rsyslog.sock local0
   log-send-hostname
+  ocsp-update.httpproxy 192.168.0.10:8000
+  ocsp-update.mindelay 300
+  ocsp-update.maxdelay 3600
+  ocsp-update.mode on
 
 defaults unnamed_defaults_1
 

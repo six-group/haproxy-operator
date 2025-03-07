@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	haproxy "github.com/haproxytech/client-native/v5/configuration/options"
-	parser "github.com/haproxytech/config-parser/v5"
+	parser "github.com/haproxytech/client-native/v6/config-parser"
+	haproxy "github.com/haproxytech/client-native/v6/configuration/options"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
 	"github.com/six-group/haproxy-operator/pkg/defaults"
@@ -564,7 +564,16 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 
 					var alpn string
 					if len(element.Alpn) > 0 {
-						alpn = fmt.Sprintf("[alpn %s]", strings.Join(element.Alpn, ","))
+						if element.Ocsp {
+							if element.OcspFile != nil {
+								files[element.OcspFile.FilePath()] = *element.OcspFile.Value
+								alpn = fmt.Sprintf("[alpn %s %s %s %s]", strings.Join(element.Alpn, ","), "ocsp-update on", "ocsp", element.OcspFile.FilePath())
+							} else {
+								alpn = fmt.Sprintf("[alpn %s %s]", strings.Join(element.Alpn, ","), "ocsp-update on")
+							}
+						} else {
+							alpn = fmt.Sprintf("[alpn %s]", strings.Join(element.Alpn, ","))
+						}
 					}
 
 					mappings = append(mappings, strings.Join([]string{element.Certificate.FilePath(), alpn, element.SNIFilter, "\n"}, " "))
@@ -595,7 +604,16 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 
 					var alpn string
 					if len(element.Alpn) > 0 {
-						alpn = fmt.Sprintf("[alpn %s]", strings.Join(element.Alpn, ","))
+						if element.Ocsp {
+							if element.OcspFile != nil {
+								files[element.OcspFile.FilePath()] = *element.OcspFile.Value
+								alpn = fmt.Sprintf("[alpn %s %s %s %s]", strings.Join(element.Alpn, ","), "ocsp-update on", "ocsp", element.OcspFile.FilePath())
+							} else {
+								alpn = fmt.Sprintf("[alpn %s %s]", strings.Join(element.Alpn, ","), "ocsp-update on")
+							}
+						} else {
+							alpn = fmt.Sprintf("[alpn %s]", strings.Join(element.Alpn, ","))
+						}
 					}
 
 					mappings = append(mappings, strings.Join([]string{element.Certificate.FilePath(), alpn, element.SNIFilter, "\n"}, " "))

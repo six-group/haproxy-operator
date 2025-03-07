@@ -63,7 +63,7 @@ func (r *Reconciler) createOrUpdateRouteForFrontend(ctx context.Context, instanc
 			}
 
 			route.Spec.Port = &routev1.RoutePort{
-				TargetPort: intstr.FromInt32(int32(bind.Port)),
+				TargetPort: intstr.FromInt32(bind.Port),
 			}
 
 			route.Spec.TLS = instance.Spec.Network.Route.TLS

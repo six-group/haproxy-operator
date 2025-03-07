@@ -3,11 +3,11 @@ run:
 linters:
   enable:
     - asciicheck
+    - copyloopvar
     - dogsled
     - durationcheck
     - errcheck
     - errorlint
-    - exportloopref
     - gofmt
     - gofumpt
     - goimports
@@ -16,7 +16,6 @@ linters:
     - govet
     - importas
     - ineffassign
-    - megacheck
     - misspell
     - nakedret
     - nolintlint
@@ -25,8 +24,6 @@ linters:
     - typecheck
     - unconvert
     - unused
-  disable:
-  - depguard # See issue: https://github.com/golangci/golangci-lint/issues/3906
 linters-settings:
   gosec:
     # Exclude generated files
@@ -34,3 +31,11 @@ linters-settings:
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true
+  revive:
+    rules:
+      - name: dot-imports
+        arguments:
+          - allowedPackages:
+              - "github.com/onsi/ginkgo"
+              - "github.com/onsi/ginkgo/v2"
+              - "github.com/onsi/gomega"

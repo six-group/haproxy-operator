@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.15.0
+    controller-gen.kubebuilder.io/version: v0.17.2
   name: instances.proxy.haproxy.com
 spec:
   group: proxy.haproxy.com
@@ -107,9 +107,7 @@ spec:
                                             This field is effectively required, but due to backwards compatibility is
                                             allowed to be empty. Instances of this type with an empty value here are
                                             almost certainly wrong.
-                                            TODO: Add other useful fields. apiVersion, kind, uid?
                                             More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                            TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                                           type: string
                                         optional:
                                           description: Specify whether the ConfigMap
@@ -203,9 +201,7 @@ spec:
                                           This field is effectively required, but due to backwards compatibility is
                                           allowed to be empty. Instances of this type with an empty value here are
                                           almost certainly wrong.
-                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                           More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -230,9 +226,7 @@ spec:
                                           This field is effectively required, but due to backwards compatibility is
                                           allowed to be empty. Instances of this type with an empty value here are
                                           almost certainly wrong.
-                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                           More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -351,6 +345,44 @@ spec:
                           specified number of threads.
                         format: int64
                         type: integer
+                      ocsp:
+                        description: Ocsp is used to enable stapling at the global
+                          level for all certificates in the configuration.
+                        properties:
+                          httpproxy:
+                            description: |-
+                              HttpProxy Allow to use an HTTP proxy for the OCSP updates. This only works with HTTP,
+                              HTTPS is not supported. This option will allow the OCSP updater to send
+                              absolute URI in the request to the proxy.
+                            properties:
+                              address:
+                                description: Address can be a host name, an IPv4 address
+                                  or an IPv6 address
+                                pattern: ^[^\s]+$
+                                type: string
+                              port:
+                                description: Port
+                                format: int64
+                                type: integer
+                            type: object
+                          maxDelay:
+                            description: |-
+                              MaxDelay sets the maximum interval between two automatic updates of the same OCSP
+                              response. This time is expressed in seconds and defaults to 3600 (1 hour).
+                            format: int64
+                            type: integer
+                          minDelay:
+                            description: |-
+                              MinDelay sets the minimum interval between two automatic updates of the same OCSP
+                              response. This time is expressed in seconds and defaults to 300 (5 minutes).
+                            format: int64
+                            type: integer
+                          mode:
+                            description: |-
+                              Mode Enable automatic OCSP response update when set to 'on', disable it otherwise.
+                              Its value defaults to 'off'.
+                            type: boolean
+                        type: object
                       reload:
                         default: false
                         description: Reload enables auto-reload of the configuration
@@ -394,9 +426,25 @@ spec:
                         description: StatsTimeout sets the timeout on the stats socket.
                           Default is set to 10 seconds.
                         type: string
-                      tune:
-                        description: TuneOptions sets the global tune options.
+                      tune_buffer_options:
+                        description: TuneBufferOptions sets the global buffer tune
+                          options.
                         properties:
+                          buffers_limit:
+                            description: |-
+                              BuffersLimit Sets a hard limit on the number of buffers which may be allocated per process.
+                              The default value is zero which means unlimited. The limit will automatically
+                              be re-adjusted to satisfy the reserved buffers for emergency situations so
+                              that the user doesn't have to perform complicated calculations.
+                            format: int64
+                            type: integer
+                          buffers_reserve:
+                            description: |-
+                              BuffersReserve Sets the number of per-thread buffers which are pre-allocated and
+                              reserved for use only during memory shortage conditions resulting in failed memory
+                              allocations. The minimum value is 2 and the default is 4.
+                            format: int64
+                            type: integer
                           bufsize:
                             description: |-
                               Bufsize sets the buffer size to this size (in bytes). Lower values allow more
@@ -404,6 +452,10 @@ spec:
                               applications with very large cookies to work.
                             format: int64
                             type: integer
+                        type: object
+                      tune_options:
+                        description: TuneOptions sets the global tune options.
+                        properties:
                           maxrewrite:
                             description: |-
                               Maxrewrite sets the reserved buffer space to this size in bytes. The reserved space is
@@ -411,68 +463,68 @@ spec:
                               fill more than bufsize-maxrewrite.
                             format: int64
                             type: integer
-                          ssl:
-                            description: SSL sets the SSL tune options.
-                            properties:
-                              cacheSize:
-                                description: |-
-                                  CacheSize sets the size of the global SSL session cache, in a number of blocks. A block
-                                  is large enough to contain an encoded session without peer certificate.  An
-                                  encoded session with peer certificate is stored in multiple blocks depending
-                                  on the size of the peer certificate. The default value may be forced
-                                  at build time, otherwise defaults to 20000.  Setting this value to 0 disables the SSL session cache.
-                                format: int64
-                                type: integer
-                              captureBufferSize:
-                                description: |-
-                                  CaptureBufferSize sets the maximum size of the buffer used for capturing client hello cipher
-                                  list, extensions list, elliptic curves list and elliptic curve point
-                                  formats. If the value is 0 (default value) the capture is disabled,
-                                  otherwise a buffer is allocated for each SSL/TLS connection.
-                                format: int64
-                                type: integer
-                              ctxCacheSize:
-                                description: |-
-                                  CtxCacheSize sets the size of the cache used to store generated certificates to <number>
-                                  entries. This is an LRU cache. Because generating an SSL certificate
-                                  dynamically is expensive, they are cached. The default cache size is set to 1000 entries.
-                                format: int64
-                                type: integer
-                              defaultDHParam:
-                                description: |-
-                                  DefaultDHParam sets the maximum size of the Diffie-Hellman parameters used for generating
-                                  the ephemeral/temporary Diffie-Hellman key in case of DHE key exchange. The
-                                  final size will try to match the size of the server's RSA (or DSA) key (e.g,
-                                  a 2048 bits temporary DH key for a 2048 bits RSA key), but will not exceed
-                                  this maximum value. Default value if 2048.
-                                format: int64
-                                type: integer
-                              forcePrivateCache:
-                                description: |-
-                                  ForcePrivateCache disables SSL session cache sharing between all processes. It
-                                  should normally not be used since it will force many renegotiations due to
-                                  clients hitting a random process.
-                                type: boolean
-                              keylog:
-                                description: |-
-                                  Keylog activates the logging of the TLS keys. It should be used with
-                                  care as it will consume more memory per SSL session and could decrease
-                                  performances. This is disabled by default.
-                                type: string
-                              lifetime:
-                                description: |-
-                                  Lifetime sets how long a cached SSL session may remain valid. This time defaults to 5 min. It is important
-                                  to understand that it does not guarantee that sessions will last that long, because if the cache is
-                                  full, the longest idle sessions will be purged despite their configured lifetime.
-                                type: string
-                              maxRecord:
-                                description: |-
-                                  MaxRecord sets the maximum amount of bytes passed to SSL_write() at a time. Default
-                                  value 0 means there is no limit. Over SSL/TLS, the client can decipher the
-                                  data only once it has received a full record.
-                                format: int64
-                                type: integer
-                            type: object
+                        type: object
+                      tune_ssl_options:
+                        description: TuneSslOptions sets the global ssl tune options.
+                        properties:
+                          cacheSize:
+                            description: |-
+                              CacheSize sets the size of the global SSL session cache, in a number of blocks. A block
+                              is large enough to contain an encoded session without peer certificate.  An
+                              encoded session with peer certificate is stored in multiple blocks depending
+                              on the size of the peer certificate. The default value may be forced
+                              at build time, otherwise defaults to 20000.  Setting this value to 0 disables the SSL session cache.
+                            format: int64
+                            type: integer
+                          captureBufferSize:
+                            description: |-
+                              CaptureBufferSize sets the maximum size of the buffer used for capturing client hello cipher
+                              list, extensions list, elliptic curves list and elliptic curve point
+                              formats. If the value is 0 (default value) the capture is disabled,
+                              otherwise a buffer is allocated for each SSL/TLS connection.
+                            format: int64
+                            type: integer
+                          ctxCacheSize:
+                            description: |-
+                              CtxCacheSize sets the size of the cache used to store generated certificates to <number>
+                              entries. This is an LRU cache. Because generating an SSL certificate
+                              dynamically is expensive, they are cached. The default cache size is set to 1000 entries.
+                            format: int64
+                            type: integer
+                          defaultDHParam:
+                            description: |-
+                              DefaultDHParam sets the maximum size of the Diffie-Hellman parameters used for generating
+                              the ephemeral/temporary Diffie-Hellman key in case of DHE key exchange. The
+                              final size will try to match the size of the server's RSA (or DSA) key (e.g,
+                              a 2048 bits temporary DH key for a 2048 bits RSA key), but will not exceed
+                              this maximum value. Default value if 2048.
+                            format: int64
+                            type: integer
+                          forcePrivateCache:
+                            description: |-
+                              ForcePrivateCache disables SSL session cache sharing between all processes. It
+                              should normally not be used since it will force many renegotiations due to
+                              clients hitting a random process.
+                            type: boolean
+                          keylog:
+                            description: |-
+                              Keylog activates the logging of the TLS keys. It should be used with
+                              care as it will consume more memory per SSL session and could decrease
+                              performances. This is disabled by default.
+                            type: string
+                          lifetime:
+                            description: |-
+                              Lifetime sets how long a cached SSL session may remain valid. This time defaults to 5 min. It is important
+                              to understand that it does not guarantee that sessions will last that long, because if the cache is
+                              full, the longest idle sessions will be purged despite their configured lifetime.
+                            type: string
+                          maxRecord:
+                            description: |-
+                              MaxRecord sets the maximum amount of bytes passed to SSL_write() at a time. Default
+                              value 0 means there is no limit. Over SSL/TLS, the client can decipher the
+                              data only once it has received a full record.
+                            format: int64
+                            type: integer
                         type: object
                     required:
                     - reload
@@ -557,9 +609,7 @@ spec:
                         This field is effectively required, but due to backwards compatibility is
                         allowed to be empty. Instances of this type with an empty value here are
                         almost certainly wrong.
-                        TODO: Add other useful fields. apiVersion, kind, uid?
                         More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                       type: string
                   type: object
                   x-kubernetes-map-type: atomic
@@ -575,7 +625,7 @@ spec:
                 nullable: true
                 properties:
                   exec:
-                    description: Exec specifies the action to take.
+                    description: Exec specifies a command to execute in the container.
                     properties:
                       command:
                         description: |-
@@ -596,7 +646,7 @@ spec:
                     format: int32
                     type: integer
                   grpc:
-                    description: GRPC specifies an action involving a GRPC port.
+                    description: GRPC specifies a GRPC HealthCheckRequest.
                     properties:
                       port:
                         description: Port number of the gRPC service. Number must
@@ -604,10 +654,10 @@ spec:
                         format: int32
                         type: integer
                       service:
+                        default: ""
                         description: |-
                           Service is the name of the service to place in the gRPC HealthCheckRequest
                           (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
-
 
                           If this is not specified, the default behavior is defined by gRPC.
                         type: string
@@ -615,7 +665,7 @@ spec:
                     - port
                     type: object
                   httpGet:
-                    description: HTTPGet specifies the http request to perform.
+                    description: HTTPGet specifies an HTTP GET request to perform.
                     properties:
                       host:
                         description: |-
@@ -682,7 +732,7 @@ spec:
                     format: int32
                     type: integer
                   tcpSocket:
-                    description: TCPSocket specifies an action involving a TCP port.
+                    description: TCPSocket specifies a connection to a TCP port.
                     properties:
                       host:
                         description: 'Optional: Host name to connect to, defaults
@@ -741,7 +791,7 @@ spec:
                     type: string
                   port:
                     description: Port specifies the port used for metrics.
-                    format: int64
+                    format: int32
                     type: integer
                   relabelings:
                     description: |-
@@ -752,7 +802,6 @@ spec:
                         RelabelConfig allows dynamic rewriting of the label set for targets, alerts,
                         scraped samples and remote write samples.
 
-
                         More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
                       properties:
                         action:
@@ -760,10 +809,8 @@ spec:
                           description: |-
                             Action to perform based on the regex matching.
 
-
                             `Uppercase` and `Lowercase` actions require Prometheus >= v2.36.0.
                             `DropEqual` and `KeepEqual` actions require Prometheus >= v2.41.0.
-
 
                             Default: "Replace"
                           enum:
@@ -794,7 +841,6 @@ spec:
                           description: |-
                             Modulus to take of the hash of the source label values.
 
-
                             Only applicable when the action is `HashMod`.
                           format: int64
                           type: integer
@@ -806,7 +852,6 @@ spec:
                           description: |-
                             Replacement value against which a Replace action is performed if the
                             regular expression matches.
-
 
                             Regex capture groups are available.
                           type: string
@@ -830,10 +875,8 @@ spec:
                           description: |-
                             Label to which the resulting string is written in a replacement.
 
-
                             It is mandatory for `Replace`, `HashMod`, `Lowercase`, `Uppercase`,
                             `KeepEqual` and `DropEqual` actions.
-
 
                             Regex capture groups are available.
                           type: string
@@ -891,6 +934,8 @@ spec:
                               chain. Do not include a CA certificate. The secret referenced should
                               be present in the same namespace as that of the Route.
                               Forbidden when `certificate` is set.
+                              The router service account needs to be granted with read-only access to this secret,
+                              please refer to openshift docs for additional details.
                             properties:
                               name:
                                 description: |-
@@ -904,15 +949,11 @@ spec:
                               insecureEdgeTerminationPolicy indicates the desired behavior for insecure connections to a route. While
                               each router may make its own decisions on which ports to expose, this is normally port 80.
 
-
                               If a route does not specify insecureEdgeTerminationPolicy, then the default behavior is "None".
-
 
                               * Allow - traffic is sent to the server on the insecure port (edge/reencrypt terminations only).
 
-
                               * None - no traffic is allowed on the insecure port (default).
-
 
                               * Redirect - clients are redirected to the secure port.
                             enum:
@@ -928,11 +969,9 @@ spec:
                             description: |-
                               termination indicates termination type.
 
-
                               * edge - TLS termination is done by the router and http is used to communicate with the backend (default)
                               * passthrough - Traffic is sent straight to the destination without the router providing TLS termination
                               * reencrypt - TLS termination is done by the router and https is used to communicate with the backend
-
 
                               Note: passthrough termination is incompatible with httpHeader actions
                             enum:
@@ -1054,7 +1093,6 @@ spec:
                             Keys that don't exist in the incoming pod labels will
                             be ignored. A null or empty list means only match against labelSelector.
 
-
                             This is a beta field and requires the MatchLabelKeysInPodTopologySpread feature gate to be enabled (enabled by default).
                           items:
                             type: string
@@ -1094,7 +1132,6 @@ spec:
                             Valid values are integers greater than 0.
                             When value is not nil, WhenUnsatisfiable must be DoNotSchedule.
 
-
                             For example, in a 3-zone cluster, MaxSkew is set to 2, MinDomains is set to 5 and pods with the same
                             labelSelector spread as 2/2/2:
                             | zone1 | zone2 | zone3 |
@@ -1112,7 +1149,6 @@ spec:
                             - Honor: only nodes matching nodeAffinity/nodeSelector are included in the calculations.
                             - Ignore: nodeAffinity/nodeSelector are ignored. All nodes are included in the calculations.
 
-
                             If this value is nil, the behavior is equivalent to the Honor policy.
                             This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.
                           type: string
@@ -1123,7 +1159,6 @@ spec:
                             - Honor: nodes without taints, along with tainted nodes for which the incoming pod
                             has a toleration, are included.
                             - Ignore: node taints are ignored. All nodes are included.
-
 
                             If this value is nil, the behavior is equivalent to the Ignore policy.
                             This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.
@@ -1194,7 +1229,7 @@ spec:
                 nullable: true
                 properties:
                   exec:
-                    description: Exec specifies the action to take.
+                    description: Exec specifies a command to execute in the container.
                     properties:
                       command:
                         description: |-
@@ -1215,7 +1250,7 @@ spec:
                     format: int32
                     type: integer
                   grpc:
-                    description: GRPC specifies an action involving a GRPC port.
+                    description: GRPC specifies a GRPC HealthCheckRequest.
                     properties:
                       port:
                         description: Port number of the gRPC service. Number must
@@ -1223,10 +1258,10 @@ spec:
                         format: int32
                         type: integer
                       service:
+                        default: ""
                         description: |-
                           Service is the name of the service to place in the gRPC HealthCheckRequest
                           (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
-
 
                           If this is not specified, the default behavior is defined by gRPC.
                         type: string
@@ -1234,7 +1269,7 @@ spec:
                     - port
                     type: object
                   httpGet:
-                    description: HTTPGet specifies the http request to perform.
+                    description: HTTPGet specifies an HTTP GET request to perform.
                     properties:
                       host:
                         description: |-
@@ -1301,7 +1336,7 @@ spec:
                     format: int32
                     type: integer
                   tcpSocket:
-                    description: TCPSocket specifies an action involving a TCP port.
+                    description: TCPSocket specifies a connection to a TCP port.
                     properties:
                       host:
                         description: 'Optional: Host name to connect to, defaults
@@ -1356,10 +1391,8 @@ spec:
                       Claims lists the names of resources, defined in spec.resourceClaims,
                       that are used by this container.
 
-
                       This is an alpha field and requires enabling the
                       DynamicResourceAllocation feature gate.
-
 
                       This field is immutable. It can only be set for containers.
                     items:
@@ -1370,6 +1403,12 @@ spec:
                             Name must match the name of one entry in pod.spec.resourceClaims of
                             the Pod where this field is used. It makes that resource available
                             inside a container.
+                          type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
                           type: string
                       required:
                       - name
@@ -1485,9 +1524,7 @@ spec:
                                       This field is effectively required, but due to backwards compatibility is
                                       allowed to be empty. Instances of this type with an empty value here are
                                       almost certainly wrong.
-                                      TODO: Add other useful fields. apiVersion, kind, uid?
                                       More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                      TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                                     type: string
                                   optional:
                                     description: Specify whether the ConfigMap or
@@ -1553,9 +1590,7 @@ spec:
                                       This field is effectively required, but due to backwards compatibility is
                                       allowed to be empty. Instances of this type with an empty value here are
                                       almost certainly wrong.
-                                      TODO: Add other useful fields. apiVersion, kind, uid?
                                       More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                      TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                                     type: string
                                   optional:
                                     description: Specify whether the Secret or its
@@ -1595,9 +1630,7 @@ spec:
                                   This field is effectively required, but due to backwards compatibility is
                                   allowed to be empty. Instances of this type with an empty value here are
                                   almost certainly wrong.
-                                  TODO: Add other useful fields. apiVersion, kind, uid?
                                   More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                  TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                                 type: string
                               optional:
                                 description: Specify whether the ConfigMap must be
@@ -1619,9 +1652,7 @@ spec:
                                   This field is effectively required, but due to backwards compatibility is
                                   allowed to be empty. Instances of this type with an empty value here are
                                   almost certainly wrong.
-                                  TODO: Add other useful fields. apiVersion, kind, uid?
                                   More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                  TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                                 type: string
                               optional:
                                 description: Specify whether the Secret must be defined
@@ -1659,7 +1690,8 @@ spec:
                             More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
                           properties:
                             exec:
-                              description: Exec specifies the action to take.
+                              description: Exec specifies a command to execute in
+                                the container.
                               properties:
                                 command:
                                   description: |-
@@ -1674,7 +1706,8 @@ spec:
                                   x-kubernetes-list-type: atomic
                               type: object
                             httpGet:
-                              description: HTTPGet specifies the http request to perform.
+                              description: HTTPGet specifies an HTTP GET request to
+                                perform.
                               properties:
                                 host:
                                   description: |-
@@ -1723,8 +1756,8 @@ spec:
                               - port
                               type: object
                             sleep:
-                              description: Sleep represents the duration that the
-                                container should sleep before being terminated.
+                              description: Sleep represents a duration that the container
+                                should sleep.
                               properties:
                                 seconds:
                                   description: Seconds is the number of seconds to
@@ -1737,8 +1770,8 @@ spec:
                             tcpSocket:
                               description: |-
                                 Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept
-                                for the backward compatibility. There are no validation of this field and
-                                lifecycle hooks will fail in runtime when tcp handler is specified.
+                                for backward compatibility. There is no validation of this field and
+                                lifecycle hooks will fail at runtime when it is specified.
                               properties:
                                 host:
                                   description: 'Optional: Host name to connect to,
@@ -1770,7 +1803,8 @@ spec:
                             More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
                           properties:
                             exec:
-                              description: Exec specifies the action to take.
+                              description: Exec specifies a command to execute in
+                                the container.
                               properties:
                                 command:
                                   description: |-
@@ -1785,7 +1819,8 @@ spec:
                                   x-kubernetes-list-type: atomic
                               type: object
                             httpGet:
-                              description: HTTPGet specifies the http request to perform.
+                              description: HTTPGet specifies an HTTP GET request to
+                                perform.
                               properties:
                                 host:
                                   description: |-
@@ -1834,8 +1869,8 @@ spec:
                               - port
                               type: object
                             sleep:
-                              description: Sleep represents the duration that the
-                                container should sleep before being terminated.
+                              description: Sleep represents a duration that the container
+                                should sleep.
                               properties:
                                 seconds:
                                   description: Seconds is the number of seconds to
@@ -1848,8 +1883,8 @@ spec:
                             tcpSocket:
                               description: |-
                                 Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept
-                                for the backward compatibility. There are no validation of this field and
-                                lifecycle hooks will fail in runtime when tcp handler is specified.
+                                for backward compatibility. There is no validation of this field and
+                                lifecycle hooks will fail at runtime when it is specified.
                               properties:
                                 host:
                                   description: 'Optional: Host name to connect to,
@@ -1877,7 +1912,8 @@ spec:
                         More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
                       properties:
                         exec:
-                          description: Exec specifies the action to take.
+                          description: Exec specifies a command to execute in the
+                            container.
                           properties:
                             command:
                               description: |-
@@ -1898,7 +1934,7 @@ spec:
                           format: int32
                           type: integer
                         grpc:
-                          description: GRPC specifies an action involving a GRPC port.
+                          description: GRPC specifies a GRPC HealthCheckRequest.
                           properties:
                             port:
                               description: Port number of the gRPC service. Number
@@ -1906,10 +1942,10 @@ spec:
                               format: int32
                               type: integer
                             service:
+                              default: ""
                               description: |-
                                 Service is the name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
-
 
                                 If this is not specified, the default behavior is defined by gRPC.
                               type: string
@@ -1917,7 +1953,7 @@ spec:
                           - port
                           type: object
                         httpGet:
-                          description: HTTPGet specifies the http request to perform.
+                          description: HTTPGet specifies an HTTP GET request to perform.
                           properties:
                             host:
                               description: |-
@@ -1984,8 +2020,7 @@ spec:
                           format: int32
                           type: integer
                         tcpSocket:
-                          description: TCPSocket specifies an action involving a TCP
-                            port.
+                          description: TCPSocket specifies a connection to a TCP port.
                           properties:
                             host:
                               description: 'Optional: Host name to connect to, defaults
@@ -2089,7 +2124,8 @@ spec:
                         More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
                       properties:
                         exec:
-                          description: Exec specifies the action to take.
+                          description: Exec specifies a command to execute in the
+                            container.
                           properties:
                             command:
                               description: |-
@@ -2110,7 +2146,7 @@ spec:
                           format: int32
                           type: integer
                         grpc:
-                          description: GRPC specifies an action involving a GRPC port.
+                          description: GRPC specifies a GRPC HealthCheckRequest.
                           properties:
                             port:
                               description: Port number of the gRPC service. Number
@@ -2118,10 +2154,10 @@ spec:
                               format: int32
                               type: integer
                             service:
+                              default: ""
                               description: |-
                                 Service is the name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
-
 
                                 If this is not specified, the default behavior is defined by gRPC.
                               type: string
@@ -2129,7 +2165,7 @@ spec:
                           - port
                           type: object
                         httpGet:
-                          description: HTTPGet specifies the http request to perform.
+                          description: HTTPGet specifies an HTTP GET request to perform.
                           properties:
                             host:
                               description: |-
@@ -2196,8 +2232,7 @@ spec:
                           format: int32
                           type: integer
                         tcpSocket:
-                          description: TCPSocket specifies an action involving a TCP
-                            port.
+                          description: TCPSocket specifies a connection to a TCP port.
                           properties:
                             host:
                               description: 'Optional: Host name to connect to, defaults
@@ -2270,10 +2305,8 @@ spec:
                             Claims lists the names of resources, defined in spec.resourceClaims,
                             that are used by this container.
 
-
                             This is an alpha field and requires enabling the
                             DynamicResourceAllocation feature gate.
-
 
                             This field is immutable. It can only be set for containers.
                           items:
@@ -2284,6 +2317,12 @@ spec:
                                   Name must match the name of one entry in pod.spec.resourceClaims of
                                   the Pod where this field is used. It makes that resource available
                                   inside a container.
+                                type: string
+                              request:
+                                description: |-
+                                  Request is the name chosen for a request in the referenced claim.
+                                  If empty, everything from the claim is made available, otherwise
+                                  only the result of this request.
                                 type: string
                             required:
                             - name
@@ -2408,7 +2447,7 @@ spec:
                         procMount:
                           description: |-
                             procMount denotes the type of proc mount to use for the containers.
-                            The default is DefaultProcMount which uses the container runtime defaults for
+                            The default value is Default which uses the container runtime defaults for
                             readonly paths and masked paths.
                             This requires the ProcMountType feature flag to be enabled.
                             Note that this field cannot be set when spec.os.name is windows.
@@ -2490,7 +2529,6 @@ spec:
                                 type indicates which kind of seccomp profile will be applied.
                                 Valid options are:
 
-
                                 Localhost - a profile defined in a file on the node should be used.
                                 RuntimeDefault - the container runtime default profile should be used.
                                 Unconfined - no profile should be applied.
@@ -2542,7 +2580,8 @@ spec:
                         More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
                       properties:
                         exec:
-                          description: Exec specifies the action to take.
+                          description: Exec specifies a command to execute in the
+                            container.
                           properties:
                             command:
                               description: |-
@@ -2563,7 +2602,7 @@ spec:
                           format: int32
                           type: integer
                         grpc:
-                          description: GRPC specifies an action involving a GRPC port.
+                          description: GRPC specifies a GRPC HealthCheckRequest.
                           properties:
                             port:
                               description: Port number of the gRPC service. Number
@@ -2571,10 +2610,10 @@ spec:
                               format: int32
                               type: integer
                             service:
+                              default: ""
                               description: |-
                                 Service is the name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
-
 
                                 If this is not specified, the default behavior is defined by gRPC.
                               type: string
@@ -2582,7 +2621,7 @@ spec:
                           - port
                           type: object
                         httpGet:
-                          description: HTTPGet specifies the http request to perform.
+                          description: HTTPGet specifies an HTTP GET request to perform.
                           properties:
                             host:
                               description: |-
@@ -2649,8 +2688,7 @@ spec:
                           format: int32
                           type: integer
                         tcpSocket:
-                          description: TCPSocket specifies an action involving a TCP
-                            port.
+                          description: TCPSocket specifies a connection to a TCP port.
                           properties:
                             host:
                               description: 'Optional: Host name to connect to, defaults
@@ -2789,9 +2827,7 @@ spec:
                               RecursiveReadOnly specifies whether read-only mounts should be handled
                               recursively.
 
-
                               If ReadOnly is false, this field has no meaning and must be unspecified.
-
 
                               If ReadOnly is true, and this field is set to Disabled, the mount is not made
                               recursively read-only.  If this field is set to IfPossible, the mount is made
@@ -2800,10 +2836,8 @@ spec:
                               supported by the container runtime, otherwise the pod will not be started and
                               an error will be generated to indicate the reason.
 
-
                               If this field is set to IfPossible or Enabled, MountPropagation must be set to
                               None (or be unspecified, which defaults to None).
-
 
                               If this field is not specified, it is treated as an equivalent of Disabled.
                             type: string

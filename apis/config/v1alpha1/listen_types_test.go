@@ -3,7 +3,7 @@ package v1alpha1_test
 import (
 	"time"
 
-	parser "github.com/haproxytech/config-parser/v5"
+	parser "github.com/haproxytech/client-native/v6/config-parser"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"

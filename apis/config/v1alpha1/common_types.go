@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/haproxytech/client-native/v5/configuration"
-	"github.com/haproxytech/client-native/v5/models"
-	parser "github.com/haproxytech/config-parser/v5"
+	parser "github.com/haproxytech/client-native/v6/config-parser"
+	"github.com/haproxytech/client-native/v6/configuration"
+	"github.com/haproxytech/client-native/v6/configuration/options"
+	"github.com/haproxytech/client-native/v6/models"
 	"github.com/six-group/haproxy-operator/pkg/defaults"
 	"github.com/six-group/haproxy-operator/pkg/hash"
 	corev1 "k8s.io/api/core/v1"
@@ -89,8 +90,8 @@ func (b *BaseSpec) AddToParser(p parser.Parser, sectionType parser.Section, sect
 		if err != nil {
 			return err
 		}
-
-		data, err := configuration.SerializeTCPRequestRule(model)
+		configOpts := &options.ConfigurationOptions{}
+		data, err := configuration.SerializeTCPRequestRule(model, configOpts)
 		if err != nil {
 			return err
 		}
@@ -108,7 +109,8 @@ func (b *BaseSpec) AddToParser(p parser.Parser, sectionType parser.Section, sect
 		}
 		for idx, rule := range rules {
 			if rule != nil {
-				data, err := configuration.SerializeHTTPRequestRule(*rule)
+				configOpts := &options.ConfigurationOptions{}
+				data, err := configuration.SerializeHTTPRequestRule(*rule, configOpts)
 				if err != nil {
 					return err
 				}
@@ -127,7 +129,8 @@ func (b *BaseSpec) AddToParser(p parser.Parser, sectionType parser.Section, sect
 		}
 		for idx, rule := range rules {
 			if rule != nil {
-				data, err := configuration.SerializeHTTPResponseRule(*rule)
+				configOpts := &options.ConfigurationOptions{}
+				data, err := configuration.SerializeHTTPResponseRule(*rule, configOpts)
 				if err != nil {
 					return err
 				}
@@ -193,7 +196,6 @@ func (t *TCPRequestRule) Model() (models.TCPRequestRule, error) {
 		Cond:     t.ConditionType,
 		CondTest: t.Condition,
 		Type:     t.Type,
-		Index:    ptr.To(int64(0)),
 	}
 
 	if t.Action != nil {
@@ -231,7 +233,6 @@ func (a *ACL) Model() (models.ACL, error) {
 		ACLName:   a.Name,
 		Criterion: a.Criterion,
 		Value:     values,
-		Index:     ptr.To(int64(0)),
 	}
 
 	return model, model.Validate(strfmt.Default)
@@ -284,7 +285,7 @@ type Bind struct {
 	// Port
 	// +kubebuilder:validation:Maximum=65535
 	// +kubebuilder:validation:Minimum=1
-	Port int64 `json:"port"`
+	Port int32 `json:"port"`
 	// PortRangeEnd if set it must be greater than Port
 	// +kubebuilder:validation:Maximum=65535
 	// +kubebuilder:validation:Minimum=1
@@ -318,7 +319,7 @@ type Bind struct {
 func (b *Bind) Model() (models.Bind, error) {
 	model := models.Bind{
 		Address:      b.Address,
-		Port:         ptr.To(b.Port),
+		Port:         ptr.To(int64(b.Port)),
 		PortRangeEnd: b.PortRangeEnd,
 		BindParams: models.BindParams{
 			Name:        b.Name,
@@ -741,6 +742,23 @@ type CertificateListElement struct {
 	// list as supported on top of ALPN.
 	// +optional
 	Alpn []string `json:"alpn,omitempty"`
+	// Ocsp Enable OCSP stapling for a specific certificate
+	// +optional
+	Ocsp bool `json:"ocsp,omitempty"`
+	// OcspFile you can save the OCSP response to a file so that HAProxy loads it during startup.
+	// +optional
+	OcspFile *OcspFile `json:"ocsp_file,omitempty"`
+}
+
+type OcspFile struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value *string `json:"value,omitempty"`
+}
+
+func (s *OcspFile) FilePath() string {
+	return fmt.Sprintf("/usr/local/etc/haproxy/%s.ocsp", strings.TrimSuffix(s.Name, ".ocsp"))
 }
 
 type CertificateList struct {
@@ -783,10 +801,9 @@ type HTTPRequestRules struct {
 func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 	model := models.HTTPRequestRules{}
 
-	for idx, header := range h.SetHeader {
+	for _, header := range h.SetHeader {
 		model = append(model, &models.HTTPRequestRule{
 			Type:      "set-header",
-			Index:     ptr.To(int64(idx)),
 			HdrName:   header.Name,
 			HdrFormat: header.Value.String(),
 			Cond:      header.ConditionType,
@@ -794,20 +811,18 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		})
 	}
 
-	for idx, path := range h.SetPath {
+	for _, path := range h.SetPath {
 		model = append(model, &models.HTTPRequestRule{
 			Type:     "set-path",
-			Index:    ptr.To(int64(idx)),
 			PathFmt:  path.Value,
 			Cond:     path.ConditionType,
 			CondTest: path.Condition,
 		})
 	}
 
-	for idx, header := range h.AddHeader {
+	for _, header := range h.AddHeader {
 		model = append(model, &models.HTTPRequestRule{
 			Type:      "add-header",
-			Index:     ptr.To(int64(idx)),
 			HdrName:   header.Name,
 			HdrFormat: header.Value.String(),
 			Cond:      header.ConditionType,
@@ -815,10 +830,9 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		})
 	}
 
-	for idx, header := range h.DelHeader {
+	for _, header := range h.DelHeader {
 		model = append(model, &models.HTTPRequestRule{
 			Type:      "del-header",
-			Index:     ptr.To(int64(idx)),
 			HdrName:   header.Name,
 			HdrMethod: header.Method,
 			Cond:      header.ConditionType,
@@ -826,10 +840,9 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		})
 	}
 
-	for idx, header := range h.ReplacePath {
+	for _, header := range h.ReplacePath {
 		model = append(model, &models.HTTPRequestRule{
 			Type:      "replace-path",
-			Index:     ptr.To(int64(idx)),
 			PathMatch: header.MatchRegex,
 			PathFmt:   header.ReplaceFmt,
 			Cond:      header.ConditionType,
@@ -837,11 +850,10 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		})
 	}
 
-	for idx, deny := range h.Deny {
+	for _, deny := range h.Deny {
 		if deny.Enabled {
 			model = append(model, &models.HTTPRequestRule{
 				DenyStatus: deny.DenyStatus,
-				Index:      ptr.To(int64(idx)),
 				Type:       "deny",
 				Cond:       deny.ConditionType,
 				CondTest:   deny.Condition,
@@ -849,11 +861,10 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		}
 	}
 
-	for idx, redirect := range h.Redirect {
+	for _, redirect := range h.Redirect {
 		redirectRule := &models.HTTPRequestRule{
 			Cond:       redirect.ConditionType,
 			CondTest:   redirect.Condition,
-			Index:      ptr.To(int64(idx)),
 			RedirCode:  redirect.Code,
 			RedirValue: redirect.Value,
 			Type:       "redirect",
@@ -915,10 +926,6 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 		})
 	}
 
-	for i := 0; i < len(model); i++ {
-		model[i].Index = ptr.To(int64(i))
-	}
-
 	return model, model.Validate(strfmt.Default)
 }
 
@@ -930,10 +937,9 @@ type HTTPResponseRules struct {
 func (h *HTTPResponseRules) Model() (models.HTTPResponseRules, error) {
 	model := models.HTTPResponseRules{}
 
-	for idx, header := range h.SetHeader {
+	for _, header := range h.SetHeader {
 		model = append(model, &models.HTTPResponseRule{
 			Type:      "set-header",
-			Index:     ptr.To(int64(idx)),
 			HdrName:   header.Name,
 			HdrFormat: header.Value.String(),
 			Cond:      header.ConditionType,

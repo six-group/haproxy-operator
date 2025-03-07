@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/haproxytech/client-native/v5/configuration"
-	"github.com/haproxytech/client-native/v5/models"
-	parser "github.com/haproxytech/config-parser/v5"
+	parser "github.com/haproxytech/client-native/v6/config-parser"
+	"github.com/haproxytech/client-native/v6/configuration"
+	"github.com/haproxytech/client-native/v6/configuration/options"
+	"github.com/haproxytech/client-native/v6/models"
 	"github.com/six-group/haproxy-operator/pkg/hash"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
@@ -76,8 +77,10 @@ func (b *Backend) GetStatus() Status {
 
 func (b *Backend) Model() (models.Backend, error) {
 	model := models.Backend{
-		Name: b.Name,
-		Mode: b.Spec.Mode,
+		BackendBase: models.BackendBase{
+			Name: b.Name,
+			Mode: b.Spec.Mode,
+		},
 	}
 
 	if b.Spec.CheckTimeout != nil {
@@ -98,17 +101,17 @@ func (b *Backend) Model() (models.Backend, error) {
 	}
 
 	if b.Spec.HTTPChk != nil {
-		model.AdvCheck = models.BackendAdvCheckHttpchk
+		model.AdvCheck = models.BackendBaseAdvCheckHttpchk
 		model.HttpchkParams = &models.HttpchkParams{
 			URI:    b.Spec.HTTPChk.URI,
 			Method: b.Spec.HTTPChk.Method,
 		}
 	} else if b.Spec.TCPCheck != nil && *b.Spec.TCPCheck {
-		model.AdvCheck = models.BackendAdvCheckTCPDashCheck
+		model.AdvCheck = models.BackendBaseAdvCheckTCPDashCheck
 	}
 
 	if b.Spec.HTTPPretendKeepalive != nil && *b.Spec.HTTPPretendKeepalive {
-		model.HTTPPretendKeepalive = models.BackendHTTPPretendKeepaliveEnabled
+		model.HTTPPretendKeepalive = models.BackendBaseHTTPPretendKeepaliveEnabled
 	}
 
 	if b.Spec.Redispatch != nil && *b.Spec.Redispatch {
@@ -218,7 +221,8 @@ func (b *Backend) AddToParser(p parser.Parser) error {
 		return err
 	}
 
-	if err := configuration.CreateEditSection(&backend, parser.Backends, b.Name, p); err != nil {
+	configOpts := &options.ConfigurationOptions{}
+	if err := configuration.CreateEditSection(&backend.BackendBase, parser.Backends, b.Name, p, configOpts); err != nil {
 		return err
 	}
 
@@ -239,7 +243,7 @@ func (b *Backend) AddToParser(p parser.Parser) error {
 			return err
 		}
 
-		err = p.Insert(parser.Backends, b.Name, "server", configuration.SerializeServer(model), idx)
+		err = p.Insert(parser.Backends, b.Name, "server", configuration.SerializeServer(model, configOpts), idx)
 		if err != nil {
 			return err
 		}
@@ -251,7 +255,7 @@ func (b *Backend) AddToParser(p parser.Parser) error {
 			return err
 		}
 
-		err = p.Insert(parser.Backends, b.Name, "server-template", configuration.SerializeServerTemplate(model), idx)
+		err = p.Insert(parser.Backends, b.Name, "server-template", configuration.SerializeServerTemplate(model, configOpts), idx)
 		if err != nil {
 			return err
 		}
