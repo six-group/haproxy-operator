@@ -1,5 +1,5 @@
 # Configuration for CRD Reference Documentation Generator (crd-ref-doc)
-##  go run github.com/elastic/crd-ref-docs@v0.0.10 --config docs/config.yaml --renderer=markdown --output-path ./docs/api-reference.md
+##  go run github.com/elastic/crd-ref-docs@v0.1.0 --config docs/config.yaml --renderer=markdown --output-path ./docs/api-reference.md
 processor:
   ignoreTypes:
     - ".*List$"

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"path/filepath"
 	"sort"
 	"text/template"
 
@@ -83,7 +84,6 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 
 	oldObj := statefulset.DeepCopy()
 
-	// FIXME OSCP-4269 workaround to change podManagementPolicy
 	_ = r.Get(ctx, client.ObjectKeyFromObject(statefulset), statefulset)
 	if statefulset.Spec.PodManagementPolicy == appsv1.OrderedReadyPodManagement {
 		_ = r.Delete(ctx, statefulset)
@@ -128,11 +128,11 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 						VolumeMounts: []corev1.VolumeMount{
 							{
 								Name:      "haproxy-run",
-								MountPath: "/var/lib/haproxy/run",
+								MountPath: filepath.Dir("/var/lib/haproxy/run/"),
 							},
 							{
 								Name:      "haproxy-config",
-								MountPath: "/usr/local/etc/haproxy",
+								MountPath: filepath.Dir("/usr/local/etc/haproxy/"),
 							},
 						},
 						ReadinessProbe: instance.Spec.ReadinessProbe,
@@ -192,7 +192,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 
 		mount := corev1.VolumeMount{
 			Name:      "rsyslog-run",
-			MountPath: "/var/lib/rsyslog", // FIXME use filepath.Dir()
+			MountPath: filepath.Dir("/var/lib/rsyslog/"),
 		}
 		statefulset.Spec.Template.Spec.Containers[0].VolumeMounts = append(statefulset.Spec.Template.Spec.Containers[0].VolumeMounts, mount)
 
@@ -204,11 +204,11 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					Name:      "rsyslog-run",
-					MountPath: "/var/lib/rsyslog", // FIXME use filepath.Dir()
+					MountPath: filepath.Dir("/var/lib/rsyslog/"),
 				},
 				{
 					Name:      "rsyslog-config",
-					MountPath: "/etc/rsyslog",
+					MountPath: filepath.Dir("/etc/rsyslog/"),
 				},
 			},
 		}
@@ -276,7 +276,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					Name:      "haproxy-run",
-					MountPath: "/var/lib/haproxy/run",
+					MountPath: filepath.Dir("/var/lib/haproxy/run/"),
 				},
 			},
 		})

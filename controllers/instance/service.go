@@ -54,8 +54,8 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 
 				service.Spec.Ports = append(service.Spec.Ports, corev1.ServicePort{
 					Name:       fmt.Sprintf("tcp-%d", bind.Port),
-					Port:       int32(bind.Port),
-					TargetPort: intstr.FromInt32(int32(bind.Port)),
+					Port:       bind.Port,
+					TargetPort: intstr.FromInt32(bind.Port),
 					Protocol:   corev1.ProtocolTCP,
 				})
 			}
@@ -69,8 +69,8 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 
 				service.Spec.Ports = append(service.Spec.Ports, corev1.ServicePort{
 					Name:       fmt.Sprintf("tcp-%d", bind.Port),
-					Port:       int32(bind.Port),
-					TargetPort: intstr.FromInt32(int32(bind.Port)),
+					Port:       bind.Port,
+					TargetPort: intstr.FromInt32(bind.Port),
 					Protocol:   corev1.ProtocolTCP,
 				})
 			}
@@ -79,8 +79,8 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 		if instance.Spec.Metrics != nil && instance.Spec.Metrics.Enabled {
 			service.Spec.Ports = append(service.Spec.Ports, corev1.ServicePort{
 				Name:       "metrics",
-				Port:       int32(instance.Spec.Metrics.Port),
-				TargetPort: intstr.FromInt32(int32(instance.Spec.Metrics.Port)),
+				Port:       instance.Spec.Metrics.Port,
+				TargetPort: intstr.FromInt32(instance.Spec.Metrics.Port),
 				Protocol:   corev1.ProtocolTCP,
 			})
 		}

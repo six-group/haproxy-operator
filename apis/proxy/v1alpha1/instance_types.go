@@ -2,15 +2,15 @@ package v1alpha1
 
 import (
 	"fmt"
-	"math"
 	"strings"
 	"time"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/haproxytech/client-native/v5/configuration"
-	"github.com/haproxytech/client-native/v5/models"
-	parser "github.com/haproxytech/config-parser/v5"
-	"github.com/haproxytech/config-parser/v5/options"
+	parser "github.com/haproxytech/client-native/v6/config-parser"
+	configparseropts "github.com/haproxytech/client-native/v6/config-parser/options"
+	"github.com/haproxytech/client-native/v6/configuration"
+	"github.com/haproxytech/client-native/v6/configuration/options"
+	"github.com/haproxytech/client-native/v6/models"
 	routev1 "github.com/openshift/api/route/v1"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
@@ -144,7 +144,7 @@ type Metrics struct {
 	// +kubebuilder:default="0.0.0.0"
 	Address *string `json:"address,omitempty"`
 	// Port specifies the port used for metrics.
-	Port int64 `json:"port"`
+	Port int32 `json:"port"`
 	// RelabelConfigs to apply to samples before scraping.
 	// More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
 	// +optional
@@ -161,18 +161,21 @@ func (m *Metrics) AddToParser(p parser.Parser) error {
 	}
 
 	frontend := models.Frontend{
-		Name: "metrics",
-		Mode: "http",
-		StatsOptions: &models.StatsOptions{
-			StatsEnable:       true,
-			StatsURIPrefix:    "/stats",
-			StatsRefreshDelay: ptr.To((10 * time.Second).Milliseconds()),
+		FrontendBase: models.FrontendBase{
+			Name: "metrics",
+			Mode: "http",
+			StatsOptions: &models.StatsOptions{
+				StatsEnable:       true,
+				StatsURIPrefix:    "/stats",
+				StatsRefreshDelay: ptr.To((10 * time.Second).Milliseconds()),
+			},
 		},
 	}
 	if err := p.SectionsCreate(parser.Frontends, frontend.Name); err != nil {
 		return err
 	}
-	if err := configuration.CreateEditSection(frontend, parser.Frontends, frontend.Name, p); err != nil {
+	configOpts := &options.ConfigurationOptions{}
+	if err := configuration.CreateEditSection(frontend.FrontendBase, parser.Frontends, frontend.Name, p, configOpts); err != nil {
 		return err
 	}
 
@@ -180,7 +183,7 @@ func (m *Metrics) AddToParser(p parser.Parser) error {
 		BindParams: models.BindParams{
 			Name: "metrics",
 		},
-		Port:    ptr.To(m.Port),
+		Port:    ptr.To(int64(m.Port)),
 		Address: ptr.Deref(m.Address, "0.0.0.0"),
 	}
 	if err := p.Insert(parser.Frontends, frontend.Name, "bind", configuration.SerializeBind(bind), 0); err != nil {
@@ -193,7 +196,8 @@ func (m *Metrics) AddToParser(p parser.Parser) error {
 		Cond:        "if",
 		CondTest:    "{ path /metrics }",
 	}
-	data, err := configuration.SerializeHTTPRequestRule(rule)
+	configOptsHTTPRequestRule := &options.ConfigurationOptions{}
+	data, err := configuration.SerializeHTTPRequestRule(rule, configOptsHTTPRequestRule)
 	if err != nil {
 		return err
 	}
@@ -231,7 +235,6 @@ type DefaultsLoggingConfiguration struct {
 func (l *DefaultsLoggingConfiguration) Model() (models.LogTarget, error) {
 	logTarget := models.LogTarget{
 		Global: l.Enabled,
-		Index:  ptr.To(int64(0)),
 	}
 
 	return logTarget, logTarget.Validate(strfmt.Default)
@@ -261,24 +264,34 @@ type GlobalConfiguration struct {
 	Nbthread *int64 `json:"nbthread,omitempty"`
 	// TuneOptions sets the global tune options.
 	// +optional
-	TuneOptions *GlobalTuneOptions `json:"tune,omitempty"`
+	TuneOptions *GlobalTuneOptions `json:"tune_options,omitempty"`
+	// TuneSslOptions sets the global ssl tune options.
+	// +optional
+	TuneSslOptions *GlobalTuneSSLOptions `json:"tune_ssl_options,omitempty"`
+	// TuneBufferOptions sets the global buffer tune options.
+	// +optional
+	TuneBufferOptions *GlobalTuneBufferOptions `json:"tune_buffer_options,omitempty"`
 	// GlobalSSL sets the global SSL options.
 	// +optional
 	SSL *GlobalSSL `json:"ssl,omitempty"`
 	// HardStopAfter is the maximum time the instance will remain alive when a soft-stop is received.
 	// +optional
 	HardStopAfter *time.Duration `json:"hardStopAfter,omitempty"`
+	// Ocsp is used to enable stapling at the global level for all certificates in the configuration.
+	// +optional
+	Ocsp *GlobalOCSPConfiguration `json:"ocsp,omitempty"`
 }
 
 func (g *GlobalConfiguration) Model() (models.Global, error) {
 	global := models.Global{
-		Maxconn:  ptr.Deref(g.Maxconn, 0),
-		Nbthread: ptr.Deref(g.Nbthread, 0),
+		GlobalBase: models.GlobalBase{
+			Nbthread: ptr.Deref(g.Nbthread, 0),
+		},
 	}
 
 	if g.AdditionalParameters != "" {
 		str := strings.ReplaceAll(fmt.Sprintf("%s\n%s", parser.Global, g.AdditionalParameters), "\n", "\n  ")
-		p, err := parser.New(options.String(str))
+		p, err := parser.New(configparseropts.String(str))
 		if err != nil {
 			return global, err
 		}
@@ -314,6 +327,30 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 		global.TuneOptions = &opts
 	}
 
+	if g.TuneBufferOptions != nil {
+		opts, err := g.TuneBufferOptions.Model()
+		if err != nil {
+			return global, err
+		}
+		global.TuneBufferOptions = &opts
+	}
+
+	if g.TuneSslOptions != nil {
+		opts, err := g.TuneSslOptions.Model()
+		if err != nil {
+			return global, err
+		}
+		global.TuneSslOptions = &opts
+	}
+
+	if g.Ocsp != nil {
+		opts, err := g.Ocsp.Model()
+		if err != nil {
+			return global, err
+		}
+		global.OcspUpdateOptions = &opts
+	}
+
 	if g.Logging != nil {
 		_, logSendHostname, err := g.Logging.Model()
 		if err != nil {
@@ -324,12 +361,12 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 	}
 
 	if g.SSL != nil {
-		global.SslDefaultBindCiphers = strings.Join(g.SSL.DefaultBindCiphers, ":")
-		global.SslDefaultBindCiphersuites = strings.Join(g.SSL.DefaultBindCipherSuites, ":")
+		global.SslOptions.DefaultBindCiphers = strings.Join(g.SSL.DefaultBindCiphers, ":")
+		global.SslOptions.DefaultBindCiphersuites = strings.Join(g.SSL.DefaultBindCipherSuites, ":")
 
 		if g.SSL.DefaultBindOptions != nil {
 			if g.SSL.DefaultBindOptions.MinVersion != nil {
-				global.SslDefaultBindOptions += fmt.Sprintf("ssl-min-ver %s ", *g.SSL.DefaultBindOptions.MinVersion)
+				global.SslOptions.DefaultBindOptions += fmt.Sprintf("ssl-min-ver %s ", *g.SSL.DefaultBindOptions.MinVersion)
 			}
 		}
 	}
@@ -346,7 +383,9 @@ func (g *GlobalConfiguration) AddToParser(p parser.Parser) error {
 	if err != nil {
 		return err
 	}
-	if err := configuration.SerializeGlobalSection(p, &global); err != nil {
+
+	configOpts := &options.ConfigurationOptions{}
+	if err := configuration.SerializeGlobalSection(p, &global, configOpts); err != nil {
 		return err
 	}
 
@@ -355,7 +394,7 @@ func (g *GlobalConfiguration) AddToParser(p parser.Parser) error {
 		if err != nil {
 			return err
 		}
-		if err := p.Insert(parser.Global, parser.GlobalSectionName, "log", configuration.SerializeLogTarget(logTarget), int(*logTarget.Index)); err != nil {
+		if err := p.Insert(parser.Global, parser.GlobalSectionName, "log", configuration.SerializeLogTarget(logTarget)); err != nil {
 			return err
 		}
 	}
@@ -391,17 +430,28 @@ type GlobalTuneOptions struct {
 	// fill more than bufsize-maxrewrite.
 	// +optional
 	Maxrewrite *int64 `json:"maxrewrite,omitempty"`
+}
+
+type GlobalTuneBufferOptions struct {
+	// BuffersLimit Sets a hard limit on the number of buffers which may be allocated per process.
+	// The default value is zero which means unlimited. The limit will automatically
+	// be re-adjusted to satisfy the reserved buffers for emergency situations so
+	// that the user doesn't have to perform complicated calculations.
+	// +optional
+	BuffersLimit *int64 `json:"buffers_limit,omitempty"`
 	// Bufsize sets the buffer size to this size (in bytes). Lower values allow more
 	// sessions to coexist in the same amount of RAM, and higher values allow some
 	// applications with very large cookies to work.
 	// +optional
 	Bufsize *int64 `json:"bufsize,omitempty"`
-	// SSL sets the SSL tune options.
+	// BuffersReserve Sets the number of per-thread buffers which are pre-allocated and
+	// reserved for use only during memory shortage conditions resulting in failed memory
+	// allocations. The minimum value is 2 and the default is 4.
 	// +optional
-	SSL *GlobalSSLTuneOptions `json:"ssl,omitempty"`
+	BuffersReserve int64 `json:"buffers_reserve,omitempty"`
 }
 
-type GlobalSSLTuneOptions struct {
+type GlobalTuneSSLOptions struct {
 	// CacheSize sets the size of the global SSL session cache, in a number of blocks. A block
 	// is large enough to contain an encoded session without peer certificate.  An
 	// encoded session with peer certificate is stored in multiple blocks depending
@@ -449,24 +499,33 @@ type GlobalSSLTuneOptions struct {
 	CaptureBufferSize *int64 `json:"captureBufferSize,omitempty"`
 }
 
-func (t *GlobalTuneOptions) Model() (models.GlobalTuneOptions, error) {
-	opts := models.GlobalTuneOptions{
+func (t *GlobalTuneOptions) Model() (models.TuneOptions, error) {
+	opts := models.TuneOptions{
 		Maxrewrite: ptr.Deref(t.Maxrewrite, 0),
-		Bufsize:    ptr.Deref(t.Bufsize, 0),
 	}
 
-	if t.SSL != nil {
-		opts.SslCachesize = t.SSL.CacheSize
-		opts.SslKeylog = t.SSL.Keylog
-		opts.SslForcePrivateCache = t.SSL.ForcePrivateCache
-		opts.SslMaxrecord = t.SSL.MaxRecord
-		opts.SslDefaultDhParam = t.SSL.DefaultDHParam
-		opts.SslCtxCacheSize = t.SSL.CtxCacheSize
-		opts.SslCaptureBufferSize = t.SSL.CaptureBufferSize
+	return opts, opts.Validate(strfmt.Default)
+}
 
-		if t.SSL.Lifetime != nil {
-			opts.SslLifetime = ptr.To(int64(math.Round(t.SSL.Lifetime.Seconds())))
-		}
+func (t *GlobalTuneBufferOptions) Model() (models.TuneBufferOptions, error) {
+	opts := models.TuneBufferOptions{
+		Bufsize:        ptr.Deref(t.Bufsize, 0),
+		BuffersLimit:   t.BuffersLimit,
+		BuffersReserve: t.BuffersReserve,
+	}
+
+	return opts, opts.Validate(strfmt.Default)
+}
+
+func (t *GlobalTuneSSLOptions) Model() (models.TuneSslOptions, error) {
+	opts := models.TuneSslOptions{
+		Cachesize:         t.CacheSize,
+		CaptureBufferSize: t.CaptureBufferSize,
+		CtxCacheSize:      t.CtxCacheSize,
+		DefaultDhParam:    t.DefaultDHParam,
+		ForcePrivateCache: t.ForcePrivateCache,
+		Keylog:            t.Keylog,
+		Maxrecord:         t.MaxRecord,
 	}
 
 	return opts, opts.Validate(strfmt.Default)
@@ -506,7 +565,6 @@ func (l *GlobalLoggingConfiguration) Model() (models.LogTarget, models.GlobalLog
 		Level:    l.Level,
 		Facility: l.Facility,
 		Format:   l.Format,
-		Index:    ptr.To(int64(0)),
 	}
 
 	logSendHostname := models.GlobalLogSendHostname{
@@ -518,6 +576,64 @@ func (l *GlobalLoggingConfiguration) Model() (models.LogTarget, models.GlobalLog
 	}
 
 	return logTarget, logSendHostname, multierr.Combine(logTarget.Validate(strfmt.Default), logSendHostname.Validate(strfmt.Default))
+}
+
+type GlobalOCSPConfiguration struct {
+	// Mode Enable automatic OCSP response update when set to 'on', disable it otherwise.
+	// Its value defaults to 'off'.
+	// +optional
+	Mode bool `json:"mode,omitempty"`
+	// MaxDelay sets the maximum interval between two automatic updates of the same OCSP
+	// response. This time is expressed in seconds and defaults to 3600 (1 hour).
+	// +optional
+	MaxDelay *int64 `json:"maxDelay,omitempty"`
+	// MinDelay sets the minimum interval between two automatic updates of the same OCSP
+	// response. This time is expressed in seconds and defaults to 300 (5 minutes).
+	// +optional
+	MinDelay *int64 `json:"minDelay,omitempty"`
+	// HttpProxy Allow to use an HTTP proxy for the OCSP updates. This only works with HTTP,
+	// HTTPS is not supported. This option will allow the OCSP updater to send
+	// absolute URI in the request to the proxy.
+	HTTPProxy *OcspUpdateOptionsHttpproxy `json:"httpproxy,omitempty"`
+}
+
+func (t *GlobalOCSPConfiguration) Model() (models.OcspUpdateOptions, error) {
+	opts := models.OcspUpdateOptions{
+		Maxdelay: t.MaxDelay,
+		Mindelay: t.MinDelay,
+	}
+	if t.Mode {
+		opts.Mode = "enabled"
+	} else {
+		opts.Mode = "disabled"
+	}
+	if t.HTTPProxy != nil {
+		httpproxy, err := t.HTTPProxy.Model()
+		if err != nil {
+			return opts, err
+		}
+		opts.Httpproxy = &httpproxy
+	}
+
+	return opts, opts.Validate(strfmt.Default)
+}
+
+type OcspUpdateOptionsHttpproxy struct {
+	// Address can be a host name, an IPv4 address or an IPv6 address
+	// +kubebuilder:validation:Pattern=^[^\s]+$
+	// +optional
+	Address string `json:"address,omitempty"`
+	// Port
+	Port *int64 `json:"port,omitempty"`
+}
+
+func (t *OcspUpdateOptionsHttpproxy) Model() (models.OcspUpdateOptionsHttpproxy, error) {
+	opts := models.OcspUpdateOptionsHttpproxy{
+		Address: t.Address,
+		Port:    t.Port,
+	}
+
+	return opts, opts.Validate(strfmt.Default)
 }
 
 type DefaultsConfiguration struct {
@@ -546,7 +662,7 @@ func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
 
 	if d.AdditionalParameters != "" {
 		str := strings.ReplaceAll(fmt.Sprintf("%s\n%s", parser.Defaults, d.AdditionalParameters), "\n", "\n  ")
-		p, err := parser.New(options.String(str))
+		p, err := parser.New(configparseropts.String(str))
 		if err != nil {
 			return defaults, err
 		}
@@ -611,7 +727,8 @@ func (d *DefaultsConfiguration) AddToParser(p parser.Parser) error {
 		return err
 	}
 
-	if err := configuration.CreateEditSection(defaults, parser.Defaults, parser.DefaultSectionName, p); err != nil {
+	configOpts := &options.ConfigurationOptions{}
+	if err := configuration.CreateEditSection(defaults.DefaultsBase, parser.Defaults, parser.DefaultSectionName, p, configOpts); err != nil {
 		return err
 	}
 
@@ -620,7 +737,7 @@ func (d *DefaultsConfiguration) AddToParser(p parser.Parser) error {
 		if err != nil {
 			return err
 		}
-		if err := p.Insert(parser.Defaults, parser.DefaultSectionName, "log", configuration.SerializeLogTarget(logTarget), int(*logTarget.Index)); err != nil {
+		if err := p.Insert(parser.Defaults, parser.DefaultSectionName, "log", configuration.SerializeLogTarget(logTarget)); err != nil {
 			return err
 		}
 	}

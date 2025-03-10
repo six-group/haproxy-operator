@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/haproxytech/client-native/v5/configuration"
-	"github.com/haproxytech/client-native/v5/models"
-	parser "github.com/haproxytech/config-parser/v5"
+	parser "github.com/haproxytech/client-native/v6/config-parser"
+	"github.com/haproxytech/client-native/v6/configuration"
+	"github.com/haproxytech/client-native/v6/configuration/options"
+	"github.com/haproxytech/client-native/v6/models"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
@@ -36,7 +37,6 @@ func (b *BackendSwitchingRule) Model() (models.BackendSwitchingRule, error) {
 	model := models.BackendSwitchingRule{
 		Cond:     b.ConditionType,
 		CondTest: b.Condition,
-		Index:    ptr.To(int64(0)),
 		Name:     b.Backend.String(),
 	}
 
@@ -102,9 +102,11 @@ func (f *Frontend) GetStatus() Status {
 
 func (f *Frontend) Model() (models.Frontend, error) {
 	model := models.Frontend{
-		Name:           f.Name,
-		Mode:           f.Spec.Mode,
-		DefaultBackend: f.Spec.DefaultBackend.Name,
+		FrontendBase: models.FrontendBase{
+			Name:           f.Name,
+			Mode:           f.Spec.Mode,
+			DefaultBackend: f.Spec.DefaultBackend.Name,
+		},
 	}
 
 	if f.Spec.HTTPLog != nil {
@@ -163,7 +165,8 @@ func (f *Frontend) AddToParser(p parser.Parser) error {
 		return err
 	}
 
-	if err := configuration.CreateEditSection(&frontend, parser.Frontends, f.Name, p); err != nil {
+	configOpts := &options.ConfigurationOptions{}
+	if err := configuration.CreateEditSection(&frontend.FrontendBase, parser.Frontends, f.Name, p, configOpts); err != nil {
 		return err
 	}
 
