@@ -1,10 +1,9 @@
 module github.com/six-group/haproxy-operator
 
 go 1.23.7
-
 require (
 	github.com/go-openapi/strfmt v0.23.0
-	github.com/haproxytech/client-native/v6 v6.1.1
+	github.com/haproxytech/client-native/v6 v6.1.2
 	github.com/onsi/ginkgo/v2 v2.23.0
 	github.com/onsi/gomega v1.36.2
 	github.com/openshift/api v0.0.0-20250303104811-f587fb60f627 // latest commit of branch https://github.com/openshift/api/tree/release-4.20
