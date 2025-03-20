@@ -361,14 +361,16 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 	}
 
 	if g.SSL != nil {
-		global.SslOptions.DefaultBindCiphers = strings.Join(g.SSL.DefaultBindCiphers, ":")
-		global.SslOptions.DefaultBindCiphersuites = strings.Join(g.SSL.DefaultBindCipherSuites, ":")
-
+		sslOptions := &models.SslOptions{
+			DefaultBindCiphers:      strings.Join(g.SSL.DefaultBindCiphers, ":"),
+			DefaultBindCiphersuites: strings.Join(g.SSL.DefaultBindCipherSuites, ":"),
+		}
 		if g.SSL.DefaultBindOptions != nil {
 			if g.SSL.DefaultBindOptions.MinVersion != nil {
-				global.SslOptions.DefaultBindOptions += fmt.Sprintf("ssl-min-ver %s ", *g.SSL.DefaultBindOptions.MinVersion)
+				sslOptions.DefaultBindOptions += fmt.Sprintf("ssl-min-ver %s ", *g.SSL.DefaultBindOptions.MinVersion)
 			}
 		}
+		global.SslOptions = sslOptions
 	}
 
 	if g.HardStopAfter != nil {
