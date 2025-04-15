@@ -91,7 +91,6 @@ This is a configuration for an HAProxy instance with two sections: `global` and 
 ```
 global
   nbthread 4
-  maxconn 20000
   stats socket /var/lib/haproxy/run/haproxy.sock expose-fd listeners level admin mode 600
   stats timeout 300000
   tune.bufsize 32768
@@ -160,7 +159,6 @@ spec:
         maxrewrite: 8192
         ssl:
           defaultDHParam: 2048
-      maxconn: 20000
       nbthread: 4
       reload: true
   image: 'haproxy:2.8.0'

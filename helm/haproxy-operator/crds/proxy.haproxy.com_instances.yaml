@@ -426,9 +426,8 @@ spec:
                         description: StatsTimeout sets the timeout on the stats socket.
                           Default is set to 10 seconds.
                         type: string
-                      tune_buffer_options:
-                        description: TuneBufferOptions sets the global buffer tune
-                          options.
+                      tune_options:
+                        description: TuneOptions sets the global tune options.
                         properties:
                           buffers_limit:
                             description: |-
@@ -452,10 +451,6 @@ spec:
                               applications with very large cookies to work.
                             format: int64
                             type: integer
-                        type: object
-                      tune_options:
-                        description: TuneOptions sets the global tune options.
-                        properties:
                           maxrewrite:
                             description: |-
                               Maxrewrite sets the reserved buffer space to this size in bytes. The reserved space is
@@ -463,68 +458,68 @@ spec:
                               fill more than bufsize-maxrewrite.
                             format: int64
                             type: integer
-                        type: object
-                      tune_ssl_options:
-                        description: TuneSslOptions sets the global ssl tune options.
-                        properties:
-                          cacheSize:
-                            description: |-
-                              CacheSize sets the size of the global SSL session cache, in a number of blocks. A block
-                              is large enough to contain an encoded session without peer certificate.  An
-                              encoded session with peer certificate is stored in multiple blocks depending
-                              on the size of the peer certificate. The default value may be forced
-                              at build time, otherwise defaults to 20000.  Setting this value to 0 disables the SSL session cache.
-                            format: int64
-                            type: integer
-                          captureBufferSize:
-                            description: |-
-                              CaptureBufferSize sets the maximum size of the buffer used for capturing client hello cipher
-                              list, extensions list, elliptic curves list and elliptic curve point
-                              formats. If the value is 0 (default value) the capture is disabled,
-                              otherwise a buffer is allocated for each SSL/TLS connection.
-                            format: int64
-                            type: integer
-                          ctxCacheSize:
-                            description: |-
-                              CtxCacheSize sets the size of the cache used to store generated certificates to <number>
-                              entries. This is an LRU cache. Because generating an SSL certificate
-                              dynamically is expensive, they are cached. The default cache size is set to 1000 entries.
-                            format: int64
-                            type: integer
-                          defaultDHParam:
-                            description: |-
-                              DefaultDHParam sets the maximum size of the Diffie-Hellman parameters used for generating
-                              the ephemeral/temporary Diffie-Hellman key in case of DHE key exchange. The
-                              final size will try to match the size of the server's RSA (or DSA) key (e.g,
-                              a 2048 bits temporary DH key for a 2048 bits RSA key), but will not exceed
-                              this maximum value. Default value if 2048.
-                            format: int64
-                            type: integer
-                          forcePrivateCache:
-                            description: |-
-                              ForcePrivateCache disables SSL session cache sharing between all processes. It
-                              should normally not be used since it will force many renegotiations due to
-                              clients hitting a random process.
-                            type: boolean
-                          keylog:
-                            description: |-
-                              Keylog activates the logging of the TLS keys. It should be used with
-                              care as it will consume more memory per SSL session and could decrease
-                              performances. This is disabled by default.
-                            type: string
-                          lifetime:
-                            description: |-
-                              Lifetime sets how long a cached SSL session may remain valid. This time defaults to 5 min. It is important
-                              to understand that it does not guarantee that sessions will last that long, because if the cache is
-                              full, the longest idle sessions will be purged despite their configured lifetime.
-                            type: string
-                          maxRecord:
-                            description: |-
-                              MaxRecord sets the maximum amount of bytes passed to SSL_write() at a time. Default
-                              value 0 means there is no limit. Over SSL/TLS, the client can decipher the
-                              data only once it has received a full record.
-                            format: int64
-                            type: integer
+                          ssl:
+                            description: SSL sets the SSL tune options.
+                            properties:
+                              cacheSize:
+                                description: |-
+                                  CacheSize sets the size of the global SSL session cache, in a number of blocks. A block
+                                  is large enough to contain an encoded session without peer certificate.  An
+                                  encoded session with peer certificate is stored in multiple blocks depending
+                                  on the size of the peer certificate. The default value may be forced
+                                  at build time, otherwise defaults to 20000.  Setting this value to 0 disables the SSL session cache.
+                                format: int64
+                                type: integer
+                              captureBufferSize:
+                                description: |-
+                                  CaptureBufferSize sets the maximum size of the buffer used for capturing client hello cipher
+                                  list, extensions list, elliptic curves list and elliptic curve point
+                                  formats. If the value is 0 (default value) the capture is disabled,
+                                  otherwise a buffer is allocated for each SSL/TLS connection.
+                                format: int64
+                                type: integer
+                              ctxCacheSize:
+                                description: |-
+                                  CtxCacheSize sets the size of the cache used to store generated certificates to <number>
+                                  entries. This is an LRU cache. Because generating an SSL certificate
+                                  dynamically is expensive, they are cached. The default cache size is set to 1000 entries.
+                                format: int64
+                                type: integer
+                              defaultDHParam:
+                                description: |-
+                                  DefaultDHParam sets the maximum size of the Diffie-Hellman parameters used for generating
+                                  the ephemeral/temporary Diffie-Hellman key in case of DHE key exchange. The
+                                  final size will try to match the size of the server's RSA (or DSA) key (e.g,
+                                  a 2048 bits temporary DH key for a 2048 bits RSA key), but will not exceed
+                                  this maximum value. Default value if 2048.
+                                format: int64
+                                type: integer
+                              forcePrivateCache:
+                                description: |-
+                                  ForcePrivateCache disables SSL session cache sharing between all processes. It
+                                  should normally not be used since it will force many renegotiations due to
+                                  clients hitting a random process.
+                                type: boolean
+                              keylog:
+                                description: |-
+                                  Keylog activates the logging of the TLS keys. It should be used with
+                                  care as it will consume more memory per SSL session and could decrease
+                                  performances. This is disabled by default.
+                                type: string
+                              lifetime:
+                                description: |-
+                                  Lifetime sets how long a cached SSL session may remain valid. This time defaults to 5 min. It is important
+                                  to understand that it does not guarantee that sessions will last that long, because if the cache is
+                                  full, the longest idle sessions will be purged despite their configured lifetime.
+                                type: string
+                              maxRecord:
+                                description: |-
+                                  MaxRecord sets the maximum amount of bytes passed to SSL_write() at a time. Default
+                                  value 0 means there is no limit. Over SSL/TLS, the client can decipher the
+                                  data only once it has received a full record.
+                                format: int64
+                                type: integer
+                            type: object
                         type: object
                     required:
                     - reload

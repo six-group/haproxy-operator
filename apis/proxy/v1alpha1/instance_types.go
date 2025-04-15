@@ -265,12 +265,6 @@ type GlobalConfiguration struct {
 	// TuneOptions sets the global tune options.
 	// +optional
 	TuneOptions *GlobalTuneOptions `json:"tune_options,omitempty"`
-	// TuneSslOptions sets the global ssl tune options.
-	// +optional
-	TuneSslOptions *GlobalTuneSSLOptions `json:"tune_ssl_options,omitempty"`
-	// TuneBufferOptions sets the global buffer tune options.
-	// +optional
-	TuneBufferOptions *GlobalTuneBufferOptions `json:"tune_buffer_options,omitempty"`
 	// GlobalSSL sets the global SSL options.
 	// +optional
 	SSL *GlobalSSL `json:"ssl,omitempty"`
@@ -325,18 +319,16 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 			return global, err
 		}
 		global.TuneOptions = &opts
-	}
 
-	if g.TuneBufferOptions != nil {
-		opts, err := g.TuneBufferOptions.Model()
-		if err != nil {
-			return global, err
+		optsBuffer, errBuffer := g.TuneOptions.ModelTuneBufferOptions()
+		if errBuffer != nil {
+			return global, errBuffer
 		}
-		global.TuneBufferOptions = &opts
+		global.TuneBufferOptions = &optsBuffer
 	}
 
-	if g.TuneSslOptions != nil {
-		opts, err := g.TuneSslOptions.Model()
+	if g.TuneOptions.SSL != nil {
+		opts, err := g.TuneOptions.ModelTuneSSLOptions()
 		if err != nil {
 			return global, err
 		}
@@ -432,9 +424,6 @@ type GlobalTuneOptions struct {
 	// fill more than bufsize-maxrewrite.
 	// +optional
 	Maxrewrite *int64 `json:"maxrewrite,omitempty"`
-}
-
-type GlobalTuneBufferOptions struct {
 	// BuffersLimit Sets a hard limit on the number of buffers which may be allocated per process.
 	// The default value is zero which means unlimited. The limit will automatically
 	// be re-adjusted to satisfy the reserved buffers for emergency situations so
@@ -451,9 +440,12 @@ type GlobalTuneBufferOptions struct {
 	// allocations. The minimum value is 2 and the default is 4.
 	// +optional
 	BuffersReserve int64 `json:"buffers_reserve,omitempty"`
+	// SSL sets the SSL tune options.
+	// +optional
+	SSL *GlobalSSLTuneOptions `json:"ssl,omitempty"`
 }
 
-type GlobalTuneSSLOptions struct {
+type GlobalSSLTuneOptions struct {
 	// CacheSize sets the size of the global SSL session cache, in a number of blocks. A block
 	// is large enough to contain an encoded session without peer certificate.  An
 	// encoded session with peer certificate is stored in multiple blocks depending
@@ -509,7 +501,7 @@ func (t *GlobalTuneOptions) Model() (models.TuneOptions, error) {
 	return opts, opts.Validate(strfmt.Default)
 }
 
-func (t *GlobalTuneBufferOptions) Model() (models.TuneBufferOptions, error) {
+func (t *GlobalTuneOptions) ModelTuneBufferOptions() (models.TuneBufferOptions, error) {
 	opts := models.TuneBufferOptions{
 		Bufsize:        ptr.Deref(t.Bufsize, 0),
 		BuffersLimit:   t.BuffersLimit,
@@ -519,15 +511,15 @@ func (t *GlobalTuneBufferOptions) Model() (models.TuneBufferOptions, error) {
 	return opts, opts.Validate(strfmt.Default)
 }
 
-func (t *GlobalTuneSSLOptions) Model() (models.TuneSslOptions, error) {
+func (t *GlobalTuneOptions) ModelTuneSSLOptions() (models.TuneSslOptions, error) {
 	opts := models.TuneSslOptions{
-		Cachesize:         t.CacheSize,
-		CaptureBufferSize: t.CaptureBufferSize,
-		CtxCacheSize:      t.CtxCacheSize,
-		DefaultDhParam:    t.DefaultDHParam,
-		ForcePrivateCache: t.ForcePrivateCache,
-		Keylog:            t.Keylog,
-		Maxrecord:         t.MaxRecord,
+		Cachesize:         t.SSL.CacheSize,
+		CaptureBufferSize: t.SSL.CaptureBufferSize,
+		CtxCacheSize:      t.SSL.CtxCacheSize,
+		DefaultDhParam:    t.SSL.DefaultDHParam,
+		ForcePrivateCache: t.SSL.ForcePrivateCache,
+		Keylog:            t.SSL.Keylog,
+		Maxrecord:         t.SSL.MaxRecord,
 	}
 
 	return opts, opts.Validate(strfmt.Default)

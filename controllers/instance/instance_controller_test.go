@@ -84,9 +84,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							},
 							TuneOptions: &proxyv1alpha1.GlobalTuneOptions{
 								Maxrewrite: ptr.To(int64(3000)),
-							},
-							TuneBufferOptions: &proxyv1alpha1.GlobalTuneBufferOptions{
-								Bufsize: ptr.To(int64(3000)),
+								Bufsize:    ptr.To(int64(3000)),
 							},
 							HardStopAfter: &dur,
 							Ocsp: &proxyv1alpha1.GlobalOCSPConfiguration{
