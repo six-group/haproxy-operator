@@ -325,14 +325,14 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 			return global, errBuffer
 		}
 		global.TuneBufferOptions = &optsBuffer
-	}
 
-	if g.TuneOptions.SSL != nil {
-		opts, err := g.TuneOptions.ModelTuneSSLOptions()
-		if err != nil {
-			return global, err
+		if g.TuneOptions.SSL != nil {
+			optsSSL, errSSL := g.TuneOptions.ModelTuneSSLOptions()
+			if errSSL != nil {
+				return global, errSSL
+			}
+			global.TuneSslOptions = &optsSSL
 		}
-		global.TuneSslOptions = &opts
 	}
 
 	if g.Ocsp != nil {
