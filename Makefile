@@ -10,7 +10,7 @@ generate: controller-gen
 
 .PHONY: docs
 docs:
-	go run github.com/elastic/crd-ref-docs@v0.1.0 --config docs/config.yaml --renderer=markdown --output-path docs/api-reference.md
+	go run github.com/elastic/crd-ref-docs@v0.1.0 --config docs/config.yaml --renderer=markdown --output-path docs/api-reference.md --source-path=apis
 
 golint: colanci-lint-bin
 	$(GOLANGCI_LINT) run
