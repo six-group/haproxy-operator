@@ -426,7 +426,7 @@ spec:
                         description: StatsTimeout sets the timeout on the stats socket.
                           Default is set to 10 seconds.
                         type: string
-                      tune_options:
+                      tune:
                         description: TuneOptions sets the global tune options.
                         properties:
                           buffers_limit:
