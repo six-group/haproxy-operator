@@ -1247,7 +1247,7 @@ _Appears in:_
 | `additionalCertificates` _[SSLCertificate](#sslcertificate) array_ | AdditionalCertificates can be used to include global ssl certificates which can bes used in any listen |  |  |
 | `maxconn` _integer_ | Maxconn sets the maximum per-process number of concurrent connections. Proxies will stop accepting connections when this limit is reached. |  |  |
 | `nbthread` _integer_ | Nbthread this setting is only available when support for threads was built in. It makes HAProxy run on specified number of threads. |  |  |
-| `tune_options` _[GlobalTuneOptions](#globaltuneoptions)_ | TuneOptions sets the global tune options. |  |  |
+| `tune` _[GlobalTuneOptions](#globaltuneoptions)_ | TuneOptions sets the global tune options. |  |  |
 | `ssl` _[GlobalSSL](#globalssl)_ | GlobalSSL sets the global SSL options. |  |  |
 | `hardStopAfter` _[Duration](#duration)_ | HardStopAfter is the maximum time the instance will remain alive when a soft-stop is received. |  |  |
 | `ocsp` _[GlobalOCSPConfiguration](#globalocspconfiguration)_ | Ocsp is used to enable stapling at the global level for all certificates in the configuration. |  |  |

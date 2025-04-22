@@ -264,7 +264,7 @@ type GlobalConfiguration struct {
 	Nbthread *int64 `json:"nbthread,omitempty"`
 	// TuneOptions sets the global tune options.
 	// +optional
-	TuneOptions *GlobalTuneOptions `json:"tune_options,omitempty"`
+	TuneOptions *GlobalTuneOptions `json:"tune,omitempty"`
 	// GlobalSSL sets the global SSL options.
 	// +optional
 	SSL *GlobalSSL `json:"ssl,omitempty"`
