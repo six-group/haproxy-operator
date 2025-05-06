@@ -84,7 +84,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							},
 							TuneOptions: &proxyv1alpha1.GlobalTuneOptions{
 								Maxrewrite: ptr.To(int64(3000)),
-								Bufsize:    ptr.To(int64(3000)),
+								Bufsize:    ptr.To(int64(16384)),
 							},
 							HardStopAfter: &dur,
 							Ocsp: &proxyv1alpha1.GlobalOCSPConfiguration{
@@ -644,7 +644,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 var (
 	haproxyConfig = `
 global
-  tune.bufsize 3000
+  tune.bufsize 16384
   tune.maxrewrite 3000
   hard-stop-after 30000
   log /var/lib/rsyslog/rsyslog.sock local0
@@ -683,7 +683,7 @@ backend foo-back2
 `
 	haproxyConfigCerts = `
 global
-  tune.bufsize 3000
+  tune.bufsize 16384
   tune.maxrewrite 3000
   hard-stop-after 30000
   log /var/lib/rsyslog/rsyslog.sock local0
