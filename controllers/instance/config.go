@@ -2,6 +2,9 @@ package instance
 
 import (
 	"context"
+	// #nosec
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -108,7 +111,20 @@ func (r *Reconciler) reconcileConfig(ctx context.Context, instance *proxyv1alpha
 		logger.Info(fmt.Sprintf("Object %s", result), "secret", configSecret.Name)
 	}
 
-	return configSecret.ResourceVersion, nil
+	cs := generateChecksum(configSecret)
+
+	return cs, nil
+}
+
+// #nosec
+func generateChecksum(secret *corev1.Secret) string {
+	var b []byte
+	for k := range secret.Data {
+		b = append(b, secret.Data[k]...)
+	}
+
+	hash := md5.Sum(b)
+	return hex.EncodeToString(hash[:])
 }
 
 func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) (string, error) {
