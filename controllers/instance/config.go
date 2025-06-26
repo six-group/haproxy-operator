@@ -119,7 +119,12 @@ func (r *Reconciler) reconcileConfig(ctx context.Context, instance *proxyv1alpha
 // #nosec
 func generateChecksum(secret *corev1.Secret) string {
 	var b []byte
+	keys := make([]string, 0, len(secret.Data))
 	for k := range secret.Data {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
 		b = append(b, secret.Data[k]...)
 	}
 
