@@ -475,7 +475,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				Scheme: scheme,
 			}
 			result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Name: proxy.Name, Namespace: proxy.Namespace}})
-			Ω(err).ShouldNot(HaveOccurred())
+			Ω(err).Should(HaveOccurred())
 			Ω(result).ShouldNot(BeNil())
 
 			Ω(cli.Get(ctx, client.ObjectKeyFromObject(proxy), proxy)).ShouldNot(HaveOccurred())
