@@ -5,6 +5,7 @@ import (
 
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
+	"go.uber.org/multierr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -119,7 +120,7 @@ func (r *Reconciler) handleError(ctx context.Context, instance *proxyv1alpha1.In
 		Error: err.Error(),
 	}
 
-	return r.Status().Update(ctx, instance)
+	return multierr.Combine(err, r.Status().Update(ctx, instance))
 }
 
 func (r *Reconciler) updateConfig(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) {
