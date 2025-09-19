@@ -1013,6 +1013,9 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `configMapKeyRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#configmapkeyselector-v1-core)_ | ConfigMapKeyRef selects a key of a ConfigMap |  |  |
 | `secretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#secretkeyselector-v1-core)_ | SecretKeyRef selects a key of a secret in the pod namespace |  |  |
+| `secretKeyExternalRef` _[SecretKeySelectorExternal](#secretkeyselectorexternal)_ | SecretKeyExternalRef selects a key of a secret in a specific namespace |  |  |
+
+
 
 
 #### Server

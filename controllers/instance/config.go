@@ -493,6 +493,20 @@ func (r *Reconciler) loadSSLCertificateValueData(ctx context.Context, instance *
 
 			items = append(items, strings.TrimSpace(string(data)))
 		}
+
+		if ref.SecretKeyExternalRef != nil {
+			secret := &corev1.Secret{}
+			if err := r.Client.Get(ctx, client.ObjectKey{Name: ref.SecretKeyExternalRef.Name, Namespace: ref.SecretKeyExternalRef.Namespace}, secret); err != nil {
+				return "", err
+			}
+
+			data, ok := secret.Data[ref.SecretKeyExternalRef.Key]
+			if !ok {
+				return "", fmt.Errorf("key %s not found in SSL certrifcate secret: %s/%s", ref.SecretKeyExternalRef.Key, ref.SecretKeyExternalRef.Namespace, ref.SecretKeyExternalRef.Name)
+			}
+
+			items = append(items, strings.TrimSpace(string(data)))
+		}
 	}
 
 	return strings.Join(items, "\n"), nil
@@ -581,7 +595,13 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 				}
 
 				for _, element := range elements {
-					files[element.Certificate.FilePath()] = *element.Certificate.Value
+					data, err := r.loadSSLCertificateValueData(ctx, instance, &element.Certificate)
+					if err != nil {
+						frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+						frontend.Status.Error = err.Error()
+						return nil, multierr.Combine(err, r.Status().Update(ctx, &frontend))
+					}
+					files[element.Certificate.FilePath()] = data
 
 					var alpn string
 					if len(element.Alpn) > 0 {
@@ -621,7 +641,13 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 				}
 
 				for _, element := range elements {
-					files[element.Certificate.FilePath()] = *element.Certificate.Value
+					data, err := r.loadSSLCertificateValueData(ctx, instance, &element.Certificate)
+					if err != nil {
+						listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
+						listen.Status.Error = err.Error()
+						return nil, multierr.Combine(err, r.Status().Update(ctx, &listen))
+					}
+					files[element.Certificate.FilePath()] = data
 
 					var alpn string
 					if len(element.Alpn) > 0 {
