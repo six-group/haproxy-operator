@@ -21,21 +21,21 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: go mod tidy && git diff --exit-code go.mod go.sum
       - run: go run github.com/elastic/crd-ref-docs@v0.1.0 --config docs/config.yaml --renderer=markdown --output-path docs/api-reference.md --source-path=apis
   helm:
     name: helm-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: helm lint helm/haproxy-operator/ --strict
       - run: helm template chart helm/haproxy-operator > /dev/null
   golangci:
     name: golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -52,7 +52,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: go run github.com/onsi/ginkgo/v2/ginkgo@v2.23.0 -r --randomize-all --randomize-suites --race --trace --fail-on-pending --keep-going --vet off --cover
       - run: cat coverprofile.out | grep -v "zz_generated." > coverprofile.out.filtered
       - uses: shogo82148/actions-goveralls@v1
