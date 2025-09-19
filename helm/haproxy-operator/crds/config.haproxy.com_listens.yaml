@@ -177,6 +177,26 @@ spec:
                                     - key
                                     type: object
                                     x-kubernetes-map-type: atomic
+                                  secretKeyExternalRef:
+                                    description: SecretKeyExternalRef selects a key
+                                      of a secret in a specific namespace
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: name is unique within a namespace
+                                          to reference a secret resource.
+                                        type: string
+                                      namespace:
+                                        description: namespace defines the space within
+                                          which the secret name must be unique.
+                                        type: string
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
                                   secretKeyRef:
                                     description: SecretKeyRef selects a key of a secret
                                       in the pod namespace
@@ -239,6 +259,26 @@ spec:
                                         description: Specify whether the ConfigMap
                                           or its key must be defined
                                         type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                  secretKeyExternalRef:
+                                    description: SecretKeyExternalRef selects a key
+                                      of a secret in a specific namespace
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: name is unique within a namespace
+                                          to reference a secret resource.
+                                        type: string
+                                      namespace:
+                                        description: namespace defines the space within
+                                          which the secret name must be unique.
+                                        type: string
                                     required:
                                     - key
                                     type: object
@@ -366,6 +406,28 @@ spec:
                                               description: Specify whether the ConfigMap
                                                 or its key must be defined
                                               type: boolean
+                                          required:
+                                          - key
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        secretKeyExternalRef:
+                                          description: SecretKeyExternalRef selects
+                                            a key of a secret in a specific namespace
+                                          properties:
+                                            key:
+                                              description: The key of the secret to
+                                                select from.  Must be a valid secret
+                                                key.
+                                              type: string
+                                            name:
+                                              description: name is unique within a
+                                                namespace to reference a secret resource.
+                                              type: string
+                                            namespace:
+                                              description: namespace defines the space
+                                                within which the secret name must
+                                                be unique.
+                                              type: string
                                           required:
                                           - key
                                           type: object
@@ -733,6 +795,26 @@ spec:
                                   description: Specify whether the ConfigMap or its
                                     key must be defined
                                   type: boolean
+                              required:
+                              - key
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            secretKeyExternalRef:
+                              description: SecretKeyExternalRef selects a key of a
+                                secret in a specific namespace
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must
+                                    be a valid secret key.
+                                  type: string
+                                name:
+                                  description: name is unique within a namespace to
+                                    reference a secret resource.
+                                  type: string
+                                namespace:
+                                  description: namespace defines the space within
+                                    which the secret name must be unique.
+                                  type: string
                               required:
                               - key
                               type: object
@@ -1725,6 +1807,26 @@ spec:
                                     - key
                                     type: object
                                     x-kubernetes-map-type: atomic
+                                  secretKeyExternalRef:
+                                    description: SecretKeyExternalRef selects a key
+                                      of a secret in a specific namespace
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: name is unique within a namespace
+                                          to reference a secret resource.
+                                        type: string
+                                      namespace:
+                                        description: namespace defines the space within
+                                          which the secret name must be unique.
+                                        type: string
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
                                   secretKeyRef:
                                     description: SecretKeyRef selects a key of a secret
                                       in the pod namespace
@@ -1787,6 +1889,26 @@ spec:
                                         description: Specify whether the ConfigMap
                                           or its key must be defined
                                         type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                  secretKeyExternalRef:
+                                    description: SecretKeyExternalRef selects a key
+                                      of a secret in a specific namespace
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: name is unique within a namespace
+                                          to reference a secret resource.
+                                        type: string
+                                      namespace:
+                                        description: namespace defines the space within
+                                          which the secret name must be unique.
+                                        type: string
                                     required:
                                     - key
                                     type: object
@@ -2074,6 +2196,26 @@ spec:
                                     - key
                                     type: object
                                     x-kubernetes-map-type: atomic
+                                  secretKeyExternalRef:
+                                    description: SecretKeyExternalRef selects a key
+                                      of a secret in a specific namespace
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: name is unique within a namespace
+                                          to reference a secret resource.
+                                        type: string
+                                      namespace:
+                                        description: namespace defines the space within
+                                          which the secret name must be unique.
+                                        type: string
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
                                   secretKeyRef:
                                     description: SecretKeyRef selects a key of a secret
                                       in the pod namespace
@@ -2136,6 +2278,26 @@ spec:
                                         description: Specify whether the ConfigMap
                                           or its key must be defined
                                         type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                  secretKeyExternalRef:
+                                    description: SecretKeyExternalRef selects a key
+                                      of a secret in a specific namespace
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: name is unique within a namespace
+                                          to reference a secret resource.
+                                        type: string
+                                      namespace:
+                                        description: namespace defines the space within
+                                          which the secret name must be unique.
+                                        type: string
                                     required:
                                     - key
                                     type: object

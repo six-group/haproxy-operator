@@ -36,6 +36,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			backend, backend2 *configv1alpha1.Backend
 			listen            *configv1alpha1.Listen
 			resolver          *configv1alpha1.Resolver
+			secret            *corev1.Secret
 			initObjs          []client.Object
 
 			frontend, frontendCustomCerts, frontendCustomCerts2,
@@ -66,6 +67,17 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			}
 
 			dur, _ := time.ParseDuration("30s")
+
+			secret = &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "ssl-cert",
+					Namespace: "other-ns",
+				},
+				Data: map[string][]byte{
+					"tls.key": []byte("aa"),
+					"tls.crt": []byte("bb"),
+				},
+			}
 
 			proxy = &proxyv1alpha1.Instance{
 				ObjectMeta: metav1.ObjectMeta{
@@ -365,6 +377,27 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							},
 							SSLCertificateList: &configv1alpha1.CertificateList{
 								Name: "cert_list",
+								Elements: []configv1alpha1.CertificateListElement{
+									{Certificate: configv1alpha1.SSLCertificate{
+										Name: "tls.crt",
+										ValueFrom: []configv1alpha1.SSLCertificateValueFrom{
+											{SecretKeyExternalRef: &configv1alpha1.SecretKeySelectorExternal{
+												SecretReference: corev1.SecretReference{
+													Name:      secret.Name,
+													Namespace: secret.Namespace,
+												},
+												Key: "tls.crt",
+											}},
+											{SecretKeyExternalRef: &configv1alpha1.SecretKeySelectorExternal{
+												SecretReference: corev1.SecretReference{
+													Name:      "ssl-cert",
+													Namespace: "other-ns",
+												},
+												Key: "tls.key",
+											}},
+										},
+									}},
+								},
 								LabelSelector: &metav1.LabelSelector{
 									MatchLabels: map[string]string{
 										"config.haproxy.com/frontend": "li-tcp",
@@ -429,7 +462,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				},
 			}
 
-			initObjs = []client.Object{proxy, frontend, frontendCustomCerts, frontendCustomCerts2, frontendCustomCertsEmpty, backend, backend2, resolver}
+			initObjs = []client.Object{proxy, frontend, frontendCustomCerts, frontendCustomCerts2, frontendCustomCertsEmpty, backend, backend2, resolver, secret}
 		})
 
 		It("should deploy haproxy instance", func() {
@@ -522,7 +555,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				"/usr/local/etc/haproxy/route.name.crt  route.host \n" +
 					"/usr/local/etc/haproxy/route.name.tcp.crt [alpn h2,http/1.0 ocsp-update on ocsp /usr/local/etc/haproxy/route.name.tcp.ocsp] route.host.tcp \n" +
 					"/usr/local/etc/haproxy/route.name2.crt [alpn h2,http/1.0 ocsp-update on ocsp /usr/local/etc/haproxy/route.name2.ocsp] route.host2 \n" +
-					"/usr/local/etc/haproxy/route.name4.crt [alpn h2,http/1.0 ocsp-update on] route.host4 \n",
+					"/usr/local/etc/haproxy/route.name4.crt [alpn h2,http/1.0 ocsp-update on] route.host4 \n" +
+					"/usr/local/etc/haproxy/tls.crt   \n",
 			),
 			)
 			Ω(string(secret.Data["route.name.crt"])).Should(Equal("Key\n\nCertificate\n\nCAcertificate"))

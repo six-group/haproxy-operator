@@ -55,6 +55,7 @@ jobs:
       - uses: actions/checkout@v5
       - run: go run github.com/onsi/ginkgo/v2/ginkgo@v2.23.0 -r --randomize-all --randomize-suites --race --trace --fail-on-pending --keep-going --vet off --cover
       - run: cat coverprofile.out | grep -v "zz_generated." > coverprofile.out.filtered
-      - uses: shogo82148/actions-goveralls@v1
+      - uses: coverallsapp/github-action@v2
         with:
-          path-to-profile: coverprofile.out.filtered
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverprofile.out.filtered

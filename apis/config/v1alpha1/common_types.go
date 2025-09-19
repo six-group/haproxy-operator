@@ -730,6 +730,15 @@ type SSLCertificateValueFrom struct {
 	// SecretKeyRef selects a key of a secret in the pod namespace
 	// +optional
 	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
+	// SecretKeyExternalRef selects a key of a secret in a specific namespace
+	// +optional
+	SecretKeyExternalRef *SecretKeySelectorExternal `json:"secretKeyExternalRef,omitempty"`
+}
+
+type SecretKeySelectorExternal struct {
+	corev1.SecretReference `json:",inline"`
+	// The key of the secret to select from.  Must be a valid secret key.
+	Key string `json:"key" protobuf:"bytes,2,opt,name=key"`
 }
 
 type CertificateListElement struct {
