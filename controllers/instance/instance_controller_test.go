@@ -672,6 +672,31 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(pdb.Spec.MinAvailable.IntVal).Should(BeEquivalentTo(3))
 			Ω(pdb.Spec.Selector.MatchLabels).ShouldNot(BeEmpty())
 		})
+		It("remove duplicate port", func() {
+			feAdd1 := frontendCustomCerts2.DeepCopy()
+			feAdd1.Name = "additional1"
+			feAdd1.Spec.Binds[0].Hidden = ptr.To(false)
+
+			feAdd2 := frontendCustomCerts2.DeepCopy()
+			feAdd2.Name = "additional2"
+			feAdd2.Spec.Binds[0].Hidden = ptr.To(false)
+
+			initObjs = append(initObjs, feAdd1, feAdd2)
+
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
+			r := instance.Reconciler{
+				Client: cli,
+				Scheme: scheme,
+			}
+			result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Name: proxy.Name, Namespace: proxy.Namespace}})
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(result).ShouldNot(BeNil())
+
+			service := &corev1.Service{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: utils.GetServiceName(proxy)}, service)).ShouldNot(HaveOccurred())
+			Ω(service.Spec.Ports).Should(HaveLen(1))
+			Ω(service.Annotations["service.beta.kubernetes.io/aws-load-balancer-scheme"]).Should(Equal("internet-facing"))
+		})
 	})
 })
 

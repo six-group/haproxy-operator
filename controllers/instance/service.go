@@ -53,7 +53,7 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 				}
 
 				service.Spec.Ports = append(service.Spec.Ports, corev1.ServicePort{
-					Name:       fmt.Sprintf("tcp-%d", bind.Port),
+					Name:       bind.Name,
 					Port:       bind.Port,
 					TargetPort: intstr.FromInt32(bind.Port),
 					Protocol:   corev1.ProtocolTCP,
@@ -68,7 +68,7 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 				}
 
 				service.Spec.Ports = append(service.Spec.Ports, corev1.ServicePort{
-					Name:       fmt.Sprintf("tcp-%d", bind.Port),
+					Name:       bind.Name,
 					Port:       bind.Port,
 					TargetPort: intstr.FromInt32(bind.Port),
 					Protocol:   corev1.ProtocolTCP,
@@ -84,6 +84,8 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 				Protocol:   corev1.ProtocolTCP,
 			})
 		}
+
+		service.Spec.Ports = removeDuplicatesByPort(service.Spec.Ports)
 
 		sort.Slice(service.Spec.Ports, func(i, j int) bool {
 			return service.Spec.Ports[i].Name < service.Spec.Ports[j].Name
@@ -162,4 +164,16 @@ func (r *Reconciler) reconcileServiceEndpoints(ctx context.Context, instance *pr
 	}
 
 	return nil
+}
+
+func removeDuplicatesByPort(ports []corev1.ServicePort) []corev1.ServicePort {
+	seen := make(map[int32]bool)
+	var result []corev1.ServicePort
+	for _, item := range ports {
+		if !seen[item.Port] {
+			seen[item.Port] = true
+			result = append(result, item)
+		}
+	}
+	return result
 }
