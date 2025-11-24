@@ -261,15 +261,16 @@ var _ = Describe("Backend", Label("type"), func() {
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 5 * time.Second},
 								},
-								VerifyHost: "routername.namespace.svc",
-								Cookie:     true,
+								VerifyHost:    "routername.namespace.svc",
+								Cookie:        true,
+								ResolvePrefer: "ipv4",
 							},
 						},
 					},
 				},
 			}
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
-			Ω(p.String()).Should(ContainSubstring("ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt cookie 1c3c2192e2912699ccd31119b162666a inter 5000 verify required verifyhost routername.namespace.svc weight 256"))
+			Ω(p.String()).Should(ContainSubstring("ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt cookie 1c3c2192e2912699ccd31119b162666a inter 5000 resolve-prefer ipv4 verify required verifyhost routername.namespace.svc weight 256"))
 		})
 		It("should set option http-request redirect location", func() {
 			backend := &configv1alpha1.Backend{
@@ -584,7 +585,7 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 
 			for name, duration := range timeouts {
-				Ω(p.String()).Should(ContainSubstring(fmt.Sprintf("timeout %s %d\n", name, duration.Duration.Milliseconds())))
+				Ω(p.String()).Should(ContainSubstring(fmt.Sprintf("timeout %s %d\n", name, duration.Milliseconds())))
 			}
 		})
 		It("should not set invalid timeouts", func() {

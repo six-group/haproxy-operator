@@ -186,7 +186,8 @@ func (m *Metrics) AddToParser(p parser.Parser) error {
 		Port:    ptr.To(int64(m.Port)),
 		Address: ptr.Deref(m.Address, "0.0.0.0"),
 	}
-	if err := p.Insert(parser.Frontends, frontend.Name, "bind", configuration.SerializeBind(bind), 0); err != nil {
+	configOpts = &options.ConfigurationOptions{}
+	if err := p.Insert(parser.Frontends, frontend.Name, "bind", configuration.SerializeBind(bind, configOpts), 0); err != nil {
 		return err
 	}
 

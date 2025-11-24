@@ -1042,6 +1042,7 @@ _Appears in:_
 | `verifyHost` _string_ | VerifyHost is only available when support for OpenSSL was built in, and<br />only takes effect if pec.ssl.verify' is set to 'required'. This directive sets<br />a default static hostname to check the server certificate against when no<br />SNI was used to connect to the server. |  |  |
 | `checkSNI` _string_ | CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL |  |  |
 | `cookie` _boolean_ | Cookie sets the cookie value assigned to the server. |  |  |
+| `resolvePrefer` _string_ | When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,<br />HAProxy will prefer using an IP address from the ipv4 or ipv6. |  |  |
 | `name` _string_ | Name of the server. |  |  |
 | `address` _string_ | Address can be a host name, an IPv4 address, an IPv6 address. |  | Pattern: `^[^\s]+$` <br /> |
 | `port` _integer_ | Port |  | Maximum: 65535 <br />Minimum: 1 <br /> |
@@ -1071,6 +1072,7 @@ _Appears in:_
 | `verifyHost` _string_ | VerifyHost is only available when support for OpenSSL was built in, and<br />only takes effect if pec.ssl.verify' is set to 'required'. This directive sets<br />a default static hostname to check the server certificate against when no<br />SNI was used to connect to the server. |  |  |
 | `checkSNI` _string_ | CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL |  |  |
 | `cookie` _boolean_ | Cookie sets the cookie value assigned to the server. |  |  |
+| `resolvePrefer` _string_ | When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,<br />HAProxy will prefer using an IP address from the ipv4 or ipv6. |  |  |
 
 
 #### ServerTemplate
@@ -1097,6 +1099,7 @@ _Appears in:_
 | `verifyHost` _string_ | VerifyHost is only available when support for OpenSSL was built in, and<br />only takes effect if pec.ssl.verify' is set to 'required'. This directive sets<br />a default static hostname to check the server certificate against when no<br />SNI was used to connect to the server. |  |  |
 | `checkSNI` _string_ | CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL |  |  |
 | `cookie` _boolean_ | Cookie sets the cookie value assigned to the server. |  |  |
+| `resolvePrefer` _string_ | When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,<br />HAProxy will prefer using an IP address from the ipv4 or ipv6. |  |  |
 | `prefix` _string_ | Prefix for the server names to be built. |  | Pattern: `^[^\s]+$` <br /> |
 | `numMin` _integer_ | NumMin is the min number of servers as server name suffixes this template initializes. |  |  |
 | `num` _integer_ | Num is the max number of servers as server name suffixes this template initializes. |  |  |
