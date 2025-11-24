@@ -1,14 +1,12 @@
 FROM golang:1.24.10-bookworm as builder
-RUN apt-get update && \
-    apt-get install -y upx-ucl && \
-    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace
 COPY . /workspace
 
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o haproxy-operator main.go && \
-    upx -q haproxy-operator
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags="-s -w" -o haproxy-operator main.go
+
+RUN strip haproxy-operator
 
 FROM gcr.io/distroless/static:nonroot
 ENTRYPOINT ["/opt/go/haproxy-operator"]
