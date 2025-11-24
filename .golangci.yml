@@ -46,8 +46,3 @@ formatters:
   settings:
     gofmt:
       simplify: false
-
-linters-settings:
-  gosec:
-    # Exclude generated files
-    exclude-generated: true
