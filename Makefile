@@ -10,7 +10,7 @@ generate: controller-gen
 
 .PHONY: docs
 docs:
-	go run github.com/elastic/crd-ref-docs@v0.1.0 --config docs/config.yaml --renderer=markdown --output-path docs/api-reference.md --source-path=apis
+	go run github.com/elastic/crd-ref-docs@v0.2.0 --config docs/config.yaml --renderer=markdown --output-path docs/api-reference.md --source-path=apis
 
 golint: colanci-lint-bin
 	$(GOLANGCI_LINT) run
@@ -24,11 +24,11 @@ helm-test:
 
 CONTROLLER_GEN = bin/controller-gen
 controller-gen: ## Download controller-gen locally if necessary.
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.17.2)
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.19.0)
 
 GOLANGCI_LINT = ./bin/golangci-lint
 colanci-lint-bin:
-	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.6)
+	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.2)
 
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
@@ -41,4 +41,4 @@ endef
 
 GINKGO = ./bin/ginkgo
 ginkgo-bin:
-	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo@v2.23.0)
+	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo@v2.27.2)

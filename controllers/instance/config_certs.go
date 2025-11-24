@@ -112,7 +112,7 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 					}
 
 					backends := &configv1alpha1.BackendList{}
-					if err = r.Client.List(ctx, backends, client.MatchingLabelsSelector{Selector: selector}, client.InNamespace(instance.Namespace)); err != nil {
+					if err = r.List(ctx, backends, client.MatchingLabelsSelector{Selector: selector}, client.InNamespace(instance.Namespace)); err != nil {
 						frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
 						frontend.Status.Error = err.Error()
 						return files, multierr.Combine(err, r.Status().Update(ctx, &frontend))
@@ -216,7 +216,7 @@ func (r *Reconciler) loadSSLCertificateValueData(ctx context.Context, instance *
 	for _, ref := range certificate.ValueFrom {
 		if ref.ConfigMapKeyRef != nil {
 			configmap := &corev1.ConfigMap{}
-			if err := r.Client.Get(ctx, client.ObjectKey{Name: ref.ConfigMapKeyRef.Name, Namespace: instance.Namespace}, configmap); err != nil {
+			if err := r.Get(ctx, client.ObjectKey{Name: ref.ConfigMapKeyRef.Name, Namespace: instance.Namespace}, configmap); err != nil {
 				return "", err
 			}
 
@@ -230,7 +230,7 @@ func (r *Reconciler) loadSSLCertificateValueData(ctx context.Context, instance *
 
 		if ref.SecretKeyRef != nil {
 			secret := &corev1.Secret{}
-			if err := r.Client.Get(ctx, client.ObjectKey{Name: ref.SecretKeyRef.Name, Namespace: instance.Namespace}, secret); err != nil {
+			if err := r.Get(ctx, client.ObjectKey{Name: ref.SecretKeyRef.Name, Namespace: instance.Namespace}, secret); err != nil {
 				return "", err
 			}
 
@@ -244,7 +244,7 @@ func (r *Reconciler) loadSSLCertificateValueData(ctx context.Context, instance *
 
 		if ref.SecretKeyExternalRef != nil {
 			secret := &corev1.Secret{}
-			if err := r.Client.Get(ctx, client.ObjectKey{Name: ref.SecretKeyExternalRef.Name, Namespace: ref.SecretKeyExternalRef.Namespace}, secret); err != nil {
+			if err := r.Get(ctx, client.ObjectKey{Name: ref.SecretKeyExternalRef.Name, Namespace: ref.SecretKeyExternalRef.Namespace}, secret); err != nil {
 				return "", err
 			}
 

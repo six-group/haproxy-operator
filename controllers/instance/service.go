@@ -9,6 +9,7 @@ import (
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
 	"github.com/six-group/haproxy-operator/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
+	discoveryv1 "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
@@ -112,47 +113,43 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 func (r *Reconciler) reconcileServiceEndpoints(ctx context.Context, instance *proxyv1alpha1.Instance, service *corev1.Service) error {
 	logger := log.FromContext(ctx)
 
-	endpoints := &corev1.Endpoints{
+	endpointSlice := &discoveryv1.EndpointSlice{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      utils.GetServiceName(instance),
 			Namespace: instance.Namespace,
 		},
 	}
 
-	result, err := controllerutil.CreateOrUpdate(ctx, r.Client, endpoints, func() error {
-		if err := controllerutil.SetOwnerReference(instance, endpoints, r.Scheme); err != nil {
+	result, err := controllerutil.CreateOrUpdate(ctx, r.Client, endpointSlice, func() error {
+		if err := controllerutil.SetOwnerReference(instance, endpointSlice, r.Scheme); err != nil {
 			return err
 		}
 
-		var addresses []corev1.EndpointAddress
+		var addresses []discoveryv1.Endpoint
 		for host, ip := range instance.Spec.Network.HostIPs {
-			addresses = append(addresses, corev1.EndpointAddress{
-				IP:       ip,
-				NodeName: ptr.To(host),
+			addresses = append(addresses, discoveryv1.Endpoint{
+				Addresses: []string{ip},
+				NodeName:  ptr.To(host),
 			})
 		}
 		sort.Slice(addresses, func(i, j int) bool {
-			return addresses[i].IP < addresses[j].IP
+			return addresses[i].Addresses[0] < addresses[j].Addresses[0]
 		})
 
-		var ports []corev1.EndpointPort
+		var ports []discoveryv1.EndpointPort
 		for _, port := range service.Spec.Ports {
-			ports = append(ports, corev1.EndpointPort{
-				Name:     port.Name,
-				Port:     port.Port,
-				Protocol: port.Protocol,
+			ports = append(ports, discoveryv1.EndpointPort{
+				Name:     ptr.To(port.Name),
+				Port:     ptr.To(port.Port),
+				Protocol: ptr.To(port.Protocol),
 			})
 		}
 		sort.Slice(ports, func(i, j int) bool {
-			return ports[i].Name < ports[j].Name
+			return *ports[i].Name < *ports[j].Name
 		})
 
-		endpoints.Subsets = []corev1.EndpointSubset{
-			{
-				Addresses: addresses,
-				Ports:     ports,
-			},
-		}
+		endpointSlice.Endpoints = addresses
+		endpointSlice.Ports = ports
 
 		return nil
 	})

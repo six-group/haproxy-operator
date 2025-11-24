@@ -394,6 +394,10 @@ type ServerParams struct {
 	// Cookie sets the cookie value assigned to the server.
 	// +optional
 	Cookie bool `json:"cookie,omitempty"`
+	// When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,
+	// HAProxy will prefer using an IP address from the ipv4 or ipv6.
+	// +optional
+	ResolvePrefer string `json:"resolvePrefer,omitempty"`
 }
 
 type ServerTemplate struct {
@@ -417,8 +421,9 @@ type ServerTemplate struct {
 func (s *ServerTemplate) Model() (models.ServerTemplate, error) {
 	model := models.ServerTemplate{
 		ServerParams: models.ServerParams{
-			Weight:   s.Weight,
-			InitAddr: s.InitAddr,
+			Weight:        s.Weight,
+			InitAddr:      s.InitAddr,
+			ResolvePrefer: s.ResolvePrefer,
 		},
 		Fqdn:   s.FQDN,
 		Port:   ptr.To(s.Port),
@@ -538,10 +543,11 @@ type Server struct {
 func (s *Server) Model() (models.Server, error) {
 	model := models.Server{
 		ServerParams: models.ServerParams{
-			Weight:     s.Weight,
-			InitAddr:   s.InitAddr,
-			Verifyhost: s.VerifyHost,
-			CheckSni:   s.CheckSNI,
+			Weight:        s.Weight,
+			InitAddr:      s.InitAddr,
+			Verifyhost:    s.VerifyHost,
+			CheckSni:      s.CheckSNI,
+			ResolvePrefer: s.ResolvePrefer,
 		},
 		Name:    s.Name,
 		Address: s.Address,
@@ -549,7 +555,7 @@ func (s *Server) Model() (models.Server, error) {
 	}
 
 	if s.Cookie {
-		model.ServerParams.Cookie = hash.GetMD5Hash(model.Address + ":" + strconv.Itoa(int(*model.Port)))
+		model.Cookie = hash.GetMD5Hash(model.Address + ":" + strconv.Itoa(int(*model.Port)))
 	}
 
 	if ptr.Deref(s.SendProxy, false) {

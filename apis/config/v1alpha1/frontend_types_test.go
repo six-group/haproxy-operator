@@ -80,7 +80,7 @@ var _ = Describe("Frontend", Label("type"), func() {
 			Ω(frontend.AddToParser(p)).ShouldNot(HaveOccurred())
 
 			for name, duration := range timeouts {
-				Ω(p.String()).Should(ContainSubstring(fmt.Sprintf("timeout %s %d", name, duration.Duration.Milliseconds())))
+				Ω(p.String()).Should(ContainSubstring(fmt.Sprintf("timeout %s %d", name, duration.Milliseconds())))
 			}
 		})
 		It("should not set invalid timeouts", func() {

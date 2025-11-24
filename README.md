@@ -10,7 +10,7 @@ HAProxy Operator is a Kubernetes-native solution designed to automate the deploy
 ## Installation
 ### Helm
 ```console
-helm repo add haproxy-operator https://six-group.github.io/haproxy-operator
+helm repo add six-group https://six-group.github.io/haproxy-operator
 helm install haproxy-operator six-group/haproxy-operator
 ```
 

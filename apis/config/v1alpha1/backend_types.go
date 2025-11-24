@@ -117,7 +117,7 @@ func (b *Backend) Model() (models.Backend, error) {
 	if b.Spec.Redispatch != nil && *b.Spec.Redispatch {
 		model.Redispatch = &models.Redispatch{
 			Enabled:  ptr.To(models.RedispatchEnabledEnabled),
-			Interval: 3,
+			Interval: ptr.To(int64(3)),
 		}
 	}
 
@@ -226,7 +226,7 @@ func (b *Backend) AddToParser(p parser.Parser) error {
 		return err
 	}
 
-	err = b.Spec.BaseSpec.AddToParser(p, parser.Backends, b.Name)
+	err = b.Spec.AddToParser(p, parser.Backends, b.Name)
 	if err != nil {
 		return err
 	}

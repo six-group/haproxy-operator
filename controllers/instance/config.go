@@ -146,6 +146,7 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 
 	for i := range listens.Items {
 		listen := &listens.Items[i]
+		listen.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Listen"))
 
 		if err = checkNameKind(nameKindMap, listen); err == nil {
 			err = listen.AddToParser(p)
@@ -161,6 +162,7 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 
 	for i := range frontends.Items {
 		frontend := &frontends.Items[i]
+		frontend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Frontend"))
 
 		if err = checkNameKind(nameKindMap, frontend); err == nil {
 			err = frontend.AddToParser(p)
@@ -175,6 +177,7 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 
 	for i := range backends.Items {
 		backend := &backends.Items[i]
+		backend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Backend"))
 
 		if err = checkNameKind(nameKindMap, backend); err == nil {
 			err = backend.AddToParser(p)
@@ -189,6 +192,7 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 
 	for i := range resolvers.Items {
 		resolver := &resolvers.Items[i]
+		resolver.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Resolver"))
 
 		if err = checkNameKind(nameKindMap, resolver); err == nil {
 			err = resolver.AddToParser(p)
@@ -247,7 +251,7 @@ func (r *Reconciler) headerEnvValue(ctx context.Context, instance *proxyv1alpha1
 			ref := headers.Value.Env.ValueFrom.SecretKeyRef
 			if ref != nil {
 				secret := &corev1.Secret{}
-				if err := r.Client.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: instance.Namespace}, secret); err != nil {
+				if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: instance.Namespace}, secret); err != nil {
 					listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
 					listen.Status.Error = err.Error()
 					return nil, multierr.Combine(err, r.Status().Update(ctx, &listen))
@@ -286,7 +290,7 @@ func (r *Reconciler) generateBackendMappingFiles(ctx context.Context, instance *
 				}
 
 				backends := &configv1alpha1.BackendList{}
-				if err = r.Client.List(ctx, backends, client.MatchingLabelsSelector{Selector: selector}, client.InNamespace(instance.Namespace)); err != nil {
+				if err = r.List(ctx, backends, client.MatchingLabelsSelector{Selector: selector}, client.InNamespace(instance.Namespace)); err != nil {
 					frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
 					frontend.Status.Error = err.Error()
 					return files, multierr.Combine(err, r.Status().Update(ctx, &frontend))
@@ -334,7 +338,7 @@ func (r *Reconciler) generateErrorFiles(ctx context.Context, instance *proxyv1al
 		}
 		if file.ValueFrom.ConfigMapKeyRef != nil {
 			configmap := &corev1.ConfigMap{}
-			if err := r.Client.Get(ctx, client.ObjectKey{Name: file.ValueFrom.ConfigMapKeyRef.Name, Namespace: instance.Namespace}, configmap); err != nil {
+			if err := r.Get(ctx, client.ObjectKey{Name: file.ValueFrom.ConfigMapKeyRef.Name, Namespace: instance.Namespace}, configmap); err != nil {
 				return files, err
 			}
 

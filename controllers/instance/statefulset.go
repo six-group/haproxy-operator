@@ -161,7 +161,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 	}
 
 	if instance.Spec.RolloutOnConfigChange {
-		statefulset.Spec.Template.ObjectMeta.Annotations["checksum/config"] = checksum
+		statefulset.Spec.Template.Annotations["checksum/config"] = checksum
 	}
 
 	if hasLocalLoggingTarget(instance) {
@@ -301,9 +301,9 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 	return nil
 }
 
-func needsUpdate(old, new *appsv1.StatefulSet) bool {
-	oldCpy := old.DeepCopy()
-	newCpy := new.DeepCopy()
+func needsUpdate(oldStatefulSet, newStatefulSet *appsv1.StatefulSet) bool {
+	oldCpy := oldStatefulSet.DeepCopy()
+	newCpy := newStatefulSet.DeepCopy()
 
 	removeIrrelevantProperties(oldCpy)
 	removeIrrelevantProperties(newCpy)

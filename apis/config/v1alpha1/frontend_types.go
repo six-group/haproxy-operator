@@ -170,7 +170,7 @@ func (f *Frontend) AddToParser(p parser.Parser) error {
 		return err
 	}
 
-	err = f.Spec.BaseSpec.AddToParser(p, parser.Frontends, f.Name)
+	err = f.Spec.AddToParser(p, parser.Frontends, f.Name)
 	if err != nil {
 		return err
 	}
@@ -180,8 +180,8 @@ func (f *Frontend) AddToParser(p parser.Parser) error {
 		if err != nil {
 			return err
 		}
-
-		err = p.Insert(parser.Frontends, f.Name, "bind", configuration.SerializeBind(model), idx)
+		configOpts := &options.ConfigurationOptions{}
+		err = p.Insert(parser.Frontends, f.Name, "bind", configuration.SerializeBind(model, configOpts), idx)
 		if err != nil {
 			return err
 		}

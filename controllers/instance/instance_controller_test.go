@@ -496,10 +496,10 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 		})
 
 		It("same resource names error", func() {
-			backend.Kind = "Backend"
+			backend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Backend"))
 			backend.Name = "foo"
 
-			frontend.Kind = "Frontend"
+			frontend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Frontend"))
 			frontend.Name = "foo"
 
 			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
@@ -703,7 +703,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 var (
 	haproxyConfig = `
 global
-  tune.bufsize 16384
+  tune.bufsize 16k
   tune.maxrewrite 3000
   hard-stop-after 30000
   log /var/lib/rsyslog/rsyslog.sock local0
@@ -742,7 +742,7 @@ backend foo-back2
 `
 	haproxyConfigCerts = `
 global
-  tune.bufsize 16384
+  tune.bufsize 16k
   tune.maxrewrite 3000
   hard-stop-after 30000
   log /var/lib/rsyslog/rsyslog.sock local0
