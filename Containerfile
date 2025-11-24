@@ -1,5 +1,7 @@
 FROM golang:1.24.10-bookworm as builder
-RUN apt-get update && apt-get install -y upx
+RUN apt-get update && \
+    apt-get install -y upx-ucl && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace
 COPY . /workspace
