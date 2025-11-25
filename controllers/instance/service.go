@@ -150,6 +150,7 @@ func (r *Reconciler) reconcileServiceEndpoints(ctx context.Context, instance *pr
 
 		endpointSlice.Endpoints = addresses
 		endpointSlice.Ports = ports
+		endpointSlice.AddressType = discoveryv1.AddressTypeIPv4
 
 		return nil
 	})
