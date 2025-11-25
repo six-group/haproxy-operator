@@ -3,6 +3,7 @@ package instance
 import (
 	"context"
 	"fmt"
+	"net"
 	"sort"
 
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
@@ -150,7 +151,8 @@ func (r *Reconciler) reconcileServiceEndpoints(ctx context.Context, instance *pr
 
 		endpointSlice.Endpoints = addresses
 		endpointSlice.Ports = ports
-		endpointSlice.AddressType = discoveryv1.AddressTypeIPv4
+		ipType := detectIPType(addresses[0].Addresses[0])
+		endpointSlice.AddressType = ipType
 
 		return nil
 	})
@@ -174,4 +176,12 @@ func removeDuplicatesByPort(ports []corev1.ServicePort) []corev1.ServicePort {
 		}
 	}
 	return result
+}
+
+func detectIPType(address string) discoveryv1.AddressType {
+	ip := net.ParseIP(address)
+	if ip.To4() != nil {
+		return discoveryv1.AddressTypeIPv4
+	}
+	return discoveryv1.AddressTypeIPv6
 }
