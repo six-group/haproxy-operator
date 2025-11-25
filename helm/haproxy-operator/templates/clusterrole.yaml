@@ -43,7 +43,6 @@ rules:
       - configmaps
       - services
       - secrets
-      - endpoints
     verbs:
       - create
       - get
@@ -99,4 +98,16 @@ rules:
       - watch
       - patch
       - update
+      - delete
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
       - delete
