@@ -6,7 +6,7 @@ require (
 	github.com/go-openapi/strfmt v0.25.0
 	github.com/haproxytech/client-native/v6 v6.2.5
 	github.com/onsi/ginkgo/v2 v2.27.2
-	github.com/onsi/gomega v1.38.2
+	github.com/onsi/gomega v1.38.3
 	github.com/openshift/api v0.0.0-20251110111612-b69d477b85f5 // latest commit of branch https://github.com/openshift/api/tree/release-4.21
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.86.2
 	go.uber.org/multierr v1.11.0
