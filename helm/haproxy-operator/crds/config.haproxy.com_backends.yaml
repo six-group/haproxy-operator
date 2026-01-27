@@ -1425,6 +1425,10 @@ spec:
                         know the client address or the public address it accessed to, whatever the
                         upper layer protocol.
                       type: boolean
+                    sni:
+                      description: SNI This option allows you to specify the SNI to
+                        be used when connecting to the backend over SSL
+                      type: string
                     ssl:
                       description: SSL configures OpenSSL
                       properties:
@@ -1819,6 +1823,10 @@ spec:
                         know the client address or the public address it accessed to, whatever the
                         upper layer protocol.
                       type: boolean
+                    sni:
+                      description: SNI This option allows you to specify the SNI to
+                        be used when connecting to the backend over SSL
+                      type: string
                     ssl:
                       description: SSL configures OpenSSL
                       properties:

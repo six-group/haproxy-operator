@@ -388,6 +388,9 @@ type ServerParams struct {
 	// SNI was used to connect to the server.
 	// +optional
 	VerifyHost string `json:"verifyHost,omitempty"`
+	// SNI This option allows you to specify the SNI to be used when connecting to the backend over SSL
+	// +optional
+	SNI string `json:"sni,omitempty"`
 	// CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL
 	// +optional
 	CheckSNI string `json:"checkSNI,omitempty"`
@@ -547,6 +550,7 @@ func (s *Server) Model() (models.Server, error) {
 			InitAddr:      s.InitAddr,
 			Verifyhost:    s.VerifyHost,
 			CheckSni:      s.CheckSNI,
+			Sni:           s.SNI,
 			ResolvePrefer: s.ResolvePrefer,
 		},
 		Name:    s.Name,

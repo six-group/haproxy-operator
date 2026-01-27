@@ -1040,6 +1040,7 @@ _Appears in:_
 | `sendProxy` _boolean_ | SendProxy enforces use of the PROXY protocol over any<br />connection established to this server. The PROXY protocol informs the other<br />end about the layer 3/4 addresses of the incoming connection, so that it can<br />know the client address or the public address it accessed to, whatever the<br />upper layer protocol. |  |  |
 | `SendProxyV2` _[ProxyProtocol](#proxyprotocol)_ | SendProxyV2 preparing new update. |  |  |
 | `verifyHost` _string_ | VerifyHost is only available when support for OpenSSL was built in, and<br />only takes effect if pec.ssl.verify' is set to 'required'. This directive sets<br />a default static hostname to check the server certificate against when no<br />SNI was used to connect to the server. |  |  |
+| `sni` _string_ | SNI This option allows you to specify the SNI to be used when connecting to the backend over SSL |  |  |
 | `checkSNI` _string_ | CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL |  |  |
 | `cookie` _boolean_ | Cookie sets the cookie value assigned to the server. |  |  |
 | `resolvePrefer` _string_ | When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,<br />HAProxy will prefer using an IP address from the ipv4 or ipv6. |  |  |
@@ -1070,6 +1071,7 @@ _Appears in:_
 | `sendProxy` _boolean_ | SendProxy enforces use of the PROXY protocol over any<br />connection established to this server. The PROXY protocol informs the other<br />end about the layer 3/4 addresses of the incoming connection, so that it can<br />know the client address or the public address it accessed to, whatever the<br />upper layer protocol. |  |  |
 | `SendProxyV2` _[ProxyProtocol](#proxyprotocol)_ | SendProxyV2 preparing new update. |  |  |
 | `verifyHost` _string_ | VerifyHost is only available when support for OpenSSL was built in, and<br />only takes effect if pec.ssl.verify' is set to 'required'. This directive sets<br />a default static hostname to check the server certificate against when no<br />SNI was used to connect to the server. |  |  |
+| `sni` _string_ | SNI This option allows you to specify the SNI to be used when connecting to the backend over SSL |  |  |
 | `checkSNI` _string_ | CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL |  |  |
 | `cookie` _boolean_ | Cookie sets the cookie value assigned to the server. |  |  |
 | `resolvePrefer` _string_ | When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,<br />HAProxy will prefer using an IP address from the ipv4 or ipv6. |  |  |
@@ -1097,6 +1099,7 @@ _Appears in:_
 | `sendProxy` _boolean_ | SendProxy enforces use of the PROXY protocol over any<br />connection established to this server. The PROXY protocol informs the other<br />end about the layer 3/4 addresses of the incoming connection, so that it can<br />know the client address or the public address it accessed to, whatever the<br />upper layer protocol. |  |  |
 | `SendProxyV2` _[ProxyProtocol](#proxyprotocol)_ | SendProxyV2 preparing new update. |  |  |
 | `verifyHost` _string_ | VerifyHost is only available when support for OpenSSL was built in, and<br />only takes effect if pec.ssl.verify' is set to 'required'. This directive sets<br />a default static hostname to check the server certificate against when no<br />SNI was used to connect to the server. |  |  |
+| `sni` _string_ | SNI This option allows you to specify the SNI to be used when connecting to the backend over SSL |  |  |
 | `checkSNI` _string_ | CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL |  |  |
 | `cookie` _boolean_ | Cookie sets the cookie value assigned to the server. |  |  |
 | `resolvePrefer` _string_ | When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,<br />HAProxy will prefer using an IP address from the ipv4 or ipv6. |  |  |
