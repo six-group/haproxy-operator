@@ -78,7 +78,7 @@ func (l *Listen) ToFrontend() *Frontend {
 			BaseSpec: l.Spec.BaseSpec,
 			Binds:    l.Spec.Binds,
 			DefaultBackend: corev1.LocalObjectReference{
-				Name: l.Name,
+				Name: "be-" + l.Name,
 			},
 		},
 	}
@@ -88,6 +88,10 @@ func (l *Listen) ToFrontend() *Frontend {
 	delete(frontend.Spec.Timeouts, "queue")
 	delete(frontend.Spec.Timeouts, "server")
 	delete(frontend.Spec.Timeouts, "tunnel")
+
+	if l.Name != "" {
+		frontend.Name = "fe-" + l.Name
+	}
 
 	return &frontend
 }
@@ -112,6 +116,10 @@ func (l *Listen) ToBackend() *Backend {
 	}
 
 	delete(backend.Spec.Timeouts, "client")
+
+	if l.Name != "" {
+		backend.Name = "be-" + l.Name
+	}
 
 	return &backend
 }

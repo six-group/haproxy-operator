@@ -550,7 +550,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
-			Ω(string(secret.Data["haproxy.cfg"])).Should(Equal(haproxyConfigCerts))
+			a := string(secret.Data["haproxy.cfg"])
+			Ω(a).Should(Equal(haproxyConfigCerts))
 			Ω(string(secret.Data["cert_list.map"])).Should(Equal(
 				"/usr/local/etc/haproxy/route.name.crt  route.host \n" +
 					"/usr/local/etc/haproxy/route.name.tcp.crt [alpn h2,http/1.0 ocsp-update on ocsp /usr/local/etc/haproxy/route.name.tcp.ocsp] route.host.tcp \n" +
@@ -762,6 +763,10 @@ resolvers bar-foo-res
   parse-resolv-conf
   resolve_retries 3
 
+frontend fe-foo-listen
+  bind ${BIND_ADDRESS}:20005 name tcp-20005 ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map
+  default_backend be-foo-listen
+
 frontend fe-https-tls-termination
   bind unix@/var/lib/haproxy/run/local.sock:9443 name https ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map
 
@@ -773,17 +778,13 @@ frontend fe-https-tls-termination2
 
 frontend foo-front
 
-frontend foo-listen
-  bind ${BIND_ADDRESS}:20005 name tcp-20005 ssl accept-proxy crt-list /usr/local/etc/haproxy/cert_list.map
-  default_backend foo-listen
+backend be-foo-listen
+  server routeName routeName.routeNamespace.svc.cluster.local:8443 check ssl alpn http/1.1,h2 init-addr none inter 500 resolvers dns-routeNamespace verify required verifyhost routeName.routeName.svc weight 256
 
 backend foo-back
   server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256
 
 backend foo-back2
   server server localhost:80 check ssl alpn h2,http/1.0 ca-file /usr/local/etc/haproxy/test-ca.crt inter 5000 verify required verifyhost routername.namespace.svc weight 256
-
-backend foo-listen
-  server routeName routeName.routeNamespace.svc.cluster.local:8443 check ssl alpn http/1.1,h2 init-addr none inter 500 resolvers dns-routeNamespace verify required verifyhost routeName.routeName.svc weight 256
 `
 )

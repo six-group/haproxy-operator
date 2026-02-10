@@ -9,8 +9,8 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack\\boilerplate.go.txt" paths=${PATHS}
 
 .PHONY: docs
-docs:
-	go run github.com/elastic/crd-ref-docs@v0.2.0 --config docs/config.yaml --renderer=markdown --output-path docs/api-reference.md --source-path=apis
+docs: crd-docs-gen
+	$(CRD_DOCS) --config docs/config.yaml --renderer=markdown --output-path docs/api-reference.md --source-path=apis
 
 golint: colanci-lint-bin
 	$(GOLANGCI_LINT) run
@@ -23,12 +23,16 @@ helm-test:
 	helm template chart helm/haproxy-operator > /dev/null
 
 CONTROLLER_GEN = bin/controller-gen
-controller-gen: ## Download controller-gen locally if necessary.
+controller-gen:
 	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.19.0)
 
 GOLANGCI_LINT = ./bin/golangci-lint
 colanci-lint-bin:
 	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.2)
+
+CRD_DOCS = bin/crd-ref-docs
+crd-docs-gen:
+	$(call go-get-tool,$(CRD_DOCS),github.com/elastic/crd-ref-docs@v0.2.0)
 
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
