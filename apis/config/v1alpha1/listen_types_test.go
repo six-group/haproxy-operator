@@ -13,10 +13,10 @@ import (
 )
 
 var simple = `
-frontend foo
-  default_backend foo
+frontend fe-foo
+  default_backend be-foo
 
-backend foo
+backend be-foo
 `
 
 var _ = Describe("Listen", Label("type"), func() {
