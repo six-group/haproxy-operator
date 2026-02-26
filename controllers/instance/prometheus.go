@@ -8,6 +8,7 @@ import (
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
 	"github.com/six-group/haproxy-operator/pkg/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -45,7 +46,7 @@ func (r *Reconciler) reconcilePodMonitor(ctx context.Context, instance *proxyv1a
 				Path:           "/metrics",
 				RelabelConfigs: instance.Spec.Metrics.RelabelConfigs,
 				Interval:       instance.Spec.Metrics.Interval,
-				Scheme:         "http",
+				Scheme:         ptr.To(monitoringv1.SchemeHTTPS),
 			},
 		}
 

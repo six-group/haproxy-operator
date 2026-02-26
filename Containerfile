@@ -1,4 +1,4 @@
-FROM golang:1.24.10-bookworm as builder
+FROM golang:1.26.0-bookworm as builder
 
 WORKDIR /workspace
 COPY . /workspace
