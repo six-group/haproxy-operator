@@ -17,13 +17,13 @@ var prometheusAPIFound = false
 
 func (r *Reconciler) reconcilePrometheusConfiguration(ctx context.Context, instance *proxyv1alpha1.Instance) error {
 	if IsPrometheusAPIAvailable() {
-		return r.reconcilePodMonitor(ctx, instance)
+		return r.reconcileServiceMonitor(ctx, instance)
 	}
 
 	return nil
 }
 
-func (r *Reconciler) reconcilePodMonitor(ctx context.Context, instance *proxyv1alpha1.Instance) error {
+func (r *Reconciler) reconcileServiceMonitor(ctx context.Context, instance *proxyv1alpha1.Instance) error {
 	logger := log.FromContext(ctx)
 
 	monitor := &monitoringv1.ServiceMonitor{
@@ -46,7 +46,7 @@ func (r *Reconciler) reconcilePodMonitor(ctx context.Context, instance *proxyv1a
 				Path:           "/metrics",
 				RelabelConfigs: instance.Spec.Metrics.RelabelConfigs,
 				Interval:       instance.Spec.Metrics.Interval,
-				Scheme:         ptr.To(monitoringv1.SchemeHTTPS),
+				Scheme:         ptr.To(monitoringv1.Scheme("http")),
 			},
 		}
 
