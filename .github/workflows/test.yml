@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 env:
-  GO_VERSION: ~1.24.10
+  GO_VERSION: ~1.26.0
 
 jobs:
   basic:
@@ -43,7 +43,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.6.2
+          version: v2.9.0
   ginkgo:
     name: unit-test
     runs-on: ubuntu-latest
@@ -53,9 +53,9 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: false
       - uses: actions/checkout@v6
-      - run: go run github.com/onsi/ginkgo/v2/ginkgo@v2.27.2 -r --randomize-all --randomize-suites --race --trace --fail-on-pending --keep-going --vet off --cover
+      - run: go run github.com/onsi/ginkgo/v2/ginkgo@v2.28.1 -r --randomize-all --randomize-suites --race --trace --fail-on-pending --keep-going --vet off --cover
       - run: cat coverprofile.out | grep -v "zz_generated." > coverprofile.out.filtered
-      - uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: coverprofile.out.filtered
+      #- uses: coverallsapp/github-action@v2
+      #  with:
+      #    github-token: ${{ secrets.GITHUB_TOKEN }}
+      #    path-to-lcov: coverprofile.out.filtered

@@ -483,6 +483,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: utils.GetServiceName(proxy)}, service)).ShouldNot(HaveOccurred())
 			Ω(service.Spec.Type).Should(Equal(corev1.ServiceTypeLoadBalancer))
 			Ω(service.Annotations["service.beta.kubernetes.io/aws-load-balancer-scheme"]).Should(Equal("internet-facing"))
+			Ω(service.Spec.Selector["app.kubernetes.io/name"]).Should(Equal(proxy.Name + "-haproxy"))
 
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())

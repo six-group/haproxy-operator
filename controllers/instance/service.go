@@ -38,6 +38,7 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 		}
 
 		service.Labels = utils.GetAppSelectorLabels(instance)
+		service.Spec.Selector = utils.GetAppSelectorLabels(instance)
 
 		if instance.Spec.Network.Service.Annotations != nil {
 			service.Annotations = instance.Spec.Network.Service.Annotations
