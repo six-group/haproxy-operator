@@ -94,11 +94,6 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		return err
 	}
 
-	envVars := []corev1.EnvVar{{Name: "HAPROXY_SOCKET", Value: "/var/lib/haproxy/run/haproxy.sock"}}
-	for k, v := range instance.Spec.Env {
-		envVars = append(envVars, corev1.EnvVar{Name: k, Value: v})
-	}
-
 	imagePullPolicy := corev1.PullIfNotPresent
 	if instance.Spec.ImagePullPolicy != "" {
 		imagePullPolicy = instance.Spec.ImagePullPolicy
@@ -123,7 +118,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 						Name:            "haproxy",
 						Image:           utils.StringOrDefault(instance.Spec.Image, "haproxy:latest"),
 						ImagePullPolicy: imagePullPolicy,
-						Env:             envVars,
+						Env:             compileEnvVars(instance),
 						Resources:       getResources(instance),
 						VolumeMounts: []corev1.VolumeMount{
 							{
@@ -299,6 +294,18 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 	}
 
 	return nil
+}
+
+func compileEnvVars(instance *proxyv1alpha1.Instance) []corev1.EnvVar {
+	envVars := []corev1.EnvVar{{Name: "HAPROXY_SOCKET", Value: "/var/lib/haproxy/run/haproxy.sock"}}
+	for k, v := range instance.Spec.Env {
+		envVars = append(envVars, corev1.EnvVar{Name: k, Value: v})
+	}
+
+	sort.Slice(envVars, func(i, j int) bool {
+		return envVars[i].Name < envVars[j].Name
+	})
+	return envVars
 }
 
 func needsUpdate(oldStatefulSet, newStatefulSet *appsv1.StatefulSet) bool {
