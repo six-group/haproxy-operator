@@ -301,10 +301,6 @@ func compileEnvVars(instance *proxyv1alpha1.Instance) []corev1.EnvVar {
 	for k, v := range instance.Spec.Env {
 		envVars = append(envVars, corev1.EnvVar{Name: k, Value: v})
 	}
-
-	sort.Slice(envVars, func(i, j int) bool {
-		return envVars[i].Name < envVars[j].Name
-	})
 	return envVars
 }
 
@@ -312,10 +308,27 @@ func needsUpdate(oldStatefulSet, newStatefulSet *appsv1.StatefulSet) bool {
 	oldCpy := oldStatefulSet.DeepCopy()
 	newCpy := newStatefulSet.DeepCopy()
 
+	normalizeEnvs(oldCpy)
+	normalizeEnvs(newCpy)
+
 	removeIrrelevantProperties(oldCpy)
 	removeIrrelevantProperties(newCpy)
 
-	return !equality.Semantic.DeepEqual(oldCpy.Spec, newCpy.Spec) || !equality.Semantic.DeepEqual(oldCpy.OwnerReferences, newCpy.OwnerReferences)
+	return !equality.Semantic.DeepEqual(oldCpy.Spec, newCpy.Spec) ||
+		!equality.Semantic.DeepEqual(oldCpy.OwnerReferences, newCpy.OwnerReferences)
+}
+
+func normalizeEnvs(statefulSet *appsv1.StatefulSet) {
+	for ii := range statefulSet.Spec.Template.Spec.Containers {
+		sort.Slice(statefulSet.Spec.Template.Spec.Containers[ii].Env, func(i, j int) bool {
+			return statefulSet.Spec.Template.Spec.Containers[ii].Env[i].Name < statefulSet.Spec.Template.Spec.Containers[ii].Env[j].Name
+		})
+	}
+	for ii := range statefulSet.Spec.Template.Spec.InitContainers {
+		sort.Slice(statefulSet.Spec.Template.Spec.InitContainers[ii].Env, func(i, j int) bool {
+			return statefulSet.Spec.Template.Spec.InitContainers[ii].Env[i].Name < statefulSet.Spec.Template.Spec.InitContainers[ii].Env[j].Name
+		})
+	}
 }
 
 func removeIrrelevantProperties(ss *appsv1.StatefulSet) {

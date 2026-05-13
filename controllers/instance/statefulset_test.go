@@ -61,6 +61,10 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 						},
 					},
 					Labels: labels,
+					Env: map[string]string{
+						"WATCH_PATH":    "/a/b",
+						"SHUTDOWN_WAIT": "15m",
+					},
 				},
 			}
 
@@ -87,6 +91,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				"      then echo 'timeout waiting for IP 10.158.182.27, aborting'\n      exit 1\n    fi\n    echo 'waiting for IP 10.158.182.27 to be assigned...'\n" +
 				"    sleep 5\n  done\n\n  echo 'IP 10.158.182.27 assignment verified, waiting 5 seconds before continuing...'\n\n" +
 				"  sleep 5\n\n  echo -n \"BIND_ADDRESS=10.158.182.27\" > /var/lib/haproxy/run/env\n  cat /var/lib/haproxy/run/env\n  exit 0\nfi\n\nexit 1\n"))
+			Ω(statefulSet.Spec.Template.Spec.Containers[0].Env).Should(HaveLen(4))
 		})
 
 		It("update only on spec change", func() {
