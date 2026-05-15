@@ -140,7 +140,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 						Name: "haproxy-config",
 						VolumeSource: corev1.VolumeSource{
 							Secret: &corev1.SecretVolumeSource{
-								DefaultMode: ptr.To(int32(420)),
+								DefaultMode: new(int32(420)),
 								SecretName:  utils.GetConfigSecretName(instance),
 							},
 						},
@@ -160,7 +160,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 				Name: "rsyslog-config",
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
-						DefaultMode: ptr.To(int32(420)),
+						DefaultMode: new(int32(420)),
 						SecretName:  utils.GetConfigSecretName(instance),
 						Items: []corev1.KeyToPath{
 							{
@@ -202,8 +202,8 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 				},
 			},
 		}
+
 		statefulset.Spec.Template.Spec.Containers = append(statefulset.Spec.Template.Spec.Containers, container)
-		statefulset.Spec.Template.Spec.Containers = append(statefulset.Spec.Template.Spec.Containers, instance.Spec.Sidecars...)
 	}
 
 	if instance.Spec.Network.HostNetwork {
@@ -222,7 +222,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 
 	if ptr.Deref(instance.Spec.AllowPrivilegedPorts, false) {
 		statefulset.Spec.Template.Spec.Containers[0].SecurityContext = &corev1.SecurityContext{
-			Privileged: ptr.To(true),
+			Privileged: new(true),
 		}
 	}
 
@@ -276,6 +276,9 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 			Value: file,
 		})
 	}
+
+	statefulset.Spec.Template.Spec.InitContainers = append(statefulset.Spec.Template.Spec.InitContainers, instance.Spec.InitContainers...)
+	statefulset.Spec.Template.Spec.Containers = append(statefulset.Spec.Template.Spec.Containers, instance.Spec.Sidecars...)
 
 	if needsUpdate(oldObj, statefulset) {
 		if create {

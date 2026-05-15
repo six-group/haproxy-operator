@@ -12,7 +12,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
@@ -51,7 +50,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 								Enabled:      true,
 								Address:      "/var/lib/rsyslog/rsyslog.sock",
 								Facility:     "local0",
-								SendHostname: ptr.To(true),
+								SendHostname: new(true),
 							},
 						},
 					},
