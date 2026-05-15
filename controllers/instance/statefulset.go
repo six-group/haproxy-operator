@@ -94,11 +94,6 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		return err
 	}
 
-	imagePullPolicy := corev1.PullIfNotPresent
-	if instance.Spec.ImagePullPolicy != "" {
-		imagePullPolicy = instance.Spec.ImagePullPolicy
-	}
-
 	statefulset.Spec = appsv1.StatefulSetSpec{
 		Replicas: &instance.Spec.Replicas,
 		Selector: &metav1.LabelSelector{
@@ -117,7 +112,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 					{
 						Name:            "haproxy",
 						Image:           utils.StringOrDefault(instance.Spec.Image, "haproxy:latest"),
-						ImagePullPolicy: imagePullPolicy,
+						ImagePullPolicy: instance.Spec.ImagePullPolicy,
 						Env:             compileEnvVars(instance),
 						Resources:       getResources(instance),
 						VolumeMounts: []corev1.VolumeMount{
@@ -194,7 +189,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		container := corev1.Container{
 			Name:            "logs",
 			Image:           utils.GetRsyslogImage(),
-			ImagePullPolicy: imagePullPolicy,
+			ImagePullPolicy: instance.Spec.ImagePullPolicy,
 			Command:         []string{"/sbin/rsyslogd", "-n", "-i", "/tmp/rsyslog.pid", "-f", "/etc/rsyslog/rsyslog.conf"},
 			VolumeMounts: []corev1.VolumeMount{
 				{
@@ -265,7 +260,7 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		statefulset.Spec.Template.Spec.InitContainers = append(statefulset.Spec.Template.Spec.InitContainers, corev1.Container{
 			Name:            "setup-env",
 			Image:           utils.GetHelperImage(),
-			ImagePullPolicy: imagePullPolicy,
+			ImagePullPolicy: instance.Spec.ImagePullPolicy,
 			Command:         []string{"/bin/sh", "-c"},
 			Args:            []string{script},
 			VolumeMounts: []corev1.VolumeMount{
@@ -308,30 +303,14 @@ func needsUpdate(oldStatefulSet, newStatefulSet *appsv1.StatefulSet) bool {
 	oldCpy := oldStatefulSet.DeepCopy()
 	newCpy := newStatefulSet.DeepCopy()
 
-	normalizeEnvs(oldCpy)
-	normalizeEnvs(newCpy)
-
-	removeIrrelevantProperties(oldCpy)
-	removeIrrelevantProperties(newCpy)
+	normalize(oldCpy)
+	normalize(newCpy)
 
 	return !equality.Semantic.DeepEqual(oldCpy.Spec, newCpy.Spec) ||
 		!equality.Semantic.DeepEqual(oldCpy.OwnerReferences, newCpy.OwnerReferences)
 }
 
-func normalizeEnvs(statefulSet *appsv1.StatefulSet) {
-	for ii := range statefulSet.Spec.Template.Spec.Containers {
-		sort.Slice(statefulSet.Spec.Template.Spec.Containers[ii].Env, func(i, j int) bool {
-			return statefulSet.Spec.Template.Spec.Containers[ii].Env[i].Name < statefulSet.Spec.Template.Spec.Containers[ii].Env[j].Name
-		})
-	}
-	for ii := range statefulSet.Spec.Template.Spec.InitContainers {
-		sort.Slice(statefulSet.Spec.Template.Spec.InitContainers[ii].Env, func(i, j int) bool {
-			return statefulSet.Spec.Template.Spec.InitContainers[ii].Env[i].Name < statefulSet.Spec.Template.Spec.InitContainers[ii].Env[j].Name
-		})
-	}
-}
-
-func removeIrrelevantProperties(ss *appsv1.StatefulSet) {
+func normalize(ss *appsv1.StatefulSet) {
 	ss.Spec.UpdateStrategy = appsv1.StatefulSetUpdateStrategy{}
 	ss.Spec.RevisionHistoryLimit = nil
 	ss.Spec.PersistentVolumeClaimRetentionPolicy = nil
@@ -346,10 +325,22 @@ func removeIrrelevantProperties(ss *appsv1.StatefulSet) {
 	for i := range ss.Spec.Template.Spec.InitContainers {
 		ss.Spec.Template.Spec.InitContainers[i].TerminationMessagePath = ""
 		ss.Spec.Template.Spec.InitContainers[i].TerminationMessagePolicy = ""
+		if ss.Spec.Template.Spec.InitContainers[i].ImagePullPolicy == "" {
+			ss.Spec.Template.Spec.InitContainers[i].ImagePullPolicy = corev1.PullIfNotPresent
+		}
+		sort.Slice(ss.Spec.Template.Spec.InitContainers[i].Env, func(ii, j int) bool {
+			return ss.Spec.Template.Spec.InitContainers[i].Env[ii].Name < ss.Spec.Template.Spec.InitContainers[i].Env[j].Name
+		})
 	}
 	for i := range ss.Spec.Template.Spec.Containers {
 		ss.Spec.Template.Spec.Containers[i].TerminationMessagePath = ""
 		ss.Spec.Template.Spec.Containers[i].TerminationMessagePolicy = ""
+		if ss.Spec.Template.Spec.Containers[i].ImagePullPolicy == "" {
+			ss.Spec.Template.Spec.Containers[i].ImagePullPolicy = corev1.PullIfNotPresent
+		}
+		sort.Slice(ss.Spec.Template.Spec.Containers[i].Env, func(ii, j int) bool {
+			return ss.Spec.Template.Spec.Containers[i].Env[ii].Name < ss.Spec.Template.Spec.Containers[i].Env[j].Name
+		})
 	}
 }
 
