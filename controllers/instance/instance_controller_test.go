@@ -119,6 +119,12 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Annotations: annotations,
 						},
 					},
+					InitContainers: []corev1.Container{
+						{Name: "init", Image: "init-image"},
+					},
+					Sidecars: []corev1.Container{
+						{Name: "init", Image: "init-image"},
+					},
 				},
 			}
 
@@ -492,6 +498,9 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
 			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["app.kubernetes.io/name"]).Should(Equal(proxy.Name + "-haproxy"))
 			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["label-test"]).Should(Equal("ok"))
+			Ω(statefulSet.Spec.Template.Spec.InitContainers).Should(HaveLen(1))
+			Ω(statefulSet.Spec.Template.Spec.InitContainers[0].Name).Should(Equal(proxy.Spec.InitContainers[0].Name))
+			Ω(statefulSet.Spec.Template.Spec.Containers).Should(HaveLen(3))
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].Env).Should(HaveLen(2))
 		})
 
