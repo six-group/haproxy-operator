@@ -131,7 +131,7 @@ func (r *Reconciler) reconcileServiceEndpoints(ctx context.Context, instance *pr
 		for host, ip := range instance.Spec.Network.HostIPs {
 			addresses = append(addresses, discoveryv1.Endpoint{
 				Addresses: []string{ip},
-				NodeName:  ptr.To(host),
+				NodeName:  new(host),
 			})
 		}
 		sort.Slice(addresses, func(i, j int) bool {
@@ -141,9 +141,9 @@ func (r *Reconciler) reconcileServiceEndpoints(ctx context.Context, instance *pr
 		var ports []discoveryv1.EndpointPort
 		for _, port := range service.Spec.Ports {
 			ports = append(ports, discoveryv1.EndpointPort{
-				Name:     ptr.To(port.Name),
-				Port:     ptr.To(port.Port),
-				Protocol: ptr.To(port.Protocol),
+				Name:     new(port.Name),
+				Port:     new(port.Port),
+				Protocol: new(port.Protocol),
 			})
 		}
 		sort.Slice(ports, func(i, j int) bool {

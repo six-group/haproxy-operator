@@ -39,6 +39,9 @@ type InstanceSpec struct {
 	// Resources defines the resource requirements for the HAProxy pods.
 	// +optional
 	Resources *corev1.ResourceRequirements `json:"resources"`
+	// InitContainers additional init containers
+	// +optional
+	InitContainers []corev1.Container `json:"initContainers,omitempty"`
 	// Sidecars additional sidecar containers
 	// +optional
 	Sidecars []corev1.Container `json:"sidecars,omitempty"`
@@ -167,7 +170,7 @@ func (m *Metrics) AddToParser(p parser.Parser) error {
 			StatsOptions: &models.StatsOptions{
 				StatsEnable:       true,
 				StatsURIPrefix:    "/stats",
-				StatsRefreshDelay: ptr.To((10 * time.Second).Milliseconds()),
+				StatsRefreshDelay: new((10 * time.Second).Milliseconds()),
 			},
 		},
 	}
@@ -183,7 +186,7 @@ func (m *Metrics) AddToParser(p parser.Parser) error {
 		BindParams: models.BindParams{
 			Name: "metrics",
 		},
-		Port:    ptr.To(int64(m.Port)),
+		Port:    new(int64(m.Port)),
 		Address: ptr.Deref(m.Address, "0.0.0.0"),
 	}
 	configOpts = &options.ConfigurationOptions{}
@@ -300,12 +303,12 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 	}
 
 	if g.StatsTimeout != nil {
-		global.StatsTimeout = ptr.To(g.StatsTimeout.Milliseconds())
+		global.StatsTimeout = new(g.StatsTimeout.Milliseconds())
 	}
 
 	if g.Reload {
 		global.RuntimeAPIs = append(global.RuntimeAPIs, &models.RuntimeAPI{
-			Address: ptr.To("/var/lib/haproxy/run/haproxy.sock"),
+			Address: new("/var/lib/haproxy/run/haproxy.sock"),
 			BindParams: models.BindParams{
 				ExposeFdListeners: true,
 				Level:             "admin",
@@ -367,7 +370,7 @@ func (g *GlobalConfiguration) Model() (models.Global, error) {
 	}
 
 	if g.HardStopAfter != nil {
-		global.HardStopAfter = ptr.To(g.HardStopAfter.Milliseconds())
+		global.HardStopAfter = new(g.HardStopAfter.Milliseconds())
 	}
 
 	return global, global.Validate(strfmt.Default)
@@ -563,10 +566,10 @@ func (l *GlobalLoggingConfiguration) Model() (models.LogTarget, models.GlobalLog
 	}
 
 	logSendHostname := models.GlobalLogSendHostname{
-		Enabled: ptr.To("disabled"),
+		Enabled: new("disabled"),
 	}
 	if ptr.Deref(l.SendHostname, false) {
-		logSendHostname.Enabled = ptr.To(models.GlobalLogSendHostnameEnabledEnabled)
+		logSendHostname.Enabled = new(models.GlobalLogSendHostnameEnabledEnabled)
 		logSendHostname.Param = ptr.Deref(l.Hostname, "")
 	}
 
@@ -671,25 +674,25 @@ func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
 	for name, timeout := range d.Timeouts {
 		switch name {
 		case "check":
-			defaults.CheckTimeout = ptr.To(timeout.Milliseconds())
+			defaults.CheckTimeout = new(timeout.Milliseconds())
 		case "client":
-			defaults.ClientTimeout = ptr.To(timeout.Milliseconds())
+			defaults.ClientTimeout = new(timeout.Milliseconds())
 		case "client-fin":
-			defaults.ClientFinTimeout = ptr.To(timeout.Milliseconds())
+			defaults.ClientFinTimeout = new(timeout.Milliseconds())
 		case "connect":
-			defaults.ConnectTimeout = ptr.To(timeout.Milliseconds())
+			defaults.ConnectTimeout = new(timeout.Milliseconds())
 		case "http-keep-alive":
-			defaults.HTTPKeepAliveTimeout = ptr.To(timeout.Milliseconds())
+			defaults.HTTPKeepAliveTimeout = new(timeout.Milliseconds())
 		case "http-request":
-			defaults.HTTPRequestTimeout = ptr.To(timeout.Milliseconds())
+			defaults.HTTPRequestTimeout = new(timeout.Milliseconds())
 		case "queue":
-			defaults.QueueTimeout = ptr.To(timeout.Milliseconds())
+			defaults.QueueTimeout = new(timeout.Milliseconds())
 		case "server":
-			defaults.ServerTimeout = ptr.To(timeout.Milliseconds())
+			defaults.ServerTimeout = new(timeout.Milliseconds())
 		case "server-fin":
-			defaults.ServerFinTimeout = ptr.To(timeout.Milliseconds())
+			defaults.ServerFinTimeout = new(timeout.Milliseconds())
 		case "tunnel":
-			defaults.TunnelTimeout = ptr.To(timeout.Milliseconds())
+			defaults.TunnelTimeout = new(timeout.Milliseconds())
 		default:
 			return defaults, fmt.Errorf("timeout %s unknown", name)
 		}

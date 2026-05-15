@@ -21,7 +21,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -92,20 +91,20 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 								Enabled:      true,
 								Address:      "/var/lib/rsyslog/rsyslog.sock",
 								Facility:     "local0",
-								SendHostname: ptr.To(true),
+								SendHostname: new(true),
 							},
 							TuneOptions: &proxyv1alpha1.GlobalTuneOptions{
-								Maxrewrite: ptr.To(int64(3000)),
-								Bufsize:    ptr.To(int64(16384)),
+								Maxrewrite: new(int64(3000)),
+								Bufsize:    new(int64(16384)),
 							},
 							HardStopAfter: &dur,
 							Ocsp: &proxyv1alpha1.GlobalOCSPConfiguration{
 								Mode:     true,
-								MaxDelay: ptr.To(int64(3600)),
-								MinDelay: ptr.To(int64(300)),
+								MaxDelay: new(int64(3600)),
+								MinDelay: new(int64(300)),
 								HTTPProxy: &proxyv1alpha1.OcspUpdateOptionsHttpproxy{
 									Address: "192.168.0.10",
-									Port:    ptr.To(int64(8000)),
+									Port:    new(int64(8000)),
 								},
 							},
 						},
@@ -116,7 +115,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					Network: proxyv1alpha1.Network{
 						Service: proxyv1alpha1.ServiceSpec{
 							Enabled:     true,
-							Type:        ptr.To(corev1.ServiceTypeLoadBalancer),
+							Type:        new(corev1.ServiceTypeLoadBalancer),
 							Annotations: annotations,
 						},
 					},
@@ -146,8 +145,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Address:     "unix@/var/lib/haproxy/run/local.sock",
 							Port:        9443,
 							Name:        "https",
-							AcceptProxy: ptr.To(true),
-							Hidden:      ptr.To(true),
+							AcceptProxy: new(true),
+							Hidden:      new(true),
 							SSL: &configv1alpha1.SSL{
 								Enabled: true,
 							},
@@ -182,8 +181,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Address:     "unix@/var/lib/haproxy/run/local.sock",
 							Port:        9443,
 							Name:        "https",
-							AcceptProxy: ptr.To(true),
-							Hidden:      ptr.To(true),
+							AcceptProxy: new(true),
+							Hidden:      new(true),
 							SSL: &configv1alpha1.SSL{
 								Enabled: true,
 							},
@@ -208,8 +207,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Address:     "unix@/var/lib/haproxy/run/local.sock",
 							Port:        9443,
 							Name:        "https",
-							AcceptProxy: ptr.To(true),
-							Hidden:      ptr.To(true),
+							AcceptProxy: new(true),
+							Hidden:      new(true),
 							SSL: &configv1alpha1.SSL{
 								Enabled: true,
 							},
@@ -239,8 +238,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Address:     "unix@/var/lib/haproxy/run/local.sock",
 							Port:        9443,
 							Name:        "https",
-							AcceptProxy: ptr.To(true),
-							Hidden:      ptr.To(true),
+							AcceptProxy: new(true),
+							Hidden:      new(true),
 							SSL: &configv1alpha1.SSL{
 								Enabled: true,
 							},
@@ -289,7 +288,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 									Alpn: []string{"h2", "http/1.0"},
 								},
 								VerifyHost: "routername.namespace.svc",
-								Weight:     ptr.To(int64(256)),
+								Weight:     new(int64(256)),
 								Check: &configv1alpha1.Check{
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 5 * time.Second},
@@ -320,7 +319,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 						Ocsp:      true,
 						OcspFile: &configv1alpha1.OcspFile{
 							Name:  "route.name2",
-							Value: ptr.To(string("OCSP Response Data: ...")),
+							Value: new(string("OCSP Response Data: ...")),
 						},
 					},
 					Servers: []configv1alpha1.Server{
@@ -339,7 +338,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 									Alpn: []string{"h2", "http/1.0"},
 								},
 								VerifyHost: "routername.namespace.svc",
-								Weight:     ptr.To(int64(256)),
+								Weight:     new(int64(256)),
 								Check: &configv1alpha1.Check{
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 5 * time.Second},
@@ -370,8 +369,8 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 							Address:     "${BIND_ADDRESS}",
 							Port:        int32(20005),
 							Name:        fmt.Sprintf("tcp-%d", 20005),
-							AcceptProxy: ptr.To(true),
-							Hidden:      ptr.To(true),
+							AcceptProxy: new(true),
+							Hidden:      new(true),
 							SSL: &configv1alpha1.SSL{
 								Enabled: true,
 							},
@@ -417,9 +416,9 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 									Verify:  "required",
 									Alpn:    []string{"http/1.1", "h2"},
 								},
-								Weight:     ptr.To(int64(256)),
+								Weight:     new(int64(256)),
 								VerifyHost: "routeName" + "." + "routeName" + ".svc",
-								InitAddr:   ptr.To("none"),
+								InitAddr:   new("none"),
 								Check: &configv1alpha1.Check{
 									Enabled: true,
 									Inter:   &metav1.Duration{Duration: 500 * time.Millisecond},
@@ -440,7 +439,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 						Ocsp:      true,
 						OcspFile: &configv1alpha1.OcspFile{
 							Name:  "route.name.tcp",
-							Value: ptr.To(string("OCSP Response Data: ...")),
+							Value: new(string("OCSP Response Data: ...")),
 						},
 					},
 				},
@@ -454,7 +453,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					Labels:    labels,
 				},
 				Spec: configv1alpha1.ResolverSpec{
-					ParseResolvConf: ptr.To(true),
+					ParseResolvConf: new(true),
 					Hold: &configv1alpha1.Hold{
 						Nx:    &metav1.Duration{Duration: 500 * time.Millisecond},
 						Valid: &metav1.Duration{Duration: 1 * time.Second},
@@ -600,7 +599,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				PeriodSeconds:                 3,
 				SuccessThreshold:              4,
 				FailureThreshold:              5,
-				TerminationGracePeriodSeconds: ptr.To(int64(6)),
+				TerminationGracePeriodSeconds: new(int64(6)),
 			}
 
 			proxy.Spec.LivenessProbe = &corev1.Probe{
@@ -677,11 +676,11 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 		It("remove duplicate port", func() {
 			feAdd1 := frontendCustomCerts2.DeepCopy()
 			feAdd1.Name = "additional1"
-			feAdd1.Spec.Binds[0].Hidden = ptr.To(false)
+			feAdd1.Spec.Binds[0].Hidden = new(false)
 
 			feAdd2 := frontendCustomCerts2.DeepCopy()
 			feAdd2.Name = "additional2"
-			feAdd2.Spec.Binds[0].Hidden = ptr.To(false)
+			feAdd2.Spec.Binds[0].Hidden = new(false)
 
 			initObjs = append(initObjs, feAdd1, feAdd2)
 

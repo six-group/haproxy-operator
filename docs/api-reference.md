@@ -1419,6 +1419,7 @@ _Appears in:_
 | `rolloutOnConfigChange` _boolean_ | RolloutOnConfigChange enable rollout on config changes |  | Optional: \{\} <br /> |
 | `image` _string_ | Image specifies the HaProxy image including th tag. | haproxy:latest |  |
 | `resources` _[ResourceRequirements](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcerequirements-v1-core)_ | Resources defines the resource requirements for the HAProxy pods. |  | Optional: \{\} <br /> |
+| `initContainers` _[Container](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#container-v1-core) array_ | InitContainers additional init containers |  | Optional: \{\} <br /> |
 | `sidecars` _[Container](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#container-v1-core) array_ | Sidecars additional sidecar containers |  | Optional: \{\} <br /> |
 | `serviceAccountName` _string_ | ServiceAccountName is the name of the ServiceAccount to use to run this Instance. |  | Optional: \{\} <br /> |
 | `imagePullSecrets` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#localobjectreference-v1-core) array_ | ImagePullSecrets is an optional list of secret names in the same namespace to use for pulling any of the images used. |  | Optional: \{\} <br /> |

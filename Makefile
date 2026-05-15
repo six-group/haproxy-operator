@@ -28,7 +28,7 @@ controller-gen:
 
 GOLANGCI_LINT = ./bin/golangci-lint
 colanci-lint-bin:
-	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.10.1)
+	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.2)
 
 CRD_DOCS = bin/crd-ref-docs
 crd-docs-gen:
