@@ -2980,9 +2980,6 @@ spec:
                       More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                     type: object
                 type: object
-              rolloutOnConfigChange:
-                description: RolloutOnConfigChange enable rollout on config changes
-                type: boolean
               serviceAccountName:
                 description: ServiceAccountName is the name of the ServiceAccount
                   to use to run this Instance.

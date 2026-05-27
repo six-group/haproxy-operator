@@ -107,13 +107,15 @@ func (r *Reconciler) reconcileConfig(ctx context.Context, instance *proxyv1alpha
 	if err != nil {
 		return "", err
 	}
+
+	var checksum string
+
 	if result != controllerutil.OperationResultNone {
 		logger.Info(fmt.Sprintf("Object %s", result), "secret", configSecret.Name)
+		checksum = generateChecksum(configSecret)
 	}
 
-	cs := generateChecksum(configSecret)
-
-	return cs, nil
+	return checksum, nil
 }
 
 // #nosec

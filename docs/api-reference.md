@@ -1416,7 +1416,6 @@ _Appears in:_
 | `replicas` _integer_ | Replicas is the desired number of replicas of the HAProxy Instance. | 1 |  |
 | `network` _[Network](#network)_ | Network contains the configuration of Route, Services and other network related configuration. |  |  |
 | `configuration` _[Configuration](#configuration)_ | Configuration is used to bootstrap the global and defaults section of the HAProxy configuration. |  |  |
-| `rolloutOnConfigChange` _boolean_ | RolloutOnConfigChange enable rollout on config changes |  | Optional: \{\} <br /> |
 | `image` _string_ | Image specifies the HaProxy image including th tag. | haproxy:latest |  |
 | `resources` _[ResourceRequirements](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcerequirements-v1-core)_ | Resources defines the resource requirements for the HAProxy pods. |  | Optional: \{\} <br /> |
 | `initContainers` _[Container](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#container-v1-core) array_ | InitContainers additional init containers |  | Optional: \{\} <br /> |

@@ -3,7 +3,6 @@ package instance
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"net"
 	"path/filepath"
 	"sort"
@@ -62,12 +61,12 @@ type initScriptData struct {
 	File string
 }
 
-func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1alpha1.Instance, checksum string) error {
+func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1alpha1.Instance) error {
 	logger := log.FromContext(ctx)
 
 	statefulset := &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-haproxy", instance.Name),
+			Name:      utils.GetServiceAndStatefulsetName(instance),
 			Namespace: instance.Namespace,
 		},
 	}
@@ -148,10 +147,6 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 				},
 			},
 		},
-	}
-
-	if instance.Spec.RolloutOnConfigChange {
-		statefulset.Spec.Template.Annotations["checksum/config"] = checksum
 	}
 
 	if hasLocalLoggingTarget(instance) {

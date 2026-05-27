@@ -59,7 +59,7 @@ func (r *Reconciler) createOrUpdateRouteForFrontend(ctx context.Context, instanc
 
 			route.Spec.To = routev1.RouteTargetReference{
 				Kind: "Service",
-				Name: utils.GetServiceName(instance),
+				Name: utils.GetServiceAndStatefulsetName(instance),
 			}
 
 			route.Spec.Port = &routev1.RoutePort{

@@ -8,6 +8,7 @@ import (
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/uuid"
@@ -76,12 +77,12 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				Client: cli,
 				Scheme: scheme,
 			}
-			err := r.reconcileStatefulSet(ctx, proxy, "checksumtest")
+			err := r.reconcileStatefulSet(ctx, proxy)
 			Ω(err).ShouldNot(HaveOccurred())
 
 			statefulSet := &appsv1.StatefulSet{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
-			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["app.kubernetes.io/name"]).Should(Equal(proxy.Name + "-haproxy"))
+			Ω(statefulSet.Spec.Template.ObjectMeta.Labels[corev1.LabelMetadataName]).Should(Equal(proxy.Name + "-haproxy"))
 			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["label-test"]).Should(Equal("ok"))
 			Ω(statefulSet.Spec.Template.Spec.InitContainers).Should(HaveLen(1))
 			Ω(statefulSet.Spec.Template.Spec.InitContainers[0].Args[0]).Should(ContainSubstring("10.158.182.27"))
@@ -91,40 +92,6 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				"    sleep 5\n  done\n\n  echo 'IP 10.158.182.27 assignment verified, waiting 5 seconds before continuing...'\n\n" +
 				"  sleep 5\n\n  echo -n \"BIND_ADDRESS=10.158.182.27\" > /var/lib/haproxy/run/env\n  cat /var/lib/haproxy/run/env\n  exit 0\nfi\n\nexit 1\n"))
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].Env).Should(HaveLen(4))
-		})
-
-		It("update only on spec change", func() {
-			proxy.Spec.RolloutOnConfigChange = true
-
-			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
-			r := Reconciler{
-				Client: cli,
-				Scheme: scheme,
-			}
-			err := r.reconcileStatefulSet(ctx, proxy, "checksum1")
-			Ω(err).ShouldNot(HaveOccurred())
-
-			statefulSet := &appsv1.StatefulSet{}
-
-			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
-			Ω(statefulSet.Spec.Template.ObjectMeta.Annotations["checksum/config"]).Should(Equal("checksum1"))
-			rv1 := statefulSet.ResourceVersion
-
-			err = r.reconcileStatefulSet(ctx, proxy, "checksum2")
-			Ω(err).ShouldNot(HaveOccurred())
-
-			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
-			Ω(statefulSet.Spec.Template.ObjectMeta.Annotations["checksum/config"]).Should(Equal("checksum2"))
-			rv2 := statefulSet.ResourceVersion
-			Ω(rv2).ShouldNot(Equal(rv1))
-
-			err = r.reconcileStatefulSet(ctx, proxy, "checksum2")
-			Ω(err).ShouldNot(HaveOccurred())
-
-			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
-			Ω(statefulSet.Spec.Template.ObjectMeta.Annotations["checksum/config"]).Should(Equal("checksum2"))
-			rv3 := statefulSet.ResourceVersion
-			Ω(rv3).Should(Equal(rv2))
 		})
 	})
 })

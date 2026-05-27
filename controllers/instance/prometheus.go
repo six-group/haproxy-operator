@@ -27,7 +27,7 @@ func (r *Reconciler) reconcileServiceMonitor(ctx context.Context, instance *prox
 
 	monitor := &monitoringv1.ServiceMonitor{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      utils.GetServiceName(instance),
+			Name:      utils.GetServiceAndStatefulsetName(instance),
 			Namespace: instance.Namespace,
 		},
 	}

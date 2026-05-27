@@ -37,6 +37,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			resolver          *configv1alpha1.Resolver
 			secret            *corev1.Secret
 			initObjs          []client.Object
+			haPod1, haPod2    *corev1.Pod
 
 			frontend, frontendCustomCerts, frontendCustomCerts2,
 			frontendCustomCertsEmpty, frontendWithBackendSwitching *configv1alpha1.Frontend
@@ -467,7 +468,27 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				},
 			}
 
-			initObjs = []client.Object{proxy, frontend, frontendCustomCerts, frontendCustomCerts2, frontendCustomCertsEmpty, backend, backend2, resolver, secret}
+			haPod1 = &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "haproxy-0",
+					Namespace: "foo",
+					Labels: map[string]string{
+						corev1.LabelMetadataName: utils.GetServiceAndStatefulsetName(proxy),
+					},
+				},
+			}
+
+			haPod2 = &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "haproxy-1",
+					Namespace: "foo",
+					Labels: map[string]string{
+						corev1.LabelMetadataName: utils.GetServiceAndStatefulsetName(proxy),
+					},
+				},
+			}
+
+			initObjs = []client.Object{proxy, frontend, frontendCustomCerts, frontendCustomCerts2, frontendCustomCertsEmpty, backend, backend2, resolver, secret, haPod1, haPod2}
 		})
 
 		It("should deploy haproxy instance", func() {
@@ -485,10 +506,10 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(proxy.Status.Error).Should(BeEmpty())
 
 			service := &corev1.Service{}
-			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: utils.GetServiceName(proxy)}, service)).ShouldNot(HaveOccurred())
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: utils.GetServiceAndStatefulsetName(proxy)}, service)).ShouldNot(HaveOccurred())
 			Ω(service.Spec.Type).Should(Equal(corev1.ServiceTypeLoadBalancer))
 			Ω(service.Annotations["service.beta.kubernetes.io/aws-load-balancer-scheme"]).Should(Equal("internet-facing"))
-			Ω(service.Spec.Selector["app.kubernetes.io/name"]).Should(Equal(proxy.Name + "-haproxy"))
+			Ω(service.Spec.Selector[corev1.LabelMetadataName]).Should(Equal(proxy.Name + "-haproxy"))
 
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
@@ -496,7 +517,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			statefulSet := &appsv1.StatefulSet{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
-			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["app.kubernetes.io/name"]).Should(Equal(proxy.Name + "-haproxy"))
+			Ω(statefulSet.Spec.Template.ObjectMeta.Labels[corev1.LabelMetadataName]).Should(Equal(proxy.Name + "-haproxy"))
 			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["label-test"]).Should(Equal("ok"))
 			Ω(statefulSet.Spec.Template.Spec.InitContainers).Should(HaveLen(1))
 			Ω(statefulSet.Spec.Template.Spec.InitContainers[0].Name).Should(Equal(proxy.Spec.InitContainers[0].Name))
@@ -642,9 +663,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path).Should(Equal("/health"))
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].LivenessProbe.Exec).ShouldNot(BeNil())
 		})
-		It("add checksum", func() {
-			proxy.Spec.RolloutOnConfigChange = true
-
+		It("patch pod annotation", func() {
 			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
 			r := instance.Reconciler{
 				Client: cli,
@@ -661,7 +680,11 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			statefulSet := &appsv1.StatefulSet{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
 			Ω(statefulSet.Annotations).Should(BeEmpty())
-			Ω(statefulSet.Spec.Template.ObjectMeta.Annotations).Should(HaveKey("checksum/config"))
+
+			pods := &corev1.PodList{}
+			Ω(cli.List(ctx, pods)).ShouldNot(HaveOccurred())
+			Ω(pods.Items).ShouldNot(BeEmpty())
+			Ω(pods.Items[0].Annotations).ShouldNot(BeEmpty())
 		})
 		It("add pdb", func() {
 			proxy.Spec.PodDisruptionBudget.MaxUnavailable = &intstr.IntOrString{IntVal: 2}
@@ -703,7 +726,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(result).ShouldNot(BeNil())
 
 			service := &corev1.Service{}
-			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: utils.GetServiceName(proxy)}, service)).ShouldNot(HaveOccurred())
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: utils.GetServiceAndStatefulsetName(proxy)}, service)).ShouldNot(HaveOccurred())
 			Ω(service.Spec.Ports).Should(HaveLen(1))
 			Ω(service.Annotations["service.beta.kubernetes.io/aws-load-balancer-scheme"]).Should(Equal("internet-facing"))
 		})

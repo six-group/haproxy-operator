@@ -23,7 +23,7 @@ func (r *Reconciler) reconcileService(ctx context.Context, instance *proxyv1alph
 
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      utils.GetServiceName(instance),
+			Name:      utils.GetServiceAndStatefulsetName(instance),
 			Namespace: instance.Namespace,
 		},
 	}
@@ -117,7 +117,7 @@ func (r *Reconciler) reconcileServiceEndpoints(ctx context.Context, instance *pr
 
 	endpointSlice := &discoveryv1.EndpointSlice{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      utils.GetServiceName(instance),
+			Name:      utils.GetServiceAndStatefulsetName(instance),
 			Namespace: instance.Namespace,
 		},
 	}

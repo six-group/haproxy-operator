@@ -11,7 +11,7 @@ func GetConfigSecretName(instance *proxyv1alpha1.Instance) string {
 	return fmt.Sprintf("%s-haproxy-config", instance.Name)
 }
 
-func GetServiceName(instance *proxyv1alpha1.Instance) string {
+func GetServiceAndStatefulsetName(instance *proxyv1alpha1.Instance) string {
 	return fmt.Sprintf("%s-haproxy", instance.Name)
 }
 
