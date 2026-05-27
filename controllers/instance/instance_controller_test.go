@@ -473,7 +473,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					Name:      "haproxy-0",
 					Namespace: "foo",
 					Labels: map[string]string{
-						corev1.LabelMetadataName: utils.GetServiceAndStatefulsetName(proxy),
+						"app.kubernetes.io/name": utils.GetServiceAndStatefulsetName(proxy),
 					},
 				},
 			}
@@ -483,7 +483,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 					Name:      "haproxy-1",
 					Namespace: "foo",
 					Labels: map[string]string{
-						corev1.LabelMetadataName: utils.GetServiceAndStatefulsetName(proxy),
+						"app.kubernetes.io/name": utils.GetServiceAndStatefulsetName(proxy),
 					},
 				},
 			}
@@ -509,7 +509,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: utils.GetServiceAndStatefulsetName(proxy)}, service)).ShouldNot(HaveOccurred())
 			Ω(service.Spec.Type).Should(Equal(corev1.ServiceTypeLoadBalancer))
 			Ω(service.Annotations["service.beta.kubernetes.io/aws-load-balancer-scheme"]).Should(Equal("internet-facing"))
-			Ω(service.Spec.Selector[corev1.LabelMetadataName]).Should(Equal(proxy.Name + "-haproxy"))
+			Ω(service.Spec.Selector["app.kubernetes.io/name"]).Should(Equal(proxy.Name + "-haproxy"))
 
 			secret := &corev1.Secret{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy-config"}, secret)).ShouldNot(HaveOccurred())
@@ -517,7 +517,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			statefulSet := &appsv1.StatefulSet{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
-			Ω(statefulSet.Spec.Template.ObjectMeta.Labels[corev1.LabelMetadataName]).Should(Equal(proxy.Name + "-haproxy"))
+			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["app.kubernetes.io/name"]).Should(Equal(proxy.Name + "-haproxy"))
 			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["label-test"]).Should(Equal("ok"))
 			Ω(statefulSet.Spec.Template.Spec.InitContainers).Should(HaveLen(1))
 			Ω(statefulSet.Spec.Template.Spec.InitContainers[0].Name).Should(Equal(proxy.Spec.InitContainers[0].Name))

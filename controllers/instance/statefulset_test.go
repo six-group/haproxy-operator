@@ -8,7 +8,6 @@ import (
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/uuid"
@@ -82,7 +81,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			statefulSet := &appsv1.StatefulSet{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).ShouldNot(HaveOccurred())
-			Ω(statefulSet.Spec.Template.ObjectMeta.Labels[corev1.LabelMetadataName]).Should(Equal(proxy.Name + "-haproxy"))
+			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["app.kubernetes.io/name"]).Should(Equal(proxy.Name + "-haproxy"))
 			Ω(statefulSet.Spec.Template.ObjectMeta.Labels["label-test"]).Should(Equal("ok"))
 			Ω(statefulSet.Spec.Template.Spec.InitContainers).Should(HaveLen(1))
 			Ω(statefulSet.Spec.Template.Spec.InitContainers[0].Args[0]).Should(ContainSubstring("10.158.182.27"))
