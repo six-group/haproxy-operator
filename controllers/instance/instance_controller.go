@@ -2,6 +2,7 @@ package instance
 
 import (
 	"context"
+	"fmt"
 
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
@@ -11,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -133,7 +135,7 @@ func (r *Reconciler) handleError(ctx context.Context, instance *proxyv1alpha1.In
 
 func (r *Reconciler) patchPods(ctx context.Context, instance *proxyv1alpha1.Instance, checksum string) error {
 	ls := client.MatchingLabels{
-		corev1.LabelMetadataName: utils.GetServiceAndStatefulsetName(instance),
+		"app.kubernetes.io/name": utils.GetServiceAndStatefulsetName(instance),
 	}
 
 	l := &corev1.PodList{}
@@ -142,16 +144,10 @@ func (r *Reconciler) patchPods(ctx context.Context, instance *proxyv1alpha1.Inst
 		return err
 	}
 
+	patch := fmt.Appendf(nil, `{"metadata":{"annotations":{"haproxy.operator/checksum": "%s"}}}`, checksum)
+
 	for i := range l.Items {
-		pod := &l.Items[i]
-		original := pod.DeepCopy()
-
-		if pod.Annotations == nil {
-			pod.Annotations = map[string]string{}
-		}
-		pod.Annotations["haproxy.operator/checksum"] = checksum
-
-		err = r.Patch(ctx, pod, client.MergeFrom(original))
+		err = r.Patch(ctx, &l.Items[i], client.RawPatch(types.MergePatchType, patch))
 		if err != nil {
 			return err
 		}
