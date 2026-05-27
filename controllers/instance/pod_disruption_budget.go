@@ -18,7 +18,7 @@ func (r *Reconciler) reconcilePDB(ctx context.Context, instance *proxyv1alpha1.I
 
 	pdb := &policyv1.PodDisruptionBudget{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-haproxy", instance.Name),
+			Name:      utils.GetServiceAndStatefulsetName(instance),
 			Namespace: instance.Namespace,
 		},
 	}

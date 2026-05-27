@@ -5,7 +5,9 @@ import (
 
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
+	"github.com/six-group/haproxy-operator/pkg/utils"
 	"go.uber.org/multierr"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -94,7 +96,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}
 
-	if err := r.reconcileStatefulSet(ctx, instance, checksum); err != nil {
+	if err := r.reconcileStatefulSet(ctx, instance); err != nil {
 		return reconcile.Result{}, r.handleError(ctx, instance, err)
 	}
 
@@ -111,6 +113,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	r.updateConfig(ctx, instance, listens, frontends, backends, resolvers)
 
+	if checksum != "" {
+		if err = r.patchPods(ctx, instance, checksum); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -121,6 +129,35 @@ func (r *Reconciler) handleError(ctx context.Context, instance *proxyv1alpha1.In
 	}
 
 	return multierr.Combine(err, r.Status().Update(ctx, instance))
+}
+
+func (r *Reconciler) patchPods(ctx context.Context, instance *proxyv1alpha1.Instance, checksum string) error {
+	ls := client.MatchingLabels{
+		corev1.LabelMetadataName: utils.GetServiceAndStatefulsetName(instance),
+	}
+
+	l := &corev1.PodList{}
+	err := r.List(ctx, l, client.InNamespace(instance.Namespace), ls)
+	if err != nil {
+		return err
+	}
+
+	for i := range l.Items {
+		pod := &l.Items[i]
+		original := pod.DeepCopy()
+
+		if pod.Annotations == nil {
+			pod.Annotations = map[string]string{}
+		}
+		pod.Annotations["haproxy.operator/checksum"] = checksum
+
+		err = r.Patch(ctx, pod, client.MergeFrom(original))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (r *Reconciler) updateConfig(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) {

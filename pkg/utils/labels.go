@@ -1,14 +1,13 @@
 package utils
 
 import (
-	"fmt"
-
 	"github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func GetAppSelectorLabels(instance *v1alpha1.Instance) map[string]string {
 	return map[string]string{
-		"app.kubernetes.io/name": fmt.Sprintf("%s-haproxy", instance.Name),
+		corev1.LabelMetadataName: GetServiceAndStatefulsetName(instance),
 	}
 }
 
