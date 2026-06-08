@@ -272,7 +272,3 @@ type BackendList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Backend `json:"items"`
 }
-
-func init() {
-	SchemeBuilder.Register(&Backend{}, &BackendList{})
-}

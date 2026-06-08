@@ -56,7 +56,7 @@ This example will guide you through the process of setting up a basic HAProxy in
 
 3. Check the generated `haproxy.cfg` stored in the `Secret` `example-haproxy-config`:
     ```
-    defaults unnamed_defaults_1
+    defaults haproxy_defaults
       mode http
       timeout connect 5000
       timeout client 5000
@@ -102,7 +102,7 @@ global
   log /var/lib/rsyslog/rsyslog.sock local0
   log-send-hostname
 
-defaults unnamed_defaults_1
+defaults haproxy_defaults
   mode tcp
   log global
   option tcplog

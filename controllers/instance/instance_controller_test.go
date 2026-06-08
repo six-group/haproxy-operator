@@ -741,12 +741,13 @@ global
   hard-stop-after 30000
   log /var/lib/rsyslog/rsyslog.sock local0
   log-send-hostname
+  ocsp-update.disable off
   ocsp-update.httpproxy 192.168.0.10:8000
   ocsp-update.mindelay 300
   ocsp-update.maxdelay 3600
   ocsp-update.mode on
 
-defaults unnamed_defaults_1
+defaults haproxy_defaults
 
 resolvers bar-foo-res
   hold nx 500
@@ -780,12 +781,13 @@ global
   hard-stop-after 30000
   log /var/lib/rsyslog/rsyslog.sock local0
   log-send-hostname
+  ocsp-update.disable off
   ocsp-update.httpproxy 192.168.0.10:8000
   ocsp-update.mindelay 300
   ocsp-update.maxdelay 3600
   ocsp-update.mode on
 
-defaults unnamed_defaults_1
+defaults haproxy_defaults
 
 resolvers bar-foo-res
   hold nx 500

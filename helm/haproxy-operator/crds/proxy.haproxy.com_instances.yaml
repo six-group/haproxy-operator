@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.20.1
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: instances.proxy.haproxy.com
 spec:
   group: proxy.haproxy.com
@@ -369,6 +369,11 @@ spec:
                         description: Ocsp is used to enable stapling at the global
                           level for all certificates in the configuration.
                         properties:
+                          disable:
+                            description: |-
+                              Disable completely disables OCSP auto-update.
+                              When true, all ocsp-update settings are ignored; when false, behavior depends on global ocsp-update configuration. Default is false.
+                            type: boolean
                           httpproxy:
                             description: |-
                               HttpProxy Allow to use an HTTP proxy for the OCSP updates. This only works with HTTP,
@@ -1729,7 +1734,6 @@ spec:
                             procMount denotes the type of proc mount to use for the containers.
                             The default value is Default which uses the container runtime defaults for
                             readonly paths and masked paths.
-                            This requires the ProcMountType feature flag to be enabled.
                             Note that this field cannot be set when spec.os.name is windows.
                           type: string
                         readOnlyRootFilesystem:
@@ -2528,6 +2532,8 @@ spec:
                           rule: 'has(self.termination) && has(self.insecureEdgeTerminationPolicy)
                             ? !((self.termination==''passthrough'') && (self.insecureEdgeTerminationPolicy==''Allow''))
                             : true'
+                        - message: cannot have both spec.tls.certificate and spec.tls.externalCertificate
+                          rule: '!(has(self.certificate) && has(self.externalCertificate))'
                     required:
                     - enabled
                     type: object
@@ -4084,7 +4090,6 @@ spec:
                             procMount denotes the type of proc mount to use for the containers.
                             The default value is Default which uses the container runtime defaults for
                             readonly paths and masked paths.
-                            This requires the ProcMountType feature flag to be enabled.
                             Note that this field cannot be set when spec.os.name is windows.
                           type: string
                         readOnlyRootFilesystem:

@@ -79,7 +79,7 @@ func (b *BaseSpec) AddToParser(p parser.Parser, sectionType parser.Section, sect
 			return err
 		}
 
-		err = p.Insert(sectionType, sectionName, "acl", configuration.SerializeACL(model), idx)
+		err = p.Insert(sectionType, sectionName, "acl", model, idx)
 		if err != nil {
 			return err
 		}
@@ -321,8 +321,8 @@ func (b *Bind) Model() (models.Bind, error) {
 		Address:      b.Address,
 		Port:         ptr.To(int64(b.Port)),
 		PortRangeEnd: b.PortRangeEnd,
+		Name:         b.Name,
 		BindParams: models.BindParams{
-			Name:        b.Name,
 			Transparent: b.Transparent,
 			AcceptProxy: ptr.Deref(b.AcceptProxy, false),
 		},
