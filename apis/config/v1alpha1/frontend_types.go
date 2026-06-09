@@ -210,7 +210,3 @@ type FrontendList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Frontend `json:"items"`
 }
-
-func init() {
-	SchemeBuilder.Register(&Frontend{}, &FrontendList{})
-}

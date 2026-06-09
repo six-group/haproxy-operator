@@ -24,11 +24,11 @@ helm-test:
 
 CONTROLLER_GEN = bin/controller-gen
 controller-gen:
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.20.1)
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.21.0)
 
 GOLANGCI_LINT = ./bin/golangci-lint
 colanci-lint-bin:
-	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.2)
+	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2)
 
 CRD_DOCS = bin/crd-ref-docs
 crd-docs-gen:
@@ -45,4 +45,4 @@ endef
 
 GINKGO = ./bin/ginkgo
 ginkgo-bin:
-	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo@v2.28.1)
+	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo@v2.29.0)

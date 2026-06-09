@@ -136,7 +136,3 @@ type ListenList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Listen `json:"items"`
 }
-
-func init() {
-	SchemeBuilder.Register(&Listen{}, &ListenList{})
-}

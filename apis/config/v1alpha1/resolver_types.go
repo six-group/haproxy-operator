@@ -194,7 +194,3 @@ type ResolverList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Resolver `json:"items"`
 }
-
-func init() {
-	SchemeBuilder.Register(&Resolver{}, &ResolverList{})
-}
