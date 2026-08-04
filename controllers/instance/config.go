@@ -135,7 +135,6 @@ func generateChecksum(secret *corev1.Secret) string {
 }
 
 func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) (string, error) {
-
 	p, err := parser.New()
 	if err != nil {
 		return "", err
