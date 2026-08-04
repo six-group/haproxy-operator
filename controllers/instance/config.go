@@ -159,10 +159,13 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		if err != nil {
 			listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
 			listen.Status.Error = err.Error()
-			errConsolidated = multierr.Combine(errConsolidated, err, r.Status().Update(ctx, listen))
+			errConsolidated = multierr.Combine(errConsolidated, err)
 		} else {
 			listen.Status.Phase = configv1alpha1.StatusPhasePending
 			listen.Status.Error = ""
+		}
+		if err = r.Status().Update(ctx, listen); err != nil {
+			errConsolidated = multierr.Combine(errConsolidated, err)
 		}
 	}
 
@@ -177,10 +180,13 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		if err != nil {
 			frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
 			frontend.Status.Error = err.Error()
-			errConsolidated = multierr.Combine(errConsolidated, err, r.Status().Update(ctx, frontend))
+			errConsolidated = multierr.Combine(errConsolidated, err)
 		} else {
 			frontend.Status.Phase = configv1alpha1.StatusPhasePending
 			frontend.Status.Error = ""
+		}
+		if err = r.Status().Update(ctx, frontend); err != nil {
+			errConsolidated = multierr.Combine(errConsolidated, err)
 		}
 	}
 
@@ -195,10 +201,13 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		if err != nil {
 			backend.Status.Phase = configv1alpha1.StatusPhaseInternalError
 			backend.Status.Error = err.Error()
-			errConsolidated = multierr.Combine(errConsolidated, err, r.Status().Update(ctx, backend))
+			errConsolidated = multierr.Combine(errConsolidated, err)
 		} else {
 			backend.Status.Phase = configv1alpha1.StatusPhasePending
 			backend.Status.Error = ""
+		}
+		if err = r.Status().Update(ctx, backend); err != nil {
+			errConsolidated = multierr.Combine(errConsolidated, err)
 		}
 	}
 
@@ -213,10 +222,13 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		if err != nil {
 			resolver.Status.Phase = configv1alpha1.StatusPhaseInternalError
 			resolver.Status.Error = err.Error()
-			errConsolidated = multierr.Combine(errConsolidated, err, r.Status().Update(ctx, resolver))
+			errConsolidated = multierr.Combine(errConsolidated, err)
 		} else {
 			resolver.Status.Phase = configv1alpha1.StatusPhasePending
 			resolver.Status.Error = ""
+		}
+		if err = r.Status().Update(ctx, resolver); err != nil {
+			errConsolidated = multierr.Combine(errConsolidated, err)
 		}
 	}
 

@@ -548,6 +548,10 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 			backendRes := &configv1alpha1.Backend{}
 			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: backend.Name}, backendRes)).ShouldNot(HaveOccurred())
 			Ω(backendRes.Status.Error).Should(Equal(proxy.Status.Error))
+
+			frontendRes := &configv1alpha1.Frontend{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: frontendCustomCerts.Namespace, Name: frontendCustomCerts.Name}, frontendRes)).ShouldNot(HaveOccurred())
+			Ω(frontendRes.Status.Phase).Should(Equal(configv1alpha1.StatusPhasePending))
 		})
 
 		It("should set status to pending if there is no listens", func() {
