@@ -135,6 +135,8 @@ func generateChecksum(secret *corev1.Secret) string {
 }
 
 func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) (string, error) {
+	var errConsolidated error
+
 	p, err := parser.New()
 	if err != nil {
 		return "", err
@@ -157,9 +159,11 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		if err != nil {
 			listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
 			listen.Status.Error = err.Error()
-			return "", multierr.Combine(err, r.Status().Update(ctx, listen))
+			errConsolidated = multierr.Combine(errConsolidated, err, r.Status().Update(ctx, listen))
+		} else {
+			listen.Status.Phase = configv1alpha1.StatusPhasePending
+			listen.Status.Error = ""
 		}
-
 	}
 
 	for i := range frontends.Items {
@@ -173,7 +177,10 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		if err != nil {
 			frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
 			frontend.Status.Error = err.Error()
-			return "", multierr.Combine(err, r.Status().Update(ctx, frontend))
+			errConsolidated = multierr.Combine(errConsolidated, err, r.Status().Update(ctx, frontend))
+		} else {
+			frontend.Status.Phase = configv1alpha1.StatusPhasePending
+			frontend.Status.Error = ""
 		}
 	}
 
@@ -188,7 +195,10 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		if err != nil {
 			backend.Status.Phase = configv1alpha1.StatusPhaseInternalError
 			backend.Status.Error = err.Error()
-			return "", multierr.Combine(err, r.Status().Update(ctx, backend))
+			errConsolidated = multierr.Combine(errConsolidated, err, r.Status().Update(ctx, backend))
+		} else {
+			backend.Status.Phase = configv1alpha1.StatusPhasePending
+			backend.Status.Error = ""
 		}
 	}
 
@@ -203,17 +213,20 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		if err != nil {
 			resolver.Status.Phase = configv1alpha1.StatusPhaseInternalError
 			resolver.Status.Error = err.Error()
-			return "", multierr.Combine(err, r.Status().Update(ctx, resolver))
+			errConsolidated = multierr.Combine(errConsolidated, err, r.Status().Update(ctx, resolver))
+		} else {
+			resolver.Status.Phase = configv1alpha1.StatusPhasePending
+			resolver.Status.Error = ""
 		}
 	}
 
 	if instance.Spec.Metrics != nil {
 		if err := instance.Spec.Metrics.AddToParser(p); err != nil {
-			return "", err
+			errConsolidated = multierr.Combine(errConsolidated, err)
 		}
 	}
 
-	return p.String(), nil
+	return p.String(), errConsolidated
 }
 
 func (r *Reconciler) generateEnvs(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList) ([]string, error) {
