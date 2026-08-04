@@ -1058,6 +1058,7 @@ type StatusPhase string
 
 // These are the valid statuses of a listen configuration.
 const (
+	StatusPhasePending       StatusPhase = "Pending"
 	StatusPhaseActive        StatusPhase = "Active"
 	StatusPhaseInternalError StatusPhase = "Error"
 )

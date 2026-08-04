@@ -1297,7 +1297,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `disable` _boolean_ | Disable completely disables OCSP auto-update.<br />When true, all ocsp-update settings are ignored; when false, behavior depends on global ocsp-update configuration. Default is false. |  | Optional: \{\} <br /> |
+| `disable` _boolean_ | Disable completely disables OCSP auto-update.<br />When true, all ocsp-update settings are ignored; when false, behavior depends on global ocsp-update configuration.<br />Its value defaults to 'false'. |  | Optional: \{\} <br /> |
 | `mode` _boolean_ | Mode Enable automatic OCSP response update when set to 'on', disable it otherwise.<br />Its value defaults to 'off'. |  | Optional: \{\} <br /> |
 | `maxDelay` _integer_ | MaxDelay sets the maximum interval between two automatic updates of the same OCSP<br />response. This time is expressed in seconds and defaults to 3600 (1 hour). |  | Optional: \{\} <br /> |
 | `minDelay` _integer_ | MinDelay sets the minimum interval between two automatic updates of the same OCSP<br />response. This time is expressed in seconds and defaults to 300 (5 minutes). |  | Optional: \{\} <br /> |

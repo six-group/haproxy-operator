@@ -372,7 +372,8 @@ spec:
                           disable:
                             description: |-
                               Disable completely disables OCSP auto-update.
-                              When true, all ocsp-update settings are ignored; when false, behavior depends on global ocsp-update configuration. Default is false.
+                              When true, all ocsp-update settings are ignored; when false, behavior depends on global ocsp-update configuration.
+                              Its value defaults to 'false'.
                             type: boolean
                           httpproxy:
                             description: |-
