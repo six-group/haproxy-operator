@@ -135,7 +135,6 @@ func generateChecksum(secret *corev1.Secret) string {
 }
 
 func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) (string, error) {
-	var errConsolidated error
 
 	p, err := parser.New()
 	if err != nil {
@@ -148,93 +147,120 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		return "", err
 	}
 
+	var errConsolidated error
 	for i := range listens.Items {
 		listen := &listens.Items[i]
 		listen.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Listen"))
-
 		if err = checkNameKind(nameKindMap, listen); err == nil {
 			err = listen.AddToParser(p)
 		}
-
 		if err != nil {
-			listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
+			listen.Status.Phase = configv1alpha1.StatusPhaseError
 			listen.Status.Error = err.Error()
 			errConsolidated = multierr.Combine(errConsolidated, err)
-		} else {
-			listen.Status.Phase = configv1alpha1.StatusPhasePending
-			listen.Status.Error = ""
-		}
-		if err = r.Status().Update(ctx, listen); err != nil {
-			errConsolidated = multierr.Combine(errConsolidated, err)
+			if err = r.Status().Update(ctx, listen); err != nil {
+				errConsolidated = multierr.Combine(errConsolidated, err)
+			}
 		}
 	}
 
 	for i := range frontends.Items {
 		frontend := &frontends.Items[i]
 		frontend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Frontend"))
-
 		if err = checkNameKind(nameKindMap, frontend); err == nil {
 			err = frontend.AddToParser(p)
 		}
-
 		if err != nil {
-			frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+			frontend.Status.Phase = configv1alpha1.StatusPhaseError
 			frontend.Status.Error = err.Error()
 			errConsolidated = multierr.Combine(errConsolidated, err)
-		} else {
-			frontend.Status.Phase = configv1alpha1.StatusPhasePending
-			frontend.Status.Error = ""
-		}
-		if err = r.Status().Update(ctx, frontend); err != nil {
-			errConsolidated = multierr.Combine(errConsolidated, err)
+			if err = r.Status().Update(ctx, frontend); err != nil {
+				errConsolidated = multierr.Combine(errConsolidated, err)
+			}
 		}
 	}
 
 	for i := range backends.Items {
 		backend := &backends.Items[i]
 		backend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Backend"))
-
 		if err = checkNameKind(nameKindMap, backend); err == nil {
 			err = backend.AddToParser(p)
 		}
-
 		if err != nil {
-			backend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+			backend.Status.Phase = configv1alpha1.StatusPhaseError
 			backend.Status.Error = err.Error()
 			errConsolidated = multierr.Combine(errConsolidated, err)
-		} else {
-			backend.Status.Phase = configv1alpha1.StatusPhasePending
-			backend.Status.Error = ""
-		}
-		if err = r.Status().Update(ctx, backend); err != nil {
-			errConsolidated = multierr.Combine(errConsolidated, err)
+			if err = r.Status().Update(ctx, backend); err != nil {
+				errConsolidated = multierr.Combine(errConsolidated, err)
+			}
 		}
 	}
 
 	for i := range resolvers.Items {
 		resolver := &resolvers.Items[i]
 		resolver.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Resolver"))
-
 		if err = checkNameKind(nameKindMap, resolver); err == nil {
 			err = resolver.AddToParser(p)
 		}
-
 		if err != nil {
-			resolver.Status.Phase = configv1alpha1.StatusPhaseInternalError
+			resolver.Status.Phase = configv1alpha1.StatusPhaseError
 			resolver.Status.Error = err.Error()
 			errConsolidated = multierr.Combine(errConsolidated, err)
-		} else {
-			resolver.Status.Phase = configv1alpha1.StatusPhasePending
-			resolver.Status.Error = ""
-		}
-		if err = r.Status().Update(ctx, resolver); err != nil {
-			errConsolidated = multierr.Combine(errConsolidated, err)
+			if err = r.Status().Update(ctx, resolver); err != nil {
+				errConsolidated = multierr.Combine(errConsolidated, err)
+			}
 		}
 	}
 
 	if instance.Spec.Metrics != nil {
 		if err := instance.Spec.Metrics.AddToParser(p); err != nil {
 			errConsolidated = multierr.Combine(errConsolidated, err)
+		}
+	}
+
+	if errConsolidated != nil {
+		for i := range listens.Items {
+			listen := &listens.Items[i]
+			if listen.Status.Phase != configv1alpha1.StatusPhaseError {
+				listen.Status.Phase = configv1alpha1.StatusPhasePending
+				listen.Status.Error = ""
+				if err = r.Status().Update(ctx, listen); err != nil {
+					errConsolidated = multierr.Combine(errConsolidated, err)
+				}
+			}
+		}
+
+		for i := range frontends.Items {
+			frontend := &frontends.Items[i]
+			if frontend.Status.Phase != configv1alpha1.StatusPhaseError {
+				frontend.Status.Phase = configv1alpha1.StatusPhasePending
+				frontend.Status.Error = ""
+				if err = r.Status().Update(ctx, frontend); err != nil {
+					errConsolidated = multierr.Combine(errConsolidated, err)
+				}
+			}
+		}
+
+		for i := range backends.Items {
+			backend := &backends.Items[i]
+			if backend.Status.Phase != configv1alpha1.StatusPhaseError {
+				backend.Status.Phase = configv1alpha1.StatusPhasePending
+				backend.Status.Error = ""
+				if err = r.Status().Update(ctx, backend); err != nil {
+					errConsolidated = multierr.Combine(errConsolidated, err)
+				}
+			}
+		}
+
+		for i := range resolvers.Items {
+			resolver := &resolvers.Items[i]
+			if resolver.Status.Phase != configv1alpha1.StatusPhaseError {
+				resolver.Status.Phase = configv1alpha1.StatusPhasePending
+				resolver.Status.Error = ""
+				if err = r.Status().Update(ctx, resolver); err != nil {
+					errConsolidated = multierr.Combine(errConsolidated, err)
+				}
+			}
 		}
 	}
 
@@ -279,7 +305,7 @@ func (r *Reconciler) headerEnvValue(ctx context.Context, instance *proxyv1alpha1
 			if ref != nil {
 				secret := &corev1.Secret{}
 				if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: instance.Namespace}, secret); err != nil {
-					listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
+					listen.Status.Phase = configv1alpha1.StatusPhaseError
 					listen.Status.Error = err.Error()
 					return nil, multierr.Combine(err, r.Status().Update(ctx, &listen))
 				}
@@ -287,7 +313,7 @@ func (r *Reconciler) headerEnvValue(ctx context.Context, instance *proxyv1alpha1
 				bytes, ok := secret.Data[ref.Key]
 				if !ok {
 					err := fmt.Errorf("key %s not found in HTTP header secret: %s/%s", ref.Key, instance.Namespace, ref.Name)
-					listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
+					listen.Status.Phase = configv1alpha1.StatusPhaseError
 					listen.Status.Error = err.Error()
 					return nil, multierr.Combine(err, r.Status().Update(ctx, &listen))
 				}
@@ -311,14 +337,14 @@ func (r *Reconciler) generateBackendMappingFiles(ctx context.Context, instance *
 				labelSelector := rules.Backend.RegexMapping.LabelSelector
 				selector, err := metav1.LabelSelectorAsSelector(&labelSelector)
 				if err != nil {
-					frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+					frontend.Status.Phase = configv1alpha1.StatusPhaseError
 					frontend.Status.Error = err.Error()
 					return files, multierr.Combine(err, r.Status().Update(ctx, &frontend))
 				}
 
 				backends := &configv1alpha1.BackendList{}
 				if err = r.List(ctx, backends, client.MatchingLabelsSelector{Selector: selector}, client.InNamespace(instance.Namespace)); err != nil {
-					frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+					frontend.Status.Phase = configv1alpha1.StatusPhaseError
 					frontend.Status.Error = err.Error()
 					return files, multierr.Combine(err, r.Status().Update(ctx, &frontend))
 				}
@@ -327,7 +353,7 @@ func (r *Reconciler) generateBackendMappingFiles(ctx context.Context, instance *
 				for _, backend := range backends.Items {
 					if backend.Spec.HostRegex == "" {
 						err := fmt.Errorf("regex not found in backend: %s/%s", backend.Namespace, backend.Name)
-						frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+						frontend.Status.Phase = configv1alpha1.StatusPhaseError
 						frontend.Status.Error = err.Error()
 						return files, multierr.Combine(err, r.Status().Update(ctx, &frontend))
 					}

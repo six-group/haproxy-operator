@@ -70,7 +70,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	object.SetStatus(configv1alpha1.Status{
-		Phase: configv1alpha1.StatusPhaseInternalError,
+		Phase: configv1alpha1.StatusPhaseError,
 		Error: "No Instance with a matching label selector found",
 	})
 

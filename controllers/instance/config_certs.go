@@ -36,7 +36,7 @@ func (r *Reconciler) generateCertificates(ctx context.Context, instance *proxyv1
 		for _, certificate := range extractSLCCertificatesFromFrontend(listen.ToFrontend()) {
 			data, err := r.loadSSLCertificateValueData(ctx, instance, certificate)
 			if err != nil {
-				listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
+				listen.Status.Phase = configv1alpha1.StatusPhaseError
 				listen.Status.Error = err.Error()
 				return certificates, multierr.Combine(err, r.Status().Update(ctx, &listen))
 			}
@@ -47,7 +47,7 @@ func (r *Reconciler) generateCertificates(ctx context.Context, instance *proxyv1
 		for _, certificate := range extractSLCCertificatesFromBackend(listen.ToBackend()) {
 			data, err := r.loadSSLCertificateValueData(ctx, instance, certificate)
 			if err != nil {
-				listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
+				listen.Status.Phase = configv1alpha1.StatusPhaseError
 				listen.Status.Error = err.Error()
 				return certificates, multierr.Combine(err, r.Status().Update(ctx, &listen))
 			}
@@ -62,7 +62,7 @@ func (r *Reconciler) generateCertificates(ctx context.Context, instance *proxyv1
 		for _, certificate := range extractSLCCertificatesFromFrontend(&frontend) {
 			data, err := r.loadSSLCertificateValueData(ctx, instance, certificate)
 			if err != nil {
-				frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+				frontend.Status.Phase = configv1alpha1.StatusPhaseError
 				frontend.Status.Error = err.Error()
 				return certificates, multierr.Combine(err, r.Status().Update(ctx, &frontend))
 			}
@@ -77,7 +77,7 @@ func (r *Reconciler) generateCertificates(ctx context.Context, instance *proxyv1
 		for _, certificate := range extractSLCCertificatesFromBackend(&backend) {
 			data, err := r.loadSSLCertificateValueData(ctx, instance, certificate)
 			if err != nil {
-				backend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+				backend.Status.Phase = configv1alpha1.StatusPhaseError
 				backend.Status.Error = err.Error()
 				return certificates, multierr.Combine(err, r.Status().Update(ctx, &backend))
 			}
@@ -106,14 +106,14 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 				if bind.SSLCertificateList.LabelSelector != nil {
 					selector, err := metav1.LabelSelectorAsSelector(bind.SSLCertificateList.LabelSelector)
 					if err != nil {
-						frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+						frontend.Status.Phase = configv1alpha1.StatusPhaseError
 						frontend.Status.Error = err.Error()
 						return files, multierr.Combine(err, r.Status().Update(ctx, &frontend))
 					}
 
 					backends := &configv1alpha1.BackendList{}
 					if err = r.List(ctx, backends, client.MatchingLabelsSelector{Selector: selector}, client.InNamespace(instance.Namespace)); err != nil {
-						frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+						frontend.Status.Phase = configv1alpha1.StatusPhaseError
 						frontend.Status.Error = err.Error()
 						return files, multierr.Combine(err, r.Status().Update(ctx, &frontend))
 					}
@@ -128,7 +128,7 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 				for _, element := range elements {
 					data, err := r.loadSSLCertificateValueData(ctx, instance, &element.Certificate)
 					if err != nil {
-						frontend.Status.Phase = configv1alpha1.StatusPhaseInternalError
+						frontend.Status.Phase = configv1alpha1.StatusPhaseError
 						frontend.Status.Error = err.Error()
 						return nil, multierr.Combine(err, r.Status().Update(ctx, &frontend))
 					}
@@ -174,7 +174,7 @@ func (r *Reconciler) generateCustomCertificatesFile(ctx context.Context, instanc
 				for _, element := range elements {
 					data, err := r.loadSSLCertificateValueData(ctx, instance, &element.Certificate)
 					if err != nil {
-						listen.Status.Phase = configv1alpha1.StatusPhaseInternalError
+						listen.Status.Phase = configv1alpha1.StatusPhaseError
 						listen.Status.Error = err.Error()
 						return nil, multierr.Combine(err, r.Status().Update(ctx, &listen))
 					}

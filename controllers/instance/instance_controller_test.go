@@ -526,10 +526,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 		})
 
 		It("same resource names error", func() {
-			backend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Backend"))
 			backend.Name = "foo"
-
-			frontend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Frontend"))
 			frontend.Name = "foo"
 
 			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()

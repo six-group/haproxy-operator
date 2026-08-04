@@ -131,7 +131,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			Ω(cli.Get(context.TODO(), client.ObjectKeyFromObject(listen), listen)).ShouldNot(HaveOccurred())
 			Ω(listen.Status.Error).ShouldNot(BeNil())
-			Ω(listen.Status.Phase).Should(Equal(configv1alpha1.StatusPhaseInternalError))
+			Ω(listen.Status.Phase).Should(Equal(configv1alpha1.StatusPhaseError))
 		})
 		It("should update error status if instances do not match", func() {
 			proxy := &proxyv1alpha1.Instance{
@@ -173,7 +173,7 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 
 			Ω(cli.Get(context.TODO(), client.ObjectKeyFromObject(listen), listen)).ShouldNot(HaveOccurred())
 			Ω(listen.Status.Error).ShouldNot(BeNil())
-			Ω(listen.Status.Phase).Should(Equal(configv1alpha1.StatusPhaseInternalError))
+			Ω(listen.Status.Phase).Should(Equal(configv1alpha1.StatusPhaseError))
 		})
 		It("should not update owner reference", func() {
 			reference := metav1.OwnerReference{
