@@ -150,6 +150,7 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 	for i := range listens.Items {
 		listen := &listens.Items[i]
 		listen.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Listen"))
+		listen.Status.Phase = configv1alpha1.StatusPhaseActive
 		if err = checkNameKind(nameKindMap, listen); err == nil {
 			err = listen.AddToParser(p)
 		}
@@ -157,15 +158,13 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 			listen.Status.Phase = configv1alpha1.StatusPhaseError
 			listen.Status.Error = err.Error()
 			errConsolidated = multierr.Combine(errConsolidated, err)
-			if err = r.Status().Update(ctx, listen); err != nil {
-				errConsolidated = multierr.Combine(errConsolidated, err)
-			}
 		}
 	}
 
 	for i := range frontends.Items {
 		frontend := &frontends.Items[i]
 		frontend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Frontend"))
+		frontend.Status.Phase = configv1alpha1.StatusPhaseActive
 		if err = checkNameKind(nameKindMap, frontend); err == nil {
 			err = frontend.AddToParser(p)
 		}
@@ -173,15 +172,13 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 			frontend.Status.Phase = configv1alpha1.StatusPhaseError
 			frontend.Status.Error = err.Error()
 			errConsolidated = multierr.Combine(errConsolidated, err)
-			if err = r.Status().Update(ctx, frontend); err != nil {
-				errConsolidated = multierr.Combine(errConsolidated, err)
-			}
 		}
 	}
 
 	for i := range backends.Items {
 		backend := &backends.Items[i]
 		backend.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Backend"))
+		backend.Status.Phase = configv1alpha1.StatusPhaseActive
 		if err = checkNameKind(nameKindMap, backend); err == nil {
 			err = backend.AddToParser(p)
 		}
@@ -189,15 +186,13 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 			backend.Status.Phase = configv1alpha1.StatusPhaseError
 			backend.Status.Error = err.Error()
 			errConsolidated = multierr.Combine(errConsolidated, err)
-			if err = r.Status().Update(ctx, backend); err != nil {
-				errConsolidated = multierr.Combine(errConsolidated, err)
-			}
 		}
 	}
 
 	for i := range resolvers.Items {
 		resolver := &resolvers.Items[i]
 		resolver.GetObjectKind().SetGroupVersionKind(configv1alpha1.GroupVersion.WithKind("Resolver"))
+		resolver.Status.Phase = configv1alpha1.StatusPhaseActive
 		if err = checkNameKind(nameKindMap, resolver); err == nil {
 			err = resolver.AddToParser(p)
 		}
@@ -205,9 +200,6 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 			resolver.Status.Phase = configv1alpha1.StatusPhaseError
 			resolver.Status.Error = err.Error()
 			errConsolidated = multierr.Combine(errConsolidated, err)
-			if err = r.Status().Update(ctx, resolver); err != nil {
-				errConsolidated = multierr.Combine(errConsolidated, err)
-			}
 		}
 	}
 
@@ -217,53 +209,60 @@ func (r *Reconciler) generateHAPProxyConfiguration(ctx context.Context, instance
 		}
 	}
 
-	if errConsolidated != nil {
-		for i := range listens.Items {
-			listen := &listens.Items[i]
-			if listen.Status.Phase != configv1alpha1.StatusPhaseError {
-				listen.Status.Phase = configv1alpha1.StatusPhasePending
-				listen.Status.Error = ""
-				if err = r.Status().Update(ctx, listen); err != nil {
-					errConsolidated = multierr.Combine(errConsolidated, err)
-				}
-			}
-		}
-
-		for i := range frontends.Items {
-			frontend := &frontends.Items[i]
-			if frontend.Status.Phase != configv1alpha1.StatusPhaseError {
-				frontend.Status.Phase = configv1alpha1.StatusPhasePending
-				frontend.Status.Error = ""
-				if err = r.Status().Update(ctx, frontend); err != nil {
-					errConsolidated = multierr.Combine(errConsolidated, err)
-				}
-			}
-		}
-
-		for i := range backends.Items {
-			backend := &backends.Items[i]
-			if backend.Status.Phase != configv1alpha1.StatusPhaseError {
-				backend.Status.Phase = configv1alpha1.StatusPhasePending
-				backend.Status.Error = ""
-				if err = r.Status().Update(ctx, backend); err != nil {
-					errConsolidated = multierr.Combine(errConsolidated, err)
-				}
-			}
-		}
-
-		for i := range resolvers.Items {
-			resolver := &resolvers.Items[i]
-			if resolver.Status.Phase != configv1alpha1.StatusPhaseError {
-				resolver.Status.Phase = configv1alpha1.StatusPhasePending
-				resolver.Status.Error = ""
-				if err = r.Status().Update(ctx, resolver); err != nil {
-					errConsolidated = multierr.Combine(errConsolidated, err)
-				}
-			}
-		}
+	if err = r.updateConfigResources(ctx, instance, listens, frontends, backends, resolvers, errConsolidated != nil); err != nil {
+		errConsolidated = multierr.Combine(errConsolidated, err)
 	}
 
 	return p.String(), errConsolidated
+}
+
+func (r *Reconciler) updateConfigResources(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList, hasErr bool) error {
+	var errRes error
+
+	for i := range listens.Items {
+		listen := &listens.Items[i]
+		if hasErr && listen.Status.Phase == configv1alpha1.StatusPhaseActive {
+			listen.Status.Phase = configv1alpha1.StatusPhasePending
+			listen.Status.Error = ""
+		}
+		if err := r.updateConfigObject(ctx, instance, listen); err != nil {
+			errRes = err
+		}
+	}
+
+	for i := range frontends.Items {
+		frontend := &frontends.Items[i]
+		if hasErr && frontend.Status.Phase == configv1alpha1.StatusPhaseActive {
+			frontend.Status.Phase = configv1alpha1.StatusPhasePending
+			frontend.Status.Error = ""
+		}
+		if err := r.updateConfigObject(ctx, instance, frontend); err != nil {
+			errRes = err
+		}
+	}
+
+	for i := range backends.Items {
+		backend := &backends.Items[i]
+		if hasErr && backend.Status.Phase == configv1alpha1.StatusPhaseActive {
+			backend.Status.Phase = configv1alpha1.StatusPhasePending
+			backend.Status.Error = ""
+		}
+		if err := r.updateConfigObject(ctx, instance, backend); err != nil {
+			errRes = err
+		}
+	}
+
+	for i := range resolvers.Items {
+		resolver := &resolvers.Items[i]
+		if hasErr && resolver.Status.Phase == configv1alpha1.StatusPhaseActive {
+			resolver.Status.Phase = configv1alpha1.StatusPhasePending
+			resolver.Status.Error = ""
+		}
+		if err := r.updateConfigObject(ctx, instance, resolver); err != nil {
+			errRes = err
+		}
+	}
+	return errRes
 }
 
 func (r *Reconciler) generateEnvs(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList) ([]string, error) {
