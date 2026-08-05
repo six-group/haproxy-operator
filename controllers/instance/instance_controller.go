@@ -113,8 +113,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	r.updateConfig(ctx, instance, listens, frontends, backends, resolvers)
-
 	if checksum != "" {
 		if err = r.patchPods(ctx, instance, checksum); err != nil {
 			return ctrl.Result{}, err
@@ -156,30 +154,11 @@ func (r *Reconciler) patchPods(ctx context.Context, instance *proxyv1alpha1.Inst
 	return nil
 }
 
-func (r *Reconciler) updateConfig(ctx context.Context, instance *proxyv1alpha1.Instance, listens *configv1alpha1.ListenList, frontends *configv1alpha1.FrontendList, backends *configv1alpha1.BackendList, resolvers *configv1alpha1.ResolverList) {
-	for i := range listens.Items {
-		listen := listens.Items[i]
-		_ = r.updateConfigObject(ctx, instance, &listen)
-	}
-
-	for i := range frontends.Items {
-		frontend := frontends.Items[i]
-		_ = r.updateConfigObject(ctx, instance, &frontend)
-	}
-
-	for i := range backends.Items {
-		backend := backends.Items[i]
-		_ = r.updateConfigObject(ctx, instance, &backend)
-	}
-
-	for i := range resolvers.Items {
-		resolvers := resolvers.Items[i]
-		_ = r.updateConfigObject(ctx, instance, &resolvers)
-	}
-}
-
 func (r *Reconciler) updateConfigObject(ctx context.Context, instance *proxyv1alpha1.Instance, object configv1alpha1.Object) error {
 	logger := log.FromContext(ctx)
+
+	stPha := object.GetStatus().Phase
+	stErr := object.GetStatus().Error
 
 	_, err := controllerutil.CreateOrUpdate(ctx, r.Client, object, func() error {
 		return controllerutil.SetControllerReference(instance, object, r.Scheme)
@@ -190,9 +169,11 @@ func (r *Reconciler) updateConfigObject(ctx context.Context, instance *proxyv1al
 	}
 
 	object.SetStatus(configv1alpha1.Status{
-		Phase:              configv1alpha1.StatusPhaseActive,
+		Phase:              stPha,
+		Error:              stErr,
 		ObservedGeneration: object.GetGeneration(),
 	})
+
 	if err := r.Status().Update(ctx, object); err != nil {
 		logger.Error(err, "Unable to update status", object.GetObjectKind().GroupVersionKind().Kind, object.GetName())
 		return err
