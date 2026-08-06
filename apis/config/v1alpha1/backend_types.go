@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-openapi/strfmt"
 	parser "github.com/haproxytech/client-native/v6/config-parser"
+	parsertypes "github.com/haproxytech/client-native/v6/config-parser/types"
 	"github.com/haproxytech/client-native/v6/configuration"
 	"github.com/haproxytech/client-native/v6/configuration/options"
 	"github.com/haproxytech/client-native/v6/models"
@@ -102,9 +103,13 @@ func (b *Backend) Model() (models.Backend, error) {
 
 	if b.Spec.HTTPChk != nil {
 		model.AdvCheck = models.BackendBaseAdvCheckHttpchk
-		model.HttpchkParams = &models.HttpchkParams{
-			URI:    b.Spec.HTTPChk.URI,
-			Method: b.Spec.HTTPChk.Method,
+		if b.Spec.HTTPChk.HasCustomSendLine() {
+			model.HttpchkParams = &models.HttpchkParams{}
+		} else {
+			model.HttpchkParams = &models.HttpchkParams{
+				URI:    b.Spec.HTTPChk.URI,
+				Method: b.Spec.HTTPChk.Method,
+			}
 		}
 	} else if b.Spec.TCPCheck != nil && *b.Spec.TCPCheck {
 		model.AdvCheck = models.BackendBaseAdvCheckTCPDashCheck
@@ -224,6 +229,48 @@ func (b *Backend) AddToParser(p parser.Parser) error {
 	configOpts := &options.ConfigurationOptions{}
 	if err := configuration.CreateEditSection(&backend.BackendBase, parser.Backends, b.Name, p, configOpts); err != nil {
 		return err
+	}
+
+	if b.Spec.HTTPChk != nil && b.Spec.HTTPChk.HasCustomSendLine() {
+		optionHTTPChkData, err := p.GetOne(parser.Backends, b.Name, "option httpchk", 0)
+		if err != nil {
+			return err
+		}
+
+		var optionHTTPChk parsertypes.OptionHttpchk
+		switch value := optionHTTPChkData.(type) {
+		case *parsertypes.OptionHttpchk:
+			optionHTTPChk = *value
+		case parsertypes.OptionHttpchk:
+			optionHTTPChk = value
+		default:
+			return fmt.Errorf("unexpected parser data type for option httpchk")
+		}
+
+		optionHTTPChk.Method = ""
+		optionHTTPChk.URI = ""
+		optionHTTPChk.Version = ""
+		optionHTTPChk.Host = ""
+
+		err = p.Set(parser.Backends, b.Name, "option httpchk", &optionHTTPChk, 0)
+		if err != nil {
+			return err
+		}
+
+		httpCheck, err := b.Spec.HTTPChk.CustomSendHTTPCheck()
+		if err != nil {
+			return err
+		}
+
+		serializedCheck, err := configuration.SerializeHTTPCheck(*httpCheck)
+		if err != nil {
+			return err
+		}
+
+		err = p.Insert(parser.Backends, b.Name, "http-check", serializedCheck, 0)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = b.Spec.AddToParser(p, parser.Backends, b.Name)

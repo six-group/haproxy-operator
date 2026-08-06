@@ -427,6 +427,25 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `uri` _string_ | URI |  |  |
 | `method` _string_ | Method http method<br />Enum: [HEAD PUT POST GET TRACE PATCH DELETE CONNECT OPTIONS] |  | Enum: [HEAD PUT POST GET TRACE PATCH DELETE CONNECT OPTIONS] <br />Optional: \{\} <br /> |
+| `version` _string_ | Version HTTP version to use in a custom "http-check send" line, e.g. HTTP/1.0. |  | Pattern: `^[^\s]+$` <br />Optional: \{\} <br /> |
+| `headers` _[HTTPChkHeader](#httpchkheader) array_ | Headers defines extra headers used in a custom "http-check send" line. |  | Optional: \{\} <br /> |
+
+
+#### HTTPChkHeader
+
+
+
+
+
+
+
+_Appears in:_
+- [HTTPChk](#httpchk)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name is the header name. |  | Pattern: `^[^\s]+$` <br /> |
+| `value` _string_ | Value is the header value. |  |  |
 
 
 #### HTTPDeleteHeaderRule

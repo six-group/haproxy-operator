@@ -141,6 +141,51 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(p.String()).Should(ContainSubstring("http-request deny deny_status 404 if { var(my-ip) -m ip 127.0.0.0/8 10.0.0.0/8 }\n"))
 			Ω(p.String()).Should(ContainSubstring("option httpchk PUT a\n"))
 		})
+		It("should set custom http-check send", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					HTTPChk: &configv1alpha1.HTTPChk{
+						Method:  "GET",
+						URI:     "/",
+						Version: "HTTP/1.0",
+						Headers: []configv1alpha1.HTTPChkHeader{
+							{Name: "User-Agent", Value: "Custom-User-Agent/1.0"},
+						},
+					},
+				},
+			}
+
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("option httpchk\n"))
+			Ω(p.String()).Should(ContainSubstring("http-check send meth GET uri / ver HTTP/1.0 hdr User-Agent Custom-User-Agent/1.0\n"))
+		})
+		It("should return an error when custom http-check send has no method", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					HTTPChk: &configv1alpha1.HTTPChk{
+						URI:     "/",
+						Version: "HTTP/1.0",
+					},
+				},
+			}
+
+			Ω(backend.AddToParser(p)).Should(HaveOccurred())
+		})
+		It("should return an error when custom http-check send has no uri", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					HTTPChk: &configv1alpha1.HTTPChk{
+						Method:  "GET",
+						Version: "HTTP/1.0",
+					},
+				},
+			}
+
+			Ω(backend.AddToParser(p)).Should(HaveOccurred())
+		})
 		It("should set option http-request replace-path", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},
