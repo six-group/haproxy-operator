@@ -877,6 +877,23 @@ spec:
                 description: HTTPCheck Enables HTTP protocol to check on the servers
                   health
                 properties:
+                  headers:
+                    description: Headers defines extra headers used in a custom "http-check
+                      send" line.
+                    items:
+                      properties:
+                        name:
+                          description: Name is the header name.
+                          pattern: ^[^\s]+$
+                          type: string
+                        value:
+                          description: Value is the header value.
+                          type: string
+                      required:
+                      - name
+                      - value
+                      type: object
+                    type: array
                   method:
                     description: |-
                       Method http method
@@ -894,6 +911,11 @@ spec:
                     type: string
                   uri:
                     description: URI
+                    type: string
+                  version:
+                    description: Version HTTP version to use in a custom "http-check
+                      send" line, e.g. HTTP/1.0.
+                    pattern: ^[^\s]+$
                     type: string
                 type: object
               httpLog:

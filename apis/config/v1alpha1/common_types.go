@@ -1269,4 +1269,60 @@ type HTTPChk struct {
 	// Enum: [HEAD PUT POST GET TRACE PATCH DELETE CONNECT OPTIONS]
 	// +kubebuilder:validation:Enum=HEAD;PUT;POST;GET;TRACE;PATCH;DELETE;CONNECT;OPTIONS;
 	Method string `json:"method,omitempty"`
+	// Version HTTP version to use in a custom "http-check send" line, e.g. HTTP/1.0.
+	// +optional
+	// +kubebuilder:validation:Pattern=^[^\s]+$
+	Version string `json:"version,omitempty"`
+	// Headers defines extra headers used in a custom "http-check send" line.
+	// +optional
+	Headers []HTTPChkHeader `json:"headers,omitempty"`
+}
+
+type HTTPChkHeader struct {
+	// Name is the header name.
+	// +kubebuilder:validation:Pattern=^[^\s]+$
+	Name string `json:"name"`
+	// Value is the header value.
+	Value string `json:"value"`
+}
+
+func (h *HTTPChk) HasCustomSendLine() bool {
+	if h == nil {
+		return false
+	}
+
+	return h.Version != "" || len(h.Headers) > 0
+}
+
+func (h *HTTPChk) CustomSendHTTPCheck() (*models.HTTPCheck, error) {
+	if h == nil || !h.HasCustomSendLine() {
+		return nil, nil
+	}
+
+	if h.Method == "" {
+		return nil, fmt.Errorf("httpchk.method is required when httpchk.version or httpchk.headers is set")
+	}
+
+	if h.URI == "" {
+		return nil, fmt.Errorf("httpchk.uri is required when httpchk.version or httpchk.headers is set")
+	}
+
+	httpCheck := &models.HTTPCheck{
+		Type:    models.HTTPCheckTypeSend,
+		Method:  h.Method,
+		URI:     h.URI,
+		Version: h.Version,
+	}
+
+	for _, header := range h.Headers {
+		if header.Name == "" {
+			return nil, fmt.Errorf("httpchk.headers[].name is required")
+		}
+
+		headerName := header.Name
+		headerValue := header.Value
+		httpCheck.CheckHeaders = append(httpCheck.CheckHeaders, &models.ReturnHeader{Name: &headerName, Fmt: &headerValue})
+	}
+
+	return httpCheck, nil
 }
