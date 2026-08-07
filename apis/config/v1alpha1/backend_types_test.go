@@ -680,6 +680,65 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("server-template test_ 0 test.com:9443 ssl ca-file /usr/local/etc/haproxy/my-ca.crt crt /usr/local/etc/haproxy/my-cert.crt sni test.svc.cluster.local ssl-min-ver TLSv1.3 verify required\n"))
 		})
+		// Label policy:
+		// - Existing tests keep Label("type") for backward compatibility.
+		// - New SSL cipher-specific cases use Label("ssl-ciphers").
+		// - CI runs all tests by default; labels are for local filtering only.
+		It("should set server SSL maxVersion", Label("ssl-ciphers"), func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					Servers: []configv1alpha1.Server{
+						{
+							Name:    "server",
+							Address: "localhost",
+							Port:    9443,
+							ServerParams: configv1alpha1.ServerParams{
+								SSL: &configv1alpha1.SSL{
+									Enabled:    true,
+									MinVersion: "TLSv1.2",
+									MaxVersion: "TLSv1.3",
+									Verify:     "required",
+									CACertificate: &configv1alpha1.SSLCertificate{
+										Name: "my-ca",
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("ssl-min-ver TLSv1.2"))
+			Ω(p.String()).Should(ContainSubstring("ssl-max-ver TLSv1.3"))
+		})
+		It("should set server SSL ciphers and ciphersuites", Label("ssl-ciphers"), func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					Servers: []configv1alpha1.Server{
+						{
+							Name:    "server",
+							Address: "localhost",
+							Port:    9443,
+							ServerParams: configv1alpha1.ServerParams{
+								SSL: &configv1alpha1.SSL{
+									Enabled: true,
+									CACertificate: &configv1alpha1.SSLCertificate{
+										Name: "my-ca",
+									},
+									Ciphers:      []string{"TLSv1.2+ECDHE-RSA-AES256-GCM-SHA384", "ECDHE-RSA-AES128-GCM-SHA256"},
+									Ciphersuites: []string{"TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256"},
+								},
+							},
+						},
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("ciphers TLSv1.2+ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256"))
+			Ω(p.String()).Should(ContainSubstring("ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"))
+		})
 		It("should set sendProxy with proxy protocol v2 and options for server templates", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},

@@ -990,11 +990,14 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled enables SSL deciphering on connections instantiated from this listener. A<br />certificate is necessary. All contents in the buffers will<br />appear in clear text, so that ACLs and HTTP processing will only have access<br />to deciphered contents. SSLv3 is disabled per default, set MinVersion to SSLv3<br />to enable it. |  |  |
 | `minVersion` _string_ | MinVersion enforces use of the specified version or upper on SSL connections<br />instantiated from this listener. |  | Enum: [SSLv3 TLSv1.0 TLSv1.1 TLSv1.2 TLSv1.3] <br />Optional: \{\} <br /> |
+| `maxVersion` _string_ | MaxVersion enforces use of the specified version or lower on SSL connections<br />instantiated from this listener. |  | Enum: [SSLv3 TLSv1.0 TLSv1.1 TLSv1.2 TLSv1.3] <br />Optional: \{\} <br /> |
 | `verify` _string_ | Verify is only available when support for OpenSSL was built in. If set<br />to 'none', client certificate is not requested. This is the default. In other<br />cases, a client certificate is requested. If the client does not provide a<br />certificate after the request and if 'Verify' is set to 'required', then the<br />handshake is aborted, while it would have succeeded if set to 'optional'. The verification<br />of the certificate provided by the client using CAs from CACertificate.<br />On verify failure the handshake abortes, regardless of the 'verify' option. |  | Enum: [none optional required] <br />Optional: \{\} <br /> |
 | `caCertificate` _[SSLCertificate](#sslcertificate)_ | CACertificate configures the CACertificate used for the Server or Bind client certificate |  | Optional: \{\} <br /> |
 | `certificate` _[SSLCertificate](#sslcertificate)_ | Certificate configures a PEM based Certificate file containing both the required certificates and any<br />associated private keys. |  | Optional: \{\} <br /> |
 | `sni` _string_ | SNI parameter evaluates the sample fetch expression, converts it to a<br />string and uses the result as the host name sent in the SNI TLS extension to<br />the server. |  | Optional: \{\} <br /> |
 | `alpn` _string array_ | Alpn enables the TLS ALPN extension and advertises the specified protocol<br />list as supported on top of ALPN. |  | Optional: \{\} <br /> |
+| `ciphers` _string array_ | Ciphers sets the cipher list used for TLSv1.2 and below on this SSL bind.<br />Multiple values are joined with ':' in the generated HAProxy configuration. |  | Optional: \{\} <br /> |
+| `ciphersuites` _string array_ | Ciphersuites sets the list of cipher algorithms for TLS 1.3.<br />Multiple values are joined with ':' in the generated HAProxy configuration. |  | Optional: \{\} <br /> |
 
 
 #### SSLCertificate
