@@ -347,6 +347,18 @@ func (b *Bind) Model() (models.Bind, error) {
 		if b.SSL.MinVersion != "" {
 			model.SslMinVer = b.SSL.MinVersion
 		}
+
+		if b.SSL.MaxVersion != "" {
+			model.SslMaxVer = b.SSL.MaxVersion
+		}
+
+		if len(b.SSL.Ciphers) > 0 {
+			model.Ciphers = strings.Join(b.SSL.Ciphers, ":")
+		}
+
+		if len(b.SSL.Ciphersuites) > 0 {
+			model.Ciphersuites = strings.Join(b.SSL.Ciphersuites, ":")
+		}
 	}
 
 	return model, model.Validate(strfmt.Default)
@@ -476,6 +488,18 @@ func (s *ServerTemplate) Model() (models.ServerTemplate, error) {
 			model.SslMinVer = s.SSL.MinVersion
 		}
 
+		if s.SSL.MaxVersion != "" {
+			model.SslMaxVer = s.SSL.MaxVersion
+		}
+
+		if len(s.SSL.Ciphers) > 0 {
+			model.Ciphers = strings.Join(s.SSL.Ciphers, ":")
+		}
+
+		if len(s.SSL.Ciphersuites) > 0 {
+			model.Ciphersuites = strings.Join(s.SSL.Ciphersuites, ":")
+		}
+
 		if s.SSL.SNI != "" {
 			model.Sni = s.SSL.SNI
 		}
@@ -598,6 +622,18 @@ func (s *Server) Model() (models.Server, error) {
 			model.SslMinVer = s.SSL.MinVersion
 		}
 
+		if s.SSL.MaxVersion != "" {
+			model.SslMaxVer = s.SSL.MaxVersion
+		}
+
+		if len(s.SSL.Ciphers) > 0 {
+			model.Ciphers = strings.Join(s.SSL.Ciphers, ":")
+		}
+
+		if len(s.SSL.Ciphersuites) > 0 {
+			model.Ciphersuites = strings.Join(s.SSL.Ciphersuites, ":")
+		}
+
 		if s.SSL.SNI != "" {
 			model.Sni = s.SSL.SNI
 		}
@@ -695,6 +731,11 @@ type SSL struct {
 	// +kubebuilder:validation:Enum=SSLv3;TLSv1.0;TLSv1.1;TLSv1.2;TLSv1.3
 	// +optional
 	MinVersion string `json:"minVersion,omitempty"`
+	// MaxVersion enforces use of the specified version or lower on SSL connections
+	// instantiated from this listener.
+	// +kubebuilder:validation:Enum=SSLv3;TLSv1.0;TLSv1.1;TLSv1.2;TLSv1.3
+	// +optional
+	MaxVersion string `json:"maxVersion,omitempty"`
 	// Verify is only available when support for OpenSSL was built in. If set
 	// to 'none', client certificate is not requested. This is the default. In other
 	// cases, a client certificate is requested. If the client does not provide a
@@ -721,6 +762,14 @@ type SSL struct {
 	// list as supported on top of ALPN.
 	// +optional
 	Alpn []string `json:"alpn,omitempty"`
+	// Ciphers sets the cipher list used for TLSv1.2 and below on this SSL bind.
+	// Multiple values are joined with ':' in the generated HAProxy configuration.
+	// +optional
+	Ciphers []string `json:"ciphers,omitempty"`
+	// Ciphersuites sets the list of cipher algorithms for TLS 1.3.
+	// Multiple values are joined with ':' in the generated HAProxy configuration.
+	// +optional
+	Ciphersuites []string `json:"ciphersuites,omitempty"`
 }
 
 type SSLCertificate struct {

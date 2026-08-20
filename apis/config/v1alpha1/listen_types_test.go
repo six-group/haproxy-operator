@@ -293,6 +293,78 @@ var _ = Describe("Listen", Label("type"), func() {
 			Ω(p.String()).Should(ContainSubstring("crt /usr/local/etc/haproxy/test.crt ca-file /usr/local/etc/haproxy/test-ca.crt ssl verify required crt-list /usr/local/etc/haproxy/cert_list.map ssl-min-ver SSLv3"))
 			Ω(p.String()).Should(ContainSubstring("ssl ca-file /usr/local/etc/haproxy/test-ca.crt cookie 1c3c2192e2912699ccd31119b162666a crt /usr/local/etc/haproxy/test.crt inter 5000 sni str(localhost) ssl-min-ver TLSv1.3 weight 256"))
 		})
+		// Label policy:
+		// - Existing tests keep Label("type") for backward compatibility.
+		// - New SSL cipher-specific cases use Label("ssl-ciphers").
+		// - CI runs all tests by default; labels are for local filtering only.
+		It("should set bind ciphers for TLS 1.2", Label("ssl-ciphers"), func() {
+			listen := &configv1alpha1.Listen{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.ListenSpec{
+					Binds: []configv1alpha1.Bind{
+						{
+							Name: "bind",
+							Port: 443,
+							SSL: &configv1alpha1.SSL{
+								Enabled: true,
+								Certificate: &configv1alpha1.SSLCertificate{
+									Name: "port443.pem",
+								},
+								Ciphers: []string{"TLSv1.2+ECDHE-RSA-AES256-GCM-SHA384"},
+							},
+						},
+					},
+				},
+			}
+			Ω(listen.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("ciphers TLSv1.2+ECDHE-RSA-AES256-GCM-SHA384"))
+		})
+		It("should set bind ciphersuites for TLS 1.3", Label("ssl-ciphers"), func() {
+			listen := &configv1alpha1.Listen{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.ListenSpec{
+					Binds: []configv1alpha1.Bind{
+						{
+							Name: "bind",
+							Port: 443,
+							SSL: &configv1alpha1.SSL{
+								Enabled: true,
+								Certificate: &configv1alpha1.SSLCertificate{
+									Name: "port443.pem",
+								},
+								Ciphersuites: []string{"TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256"},
+							},
+						},
+					},
+				},
+			}
+			Ω(listen.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"))
+		})
+		It("should set bind ciphers and ciphersuites together", Label("ssl-ciphers"), func() {
+			listen := &configv1alpha1.Listen{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.ListenSpec{
+					Binds: []configv1alpha1.Bind{
+						{
+							Name: "bind",
+							Port: 443,
+							SSL: &configv1alpha1.SSL{
+								Enabled: true,
+								Certificate: &configv1alpha1.SSLCertificate{
+									Name: "port443.pem",
+								},
+								Ciphers:      []string{"TLSv1.2+ECDHE-RSA-AES256-GCM-SHA384", "ECDHE-RSA-AES128-GCM-SHA256"},
+								Ciphersuites: []string{"TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256"},
+							},
+						},
+					},
+				},
+			}
+			Ω(listen.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("ciphers TLSv1.2+ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256"))
+			Ω(p.String()).Should(ContainSubstring("ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"))
+		})
 		It("should set load balancer algorithm", func() {
 			listen := &configv1alpha1.Listen{
 				ObjectMeta: metav1.ObjectMeta{Name: "foo"},

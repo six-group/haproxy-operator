@@ -1632,6 +1632,20 @@ spec:
                           required:
                           - name
                           type: object
+                        ciphers:
+                          description: |-
+                            Ciphers sets the cipher list used for TLSv1.2 and below on this SSL bind.
+                            Multiple values are joined with ':' in the generated HAProxy configuration.
+                          items:
+                            type: string
+                          type: array
+                        ciphersuites:
+                          description: |-
+                            Ciphersuites sets the list of cipher algorithms for TLS 1.3.
+                            Multiple values are joined with ':' in the generated HAProxy configuration.
+                          items:
+                            type: string
+                          type: array
                         enabled:
                           description: |-
                             Enabled enables SSL deciphering on connections instantiated from this listener. A
@@ -1643,6 +1657,17 @@ spec:
                         minVersion:
                           description: |-
                             MinVersion enforces use of the specified version or upper on SSL connections
+                            instantiated from this listener.
+                          enum:
+                          - SSLv3
+                          - TLSv1.0
+                          - TLSv1.1
+                          - TLSv1.2
+                          - TLSv1.3
+                          type: string
+                        maxVersion:
+                          description: |-
+                            MaxVersion enforces use of the specified version or lower on SSL connections
                             instantiated from this listener.
                           enum:
                           - SSLv3
@@ -2030,6 +2055,20 @@ spec:
                           required:
                           - name
                           type: object
+                        ciphers:
+                          description: |-
+                            Ciphers sets the cipher list used for TLSv1.2 and below on this SSL bind.
+                            Multiple values are joined with ':' in the generated HAProxy configuration.
+                          items:
+                            type: string
+                          type: array
+                        ciphersuites:
+                          description: |-
+                            Ciphersuites sets the list of cipher algorithms for TLS 1.3.
+                            Multiple values are joined with ':' in the generated HAProxy configuration.
+                          items:
+                            type: string
+                          type: array
                         enabled:
                           description: |-
                             Enabled enables SSL deciphering on connections instantiated from this listener. A
@@ -2041,6 +2080,17 @@ spec:
                         minVersion:
                           description: |-
                             MinVersion enforces use of the specified version or upper on SSL connections
+                            instantiated from this listener.
+                          enum:
+                          - SSLv3
+                          - TLSv1.0
+                          - TLSv1.1
+                          - TLSv1.2
+                          - TLSv1.3
+                          type: string
+                        maxVersion:
+                          description: |-
+                            MaxVersion enforces use of the specified version or lower on SSL connections
                             instantiated from this listener.
                           enum:
                           - SSLv3
