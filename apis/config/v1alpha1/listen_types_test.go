@@ -131,6 +131,13 @@ var _ = Describe("Listen", Label("type"), func() {
 									Name: "Proxy",
 								},
 							},
+							ReplaceValue: []configv1alpha1.ReplaceValue{
+								{
+									Name:       "Host",
+									MatchRegex: "(.*):.*",
+									ReplaceFmt: "\\1",
+								},
+							},
 						},
 					},
 				},
@@ -144,6 +151,7 @@ var _ = Describe("Listen", Label("type"), func() {
 			Ω(p.String()).Should(ContainSubstring("http-request set-path /metrics if !{ ssl_fc }"))
 			Ω(p.String()).Should(ContainSubstring("http-request del-header Proxy"))
 			Ω(p.String()).Should(ContainSubstring("http-request del-header regex -m str"))
+			Ω(p.String()).Should(ContainSubstring("http-request replace-value Host (.*):.* \\1"))
 			Ω(p.String()).Should(ContainSubstring("http-response set-header Strict-Transport-Security max-age=16000000; includeSubDomains; preload; if !{ ssl_fc }"))
 		})
 		It("should create binds", func() {

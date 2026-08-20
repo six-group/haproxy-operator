@@ -858,6 +858,9 @@ type HTTPRequestRules struct {
 	// The replacement does not modify the scheme, the authority and the query-string.
 	// +optional
 	ReplacePath []ReplacePath `json:"replacePath,omitempty"`
+	// ReplaceValue matches occurrences of a header value using a regex and replaces them with the specified format.
+	// +optional
+	ReplaceValue []ReplaceValue `json:"replaceValue,omitempty"`
 	// Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error.
 	// Optionally the status code specified as an argument to deny_status.
 	// +optional
@@ -913,6 +916,17 @@ func (h *HTTPRequestRules) Model() (models.HTTPRequestRules, error) {
 			Type:      "replace-path",
 			PathMatch: header.MatchRegex,
 			PathFmt:   header.ReplaceFmt,
+			Cond:      header.ConditionType,
+			CondTest:  header.Condition,
+		})
+	}
+
+	for _, header := range h.ReplaceValue {
+		model = append(model, &models.HTTPRequestRule{
+			Type:      "replace-value",
+			HdrName:   header.Name,
+			HdrMatch:  header.MatchRegex,
+			HdrFormat: header.ReplaceFmt,
 			Cond:      header.ConditionType,
 			CondTest:  header.Condition,
 		})
@@ -1072,6 +1086,16 @@ type HTTPHeaderValue struct {
 type ReplacePath struct {
 	Rule `json:",inline"`
 	// MatchRegex is a string pattern used to identify the paths that need to be replaced.
+	MatchRegex string `json:"matchRegex"`
+	// ReplaceFmt defines the format string used to replace the values that match the pattern.
+	ReplaceFmt string `json:"replaceFmt"`
+}
+
+type ReplaceValue struct {
+	Rule `json:",inline"`
+	// Name specifies the header name.
+	Name string `json:"name"`
+	// MatchRegex is a string pattern used to identify the header values that need to be replaced.
 	MatchRegex string `json:"matchRegex"`
 	// ReplaceFmt defines the format string used to replace the values that match the pattern.
 	ReplaceFmt string `json:"replaceFmt"`
