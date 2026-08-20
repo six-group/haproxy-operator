@@ -1258,6 +1258,7 @@ _Appears in:_
 | `errorFiles` _[ErrorFile](#errorfile) array_ | ErrorFiles custom error files to be used |  | Optional: \{\} <br /> |
 | `timeouts` _object (keys:string, values:[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta))_ | Timeouts: check, client, client-fin, connect, http-keep-alive, http-request, queue, server, server-fin, tunnel.<br />The timeout value specified in milliseconds by default, but can be in any other unit if the number is suffixed by the unit.<br />More info: https://cbonte.github.io/haproxy-dconv/2.6/configuration.html | \{ client:5s connect:5s server:10s \} |  |
 | `logging` _[DefaultsLoggingConfiguration](#defaultsloggingconfiguration)_ | Logging is used to configure default logging for all proxies. |  | Optional: \{\} <br /> |
+| `h1CaseAdjustBogusServer` _boolean_ | H1CaseAdjustBogusServer enables h1-case-adjust-bogus-server in the defaults section. |  | Optional: \{\} <br /> |
 | `additionalParameters` _string_ | AdditionalParameters can be used to specify any further configuration statements which are not covered in this section explicitly. |  | Optional: \{\} <br /> |
 
 

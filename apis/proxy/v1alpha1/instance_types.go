@@ -658,6 +658,9 @@ type DefaultsConfiguration struct {
 	// Logging is used to configure default logging for all proxies.
 	// +optional
 	Logging *DefaultsLoggingConfiguration `json:"logging,omitempty"`
+	// H1CaseAdjustBogusServer enables h1-case-adjust-bogus-server in the defaults section.
+	// +optional
+	H1CaseAdjustBogusServer bool `json:"h1CaseAdjustBogusServer,omitempty"`
 	// AdditionalParameters can be used to specify any further configuration statements which are not covered in this section explicitly.
 	// +optional
 	AdditionalParameters string `json:"additionalParameters,omitempty"`
@@ -719,6 +722,10 @@ func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
 	if d.Logging != nil {
 		defaults.Httplog = ptr.Deref(d.Logging.HTTPLog, false)
 		defaults.Tcplog = ptr.Deref(d.Logging.TCPLog, false)
+	}
+
+	if d.H1CaseAdjustBogusServer {
+		defaults.H1CaseAdjustBogusServer = models.DefaultsBaseH1CaseAdjustBogusServerEnabled
 	}
 
 	return defaults, defaults.Validate(strfmt.Default)

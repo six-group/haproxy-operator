@@ -147,6 +147,10 @@ spec:
                         required:
                         - enabled
                         type: object
+                      h1CaseAdjustBogusServer:
+                        description: H1CaseAdjustBogusServer enables h1-case-adjust-bogus-server
+                          in the defaults section.
+                        type: boolean
                       mode:
                         default: http
                         description: Mode can be either 'tcp' or 'http'. In tcp mode
