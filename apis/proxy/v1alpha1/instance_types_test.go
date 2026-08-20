@@ -112,3 +112,46 @@ func TestDefaultsConfigurationAddToParserWithMaxconn(t *testing.T) {
 		t.Fatalf("expected generated config to contain maxconn 2000, got:\n%s", p.String())
 	}
 }
+
+func TestDefaultsConfiguration_AddToParser_H1CaseAdjustBogusServerEnabled(t *testing.T) {
+	p, err := parser.New()
+	if err != nil {
+		t.Fatalf("failed to create parser: %v", err)
+	}
+
+	d := &DefaultsConfiguration{
+		Mode:                    "http",
+		Timeouts:                map[string]metav1.Duration{},
+		H1CaseAdjustBogusServer: true,
+	}
+
+	if err := d.AddToParser(p); err != nil {
+		t.Fatalf("failed to add defaults to parser: %v", err)
+	}
+
+	cfg := p.String()
+	if !strings.Contains(cfg, "option h1-case-adjust-bogus-server") {
+		t.Fatalf("expected h1-case-adjust-bogus-server option in defaults section, got:\n%s", cfg)
+	}
+}
+
+func TestDefaultsConfiguration_AddToParser_H1CaseAdjustBogusServerDisabledByDefault(t *testing.T) {
+	p, err := parser.New()
+	if err != nil {
+		t.Fatalf("failed to create parser: %v", err)
+	}
+
+	d := &DefaultsConfiguration{
+		Mode:     "http",
+		Timeouts: map[string]metav1.Duration{},
+	}
+
+	if err := d.AddToParser(p); err != nil {
+		t.Fatalf("failed to add defaults to parser: %v", err)
+	}
+
+	cfg := p.String()
+	if strings.Contains(cfg, "option h1-case-adjust-bogus-server") {
+		t.Fatalf("did not expect h1-case-adjust-bogus-server option in defaults section, got:\n%s", cfg)
+	}
+}

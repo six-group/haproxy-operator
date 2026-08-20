@@ -1266,6 +1266,7 @@ _Appears in:_
 | `retries` _integer_ | Retries sets the maximum number of retries on a connection failure. |  | Minimum: 1 <br />Optional: \{\} <br /> |
 | `logging` _[DefaultsLoggingConfiguration](#defaultsloggingconfiguration)_ | Logging is used to configure default logging for all proxies. |  | Optional: \{\} <br /> |
 | `options` _[DefaultsOptions](#defaultsoptions)_ | Options configures additional HAProxy defaults options. |  | Optional: \{\} <br /> |
+| `h1CaseAdjustBogusServer` _boolean_ | H1CaseAdjustBogusServer enables h1-case-adjust-bogus-server in the defaults section. |  | Optional: \{\} <br /> |
 | `additionalParameters` _string_ | AdditionalParameters can be used to specify any further configuration statements which are not covered in this section explicitly. |  | Optional: \{\} <br /> |
 
 
