@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	github.com/go-openapi/strfmt v0.26.3
 	github.com/haproxytech/client-native/v6 v6.3.8
-	github.com/onsi/ginkgo/v2 v2.29.0
+	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.41.0
 	github.com/openshift/api v0.0.0-20260520140448-0ed3b0125858 // latest commit of branch https://github.com/openshift/api/tree/release-4.21
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.91.0
