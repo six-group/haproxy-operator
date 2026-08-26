@@ -8,6 +8,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	parser "github.com/haproxytech/client-native/v6/config-parser"
 	configparseropts "github.com/haproxytech/client-native/v6/config-parser/options"
+	parsertypes "github.com/haproxytech/client-native/v6/config-parser/types"
 	"github.com/haproxytech/client-native/v6/configuration"
 	"github.com/haproxytech/client-native/v6/configuration/options"
 	"github.com/haproxytech/client-native/v6/models"
@@ -665,6 +666,7 @@ type DefaultsConfiguration struct {
 	// Logging is used to configure default logging for all proxies.
 	// +optional
 	Logging *DefaultsLoggingConfiguration `json:"logging,omitempty"`
+	// Options contains additional defaults options.
 	// Options configures additional HAProxy defaults options.
 	// +optional
 	Options *DefaultsOptions `json:"options,omitempty"`
@@ -677,6 +679,21 @@ type DefaultsConfiguration struct {
 }
 
 type DefaultsOptions struct {
+	// LogSeparateErrors causes error and normal logs to be emitted separately.
+	// +optional
+	LogSeparateErrors *bool `json:"logSeparateErrors,omitempty"`
+	// LogHealthChecks enables logging of health checks.
+	// +optional
+	LogHealthChecks *bool `json:"logHealthChecks,omitempty"`
+	// Dontlognull controls logging of null connections.
+	// +optional
+	Dontlognull *bool `json:"dontlognull,omitempty"`
+	// DontlogNormal controls logging of normal traffic.
+	// +optional
+	DontlogNormal *bool `json:"dontlogNormal,omitempty"`
+	// HTTPLogCLF enables HTTP logging in CLF format.
+	// +optional
+	HTTPLogCLF *bool `json:"httpLogClf,omitempty"`
 	// Redispatch enables or disables redispatching in defaults.
 	// +optional
 	Redispatch *bool `json:"redispatch,omitempty"`
@@ -758,6 +775,45 @@ func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
 		defaults.H1CaseAdjustBogusServer = models.DefaultsBaseH1CaseAdjustBogusServerEnabled
 	}
 
+	if d.Options != nil {
+		if d.Options.LogSeparateErrors != nil {
+			if *d.Options.LogSeparateErrors {
+				defaults.LogSeparateErrors = models.DefaultsBaseLogSeparateErrorsEnabled
+			} else {
+				defaults.LogSeparateErrors = models.DefaultsBaseLogSeparateErrorsDisabled
+			}
+		}
+
+		if d.Options.LogHealthChecks != nil {
+			if *d.Options.LogHealthChecks {
+				defaults.LogHealthChecks = models.DefaultsBaseLogHealthChecksEnabled
+			} else {
+				defaults.LogHealthChecks = models.DefaultsBaseLogHealthChecksDisabled
+			}
+		}
+
+		if d.Options.Dontlognull != nil {
+			if *d.Options.Dontlognull {
+				defaults.Dontlognull = models.DefaultsBaseDontlognullEnabled
+			} else {
+				defaults.Dontlognull = models.DefaultsBaseDontlognullDisabled
+			}
+		}
+
+		if d.Options.DontlogNormal != nil {
+			if *d.Options.DontlogNormal {
+				defaults.DontlogNormal = models.DefaultsBaseDontlogNormalEnabled
+			} else {
+				defaults.DontlogNormal = models.DefaultsBaseDontlogNormalDisabled
+			}
+		}
+
+		if ptr.Deref(d.Options.HTTPLogCLF, false) {
+			defaults.Httplog = true
+			defaults.Clflog = true
+		}
+	}
+
 	return defaults, defaults.Validate(strfmt.Default)
 }
 
@@ -774,6 +830,12 @@ func (d *DefaultsConfiguration) AddToParser(p parser.Parser) error {
 	configOpts := &options.ConfigurationOptions{}
 	if err := configuration.CreateEditSection(defaults.DefaultsBase, parser.Defaults, defaultsSectionName, p, configOpts); err != nil {
 		return err
+	}
+
+	if d.Options != nil && ptr.Deref(d.Options.HTTPLogCLF, false) {
+		if err := p.Set(parser.Defaults, defaultsSectionName, "option httplog", &parsertypes.OptionHTTPLog{Clf: true}, 0); err != nil {
+			return err
+		}
 	}
 
 	if d.Logging != nil && d.Logging.Enabled {
