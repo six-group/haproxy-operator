@@ -287,6 +287,23 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("cookie 098f6bcd4621d373cade4e832627b4f6 domain domain1 domain .openshift attr SameSite=None httponly indirect maxidle 120 maxlife 45 nocache postonly preserve rewrite secure\n"))
 		})
+		It("should set cookie custom name", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "set_cookie"},
+				Spec: configv1alpha1.BackendSpec{
+					Cookie: &configv1alpha1.Cookie{
+						Name:       "test",
+						CustomName: "ILB_SESSION",
+						Mode: configv1alpha1.CookieMode{
+							Insert: true,
+						},
+						NoCache: ptr.To(true),
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("cookie ILB_SESSION nocache insert\n"))
+		})
 		It("should return an error for selecting more than one cookie mode", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "set_cookie"},

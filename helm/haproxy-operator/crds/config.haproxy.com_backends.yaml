@@ -118,6 +118,10 @@ spec:
                     items:
                       type: string
                     type: array
+                  customName:
+                    description: CustomName allows setting the cookie name as-is.
+                      When empty, Name is hashed and used as before.
+                    type: string
                   dynamic:
                     description: |-
                       Dynamic activates dynamic cookies, when used, a session cookie is dynamically created for each server,

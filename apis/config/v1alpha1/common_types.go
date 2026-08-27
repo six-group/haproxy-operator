@@ -1243,6 +1243,9 @@ type HTTPPretendKeepalive struct {
 type Cookie struct {
 	// Name of the cookie which will be monitored, modified or inserted in order to bring persistence.
 	Name string `json:"name,omitempty"`
+	// CustomName allows setting the cookie name as-is. When empty, Name is hashed and used as before.
+	// +optional
+	CustomName string `json:"customName,omitempty"`
 	// Mode could be 'rewrite', 'insert', 'prefix'. Select one.
 	// +optional
 	Mode CookieMode `json:"mode,omitempty"`
