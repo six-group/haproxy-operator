@@ -68,6 +68,25 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
 			Ω(p.String()).Should(ContainSubstring("option redispatch"))
 		})
+		It("should set health check port", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					Servers: []configv1alpha1.Server{
+						{
+							Name:    "server",
+							Address: "10.0.0.4",
+							Port:    8080,
+							ServerParams: configv1alpha1.ServerParams{
+								Check: &configv1alpha1.Check{Enabled: true, Port: ptr.To(int64(80))},
+							},
+						},
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("server server 10.0.0.4:8080 check port 80"))
+		})
 		It("should set hash-type", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "foo"},

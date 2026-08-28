@@ -234,6 +234,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enable enables health checks on a server. If not set, no health checking is performed, and the server is always<br />considered available. |  |  |
+| `port` _integer_ | Port specifies a port for health checks that differs from the server port. |  | Maximum: 65535 <br />Minimum: 1 <br />Optional: \{\} <br /> |
 | `inter` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta)_ | Inter sets the interval between two consecutive health checks. If left unspecified, the delay defaults to 2000 ms. |  | Optional: \{\} <br /> |
 | `rise` _integer_ | Rise specifies the number of consecutive successful health checks after a server will be considered as operational.<br />This value defaults to 2 if unspecified. |  | Optional: \{\} <br /> |
 | `fall` _integer_ | Fall specifies the number of consecutive unsuccessful health checks after a server will be considered as dead.<br />This value defaults to 3 if unspecified. |  | Optional: \{\} <br /> |
