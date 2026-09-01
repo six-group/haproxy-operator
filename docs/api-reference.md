@@ -547,6 +547,7 @@ _Appears in:_
 | `delHeader` _[HTTPDeleteHeaderRule](#httpdeleteheaderrule) array_ | DelHeader removes all HTTP header fields |  |  |
 | `redirect` _[Redirect](#redirect) array_ | Redirect performs an HTTP redirection based on a redirect rule. |  | Optional: \{\} <br /> |
 | `replacePath` _[ReplacePath](#replacepath) array_ | ReplacePath matches the value of the path using a regex and completely replaces it with the specified format.<br />The replacement does not modify the scheme, the authority and the query-string. |  | Optional: \{\} <br /> |
+| `replaceValue` _[ReplaceValue](#replacevalue) array_ | ReplaceValue matches occurrences of a header value using a regex and replaces them with the specified format. |  | Optional: \{\} <br /> |
 | `deny` _[Deny](#deny) array_ | Deny stops the evaluation of the rules and immediately rejects the request and emits an HTTP 403 error.<br />Optionally the status code specified as an argument to deny_status. |  | Optional: \{\} <br /> |
 | `return` _[HTTPReturn](#httpreturn)_ | Return stops the evaluation of the rules and immediately returns a response. |  |  |
 
@@ -906,6 +907,26 @@ _Appears in:_
 | `conditionType` _string_ | ConditionType specifies the type of the condition matching ('if' or 'unless') |  | Enum: [if unless] <br />Optional: \{\} <br /> |
 | `condition` _string_ | Condition is a condition composed of ACLs. |  | Optional: \{\} <br /> |
 | `matchRegex` _string_ | MatchRegex is a string pattern used to identify the paths that need to be replaced. |  |  |
+| `replaceFmt` _string_ | ReplaceFmt defines the format string used to replace the values that match the pattern. |  |  |
+
+
+#### ReplaceValue
+
+
+
+
+
+
+
+_Appears in:_
+- [HTTPRequestRules](#httprequestrules)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `conditionType` _string_ | ConditionType specifies the type of the condition matching ('if' or 'unless') |  | Enum: [if unless] <br />Optional: \{\} <br /> |
+| `condition` _string_ | Condition is a condition composed of ACLs. |  | Optional: \{\} <br /> |
+| `name` _string_ | Name specifies the header name. |  |  |
+| `matchRegex` _string_ | MatchRegex is a string pattern used to identify the header values that need to be replaced. |  |  |
 | `replaceFmt` _string_ | ReplaceFmt defines the format string used to replace the values that match the pattern. |  |  |
 
 
