@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 	configv1alpha1 "github.com/six-group/haproxy-operator/apis/config/v1alpha1"
 	proxyv1alpha1 "github.com/six-group/haproxy-operator/apis/proxy/v1alpha1"
+	"github.com/six-group/haproxy-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -91,6 +92,58 @@ var _ = Describe("Reconcile", Label("controller"), func() {
 				"    sleep 5\n  done\n\n  echo 'IP 10.158.182.27 assignment verified, waiting 5 seconds before continuing...'\n\n" +
 				"  sleep 5\n\n  echo -n \"BIND_ADDRESS=10.158.182.27\" > /var/lib/haproxy/run/env\n  cat /var/lib/haproxy/run/env\n  exit 0\nfi\n\nexit 1\n"))
 			Ω(statefulSet.Spec.Template.Spec.Containers[0].Env).Should(HaveLen(4))
+		})
+
+		It("enforces one pod per node when requested", func() {
+			proxy.Spec.Placement = &proxyv1alpha1.Placement{EnforcePodAntiAffinity: true}
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
+			r := Reconciler{
+				Client: cli,
+				Scheme: scheme,
+			}
+
+			Ω(r.reconcileStatefulSet(ctx, proxy)).Should(Succeed())
+
+			statefulSet := &appsv1.StatefulSet{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).Should(Succeed())
+			affinity := statefulSet.Spec.Template.Spec.Affinity
+			Ω(affinity).ShouldNot(BeNil())
+			Ω(affinity.PodAntiAffinity).ShouldNot(BeNil())
+			terms := affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution
+			Ω(terms).Should(HaveLen(1))
+			Ω(terms[0].TopologyKey).Should(Equal("kubernetes.io/hostname"))
+			Ω(terms[0].LabelSelector.MatchLabels).Should(Equal(utils.GetAppSelectorLabels(proxy)))
+		})
+
+		It("enforces anti-affinity with pods selected by labels", func() {
+			proxy.Spec.Placement = &proxyv1alpha1.Placement{
+				EnforcePodAntiAffinity: true,
+				AntiAffinity: &proxyv1alpha1.PodAntiAffinityRule{
+					Required:    true,
+					TopologyKey: "kubernetes.io/hostname",
+					MatchLabels: map[string]string{
+						"app":   "haproxy",
+						"group": "b",
+					},
+				},
+			}
+			cli := fake.NewClientBuilder().WithScheme(scheme).WithObjects(initObjs...).WithStatusSubresource(initObjs...).Build()
+			r := Reconciler{
+				Client: cli,
+				Scheme: scheme,
+			}
+
+			Ω(r.reconcileStatefulSet(ctx, proxy)).Should(Succeed())
+
+			statefulSet := &appsv1.StatefulSet{}
+			Ω(cli.Get(ctx, client.ObjectKey{Namespace: proxy.Namespace, Name: "bar-foo-haproxy"}, statefulSet)).Should(Succeed())
+			terms := statefulSet.Spec.Template.Spec.Affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution
+			Ω(terms).Should(HaveLen(2))
+			Ω(terms[1].TopologyKey).Should(Equal("kubernetes.io/hostname"))
+			Ω(terms[1].LabelSelector.MatchLabels).Should(Equal(map[string]string{
+				"app":   "haproxy",
+				"group": "b",
+			}))
 		})
 	})
 })

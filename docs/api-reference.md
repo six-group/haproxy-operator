@@ -1607,7 +1607,27 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `nodeSelector` _object (keys:string, values:string)_ | NodeSelector is a selector which must be true for the pod to fit on a node. |  | Optional: \{\} <br /> |
+| `enforcePodAntiAffinity` _boolean_ | EnforcePodAntiAffinity prevents pods of the same Instance from being scheduled on the same node. Pods remain Pending when no distinct node is available. |  | Optional: \{\} <br /> |
+| `antiAffinity` _[PodAntiAffinityRule](#podantiaffinityrule)_ | AntiAffinity prevents pods selected by MatchLabels from being scheduled in the same topology domain. |  | Optional: \{\} <br /> |
 | `topologySpreadConstraints` _[TopologySpreadConstraint](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#topologyspreadconstraint-v1-core) array_ | TopologySpreadConstraints describes how a group of pods ought to spread across topology<br />domains. Scheduler will schedule pods in a way which abides by the constraints. |  | Optional: \{\} <br /> |
+
+
+#### PodAntiAffinityRule
+
+
+
+
+
+
+
+_Appears in:_
+- [Placement](#placement)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `required` _boolean_ | Required enforces the rule. When false, the rule is not applied. |  | Optional: \{\} <br /> |
+| `topologyKey` _string_ | TopologyKey is the node label key that defines the scheduling domain. |  | Optional: \{\} <br /> |
+| `matchLabels` _object (keys:string, values:string)_ | MatchLabels selects the pods that must not share the topology domain. |  | MinProperties: 1 <br /> |
 
 
 #### PodDisruptionBudget

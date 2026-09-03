@@ -93,10 +93,29 @@ type Placement struct {
 	// NodeSelector is a selector which must be true for the pod to fit on a node.
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// EnforcePodAntiAffinity prevents pods of the same Instance from being scheduled on the same node.
+	// Pods remain Pending when no distinct node is available.
+	// +optional
+	EnforcePodAntiAffinity bool `json:"enforcePodAntiAffinity,omitempty"`
+	// AntiAffinity prevents pods selected by MatchLabels from being scheduled in the same topology domain.
+	// +optional
+	AntiAffinity *PodAntiAffinityRule `json:"antiAffinity,omitempty"`
 	// TopologySpreadConstraints describes how a group of pods ought to spread across topology
 	// domains. Scheduler will schedule pods in a way which abides by the constraints.
 	// +optional
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty"`
+}
+
+type PodAntiAffinityRule struct {
+	// Required enforces the rule. When false, the rule is not applied.
+	// +optional
+	Required bool `json:"required,omitempty"`
+	// TopologyKey is the node label key that defines the scheduling domain.
+	// +optional
+	TopologyKey string `json:"topologyKey,omitempty"`
+	// MatchLabels selects the pods that must not share the topology domain.
+	// +kubebuilder:validation:MinProperties=1
+	MatchLabels map[string]string `json:"matchLabels"`
 }
 
 type PodDisruptionBudget struct {
