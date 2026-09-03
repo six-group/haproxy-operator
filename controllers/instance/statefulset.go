@@ -213,6 +213,35 @@ func (r *Reconciler) reconcileStatefulSet(ctx context.Context, instance *proxyv1
 		for idx := range statefulset.Spec.Template.Spec.TopologySpreadConstraints {
 			statefulset.Spec.Template.Spec.TopologySpreadConstraints[idx].LabelSelector = statefulset.Spec.Selector
 		}
+
+		if instance.Spec.Placement.EnforcePodAntiAffinity {
+			statefulset.Spec.Template.Spec.Affinity = &corev1.Affinity{
+				PodAntiAffinity: &corev1.PodAntiAffinity{
+					RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+						{
+							LabelSelector: statefulset.Spec.Selector.DeepCopy(),
+							TopologyKey:  "kubernetes.io/hostname",
+						},
+					},
+				},
+			}
+		}
+
+		antiAffinity := instance.Spec.Placement.AntiAffinity
+		if antiAffinity != nil && antiAffinity.Required {
+			if statefulset.Spec.Template.Spec.Affinity == nil {
+				statefulset.Spec.Template.Spec.Affinity = &corev1.Affinity{
+					PodAntiAffinity: &corev1.PodAntiAffinity{},
+				}
+			}
+			statefulset.Spec.Template.Spec.Affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution = append(
+				statefulset.Spec.Template.Spec.Affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution,
+				corev1.PodAffinityTerm{
+					LabelSelector: &metav1.LabelSelector{MatchLabels: antiAffinity.MatchLabels},
+					TopologyKey:  antiAffinity.TopologyKey,
+				},
+			)
+		}
 	}
 
 	if ptr.Deref(instance.Spec.AllowPrivilegedPorts, false) {
