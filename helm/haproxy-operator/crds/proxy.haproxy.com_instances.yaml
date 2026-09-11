@@ -147,6 +147,15 @@ spec:
                         required:
                         - enabled
                         type: object
+                      options:
+                        description: Options configures additional HAProxy defaults
+                          options.
+                        properties:
+                          redispatch:
+                            description: Redispatch enables or disables redispatching
+                              in defaults.
+                            type: boolean
+                        type: object
                       mode:
                         default: http
                         description: Mode can be either 'tcp' or 'http'. In tcp mode
@@ -155,6 +164,12 @@ spec:
                         - http
                         - tcp
                         type: string
+                      retries:
+                        description: Retries sets the maximum number of retries on
+                          a connection failure.
+                        format: int64
+                        minimum: 1
+                        type: integer
                       timeouts:
                         additionalProperties:
                           type: string

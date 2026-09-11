@@ -1900,6 +1900,9 @@ spec:
                       description: CheckSNI This option allows you to specify the
                         SNI to be used when doing health checks over SSL
                       type: string
+                    backup:
+                      description: Backup marks the server as a backup server.
+                      type: boolean
                     cookie:
                       description: Cookie sets the cookie value assigned to the server.
                       type: boolean
@@ -2337,6 +2340,9 @@ spec:
                       description: CheckSNI This option allows you to specify the
                         SNI to be used when doing health checks over SSL
                       type: string
+                    backup:
+                      description: Backup marks the server as a backup server.
+                      type: boolean
                     cookie:
                       description: Cookie sets the cookie value assigned to the server.
                       type: boolean

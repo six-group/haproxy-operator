@@ -739,6 +739,25 @@ var _ = Describe("Backend", Label("type"), func() {
 			Ω(p.String()).Should(ContainSubstring("ciphers TLSv1.2+ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256"))
 			Ω(p.String()).Should(ContainSubstring("ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"))
 		})
+		It("should set backup server", func() {
+			backend := &configv1alpha1.Backend{
+				ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+				Spec: configv1alpha1.BackendSpec{
+					Servers: []configv1alpha1.Server{
+						{
+							Name:    "backup0-0",
+							Address: "10.10.0.1",
+							Port:    80,
+							ServerParams: configv1alpha1.ServerParams{
+								Backup: true,
+							},
+						},
+					},
+				},
+			}
+			Ω(backend.AddToParser(p)).ShouldNot(HaveOccurred())
+			Ω(p.String()).Should(ContainSubstring("server backup0-0 10.10.0.1:80 backup\n"))
+		})
 		It("should set sendProxy with proxy protocol v2 and options for server templates", func() {
 			backend := &configv1alpha1.Backend{
 				ObjectMeta: metav1.ObjectMeta{Name: "openshift_default"},

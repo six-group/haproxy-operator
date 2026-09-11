@@ -1085,6 +1085,7 @@ _Appears in:_
 | `verifyHost` _string_ | VerifyHost is only available when support for OpenSSL was built in, and<br />only takes effect if pec.ssl.verify' is set to 'required'. This directive sets<br />a default static hostname to check the server certificate against when no<br />SNI was used to connect to the server. |  | Optional: \{\} <br /> |
 | `sni` _string_ | SNI This option allows you to specify the SNI to be used when connecting to the backend over SSL |  | Optional: \{\} <br /> |
 | `checkSNI` _string_ | CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL |  | Optional: \{\} <br /> |
+| `backup` _boolean_ | Backup marks the server as a backup server. |  | Optional: \{\} <br /> |
 | `cookie` _boolean_ | Cookie sets the cookie value assigned to the server. |  | Optional: \{\} <br /> |
 | `resolvePrefer` _string_ | When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,<br />HAProxy will prefer using an IP address from the ipv4 or ipv6. |  | Optional: \{\} <br /> |
 | `name` _string_ | Name of the server. |  |  |
@@ -1116,6 +1117,7 @@ _Appears in:_
 | `verifyHost` _string_ | VerifyHost is only available when support for OpenSSL was built in, and<br />only takes effect if pec.ssl.verify' is set to 'required'. This directive sets<br />a default static hostname to check the server certificate against when no<br />SNI was used to connect to the server. |  | Optional: \{\} <br /> |
 | `sni` _string_ | SNI This option allows you to specify the SNI to be used when connecting to the backend over SSL |  | Optional: \{\} <br /> |
 | `checkSNI` _string_ | CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL |  | Optional: \{\} <br /> |
+| `backup` _boolean_ | Backup marks the server as a backup server. |  | Optional: \{\} <br /> |
 | `cookie` _boolean_ | Cookie sets the cookie value assigned to the server. |  | Optional: \{\} <br /> |
 | `resolvePrefer` _string_ | When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,<br />HAProxy will prefer using an IP address from the ipv4 or ipv6. |  | Optional: \{\} <br /> |
 
@@ -1144,6 +1146,7 @@ _Appears in:_
 | `verifyHost` _string_ | VerifyHost is only available when support for OpenSSL was built in, and<br />only takes effect if pec.ssl.verify' is set to 'required'. This directive sets<br />a default static hostname to check the server certificate against when no<br />SNI was used to connect to the server. |  | Optional: \{\} <br /> |
 | `sni` _string_ | SNI This option allows you to specify the SNI to be used when connecting to the backend over SSL |  | Optional: \{\} <br /> |
 | `checkSNI` _string_ | CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL |  | Optional: \{\} <br /> |
+| `backup` _boolean_ | Backup marks the server as a backup server. |  | Optional: \{\} <br /> |
 | `cookie` _boolean_ | Cookie sets the cookie value assigned to the server. |  | Optional: \{\} <br /> |
 | `resolvePrefer` _string_ | When DNS resolution is enabled for a server and multiple IP addresses from different families are returned,<br />HAProxy will prefer using an IP address from the ipv4 or ipv6. |  | Optional: \{\} <br /> |
 | `prefix` _string_ | Prefix for the server names to be built. |  | Pattern: `^[^\s]+$` <br /> |
@@ -1257,8 +1260,25 @@ _Appears in:_
 | `mode` _string_ | Mode can be either 'tcp' or 'http'. In tcp mode it is a layer 4 proxy. In http mode it is a layer 7 proxy. | http | Enum: [http tcp] <br /> |
 | `errorFiles` _[ErrorFile](#errorfile) array_ | ErrorFiles custom error files to be used |  | Optional: \{\} <br /> |
 | `timeouts` _object (keys:string, values:[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta))_ | Timeouts: check, client, client-fin, connect, http-keep-alive, http-request, queue, server, server-fin, tunnel.<br />The timeout value specified in milliseconds by default, but can be in any other unit if the number is suffixed by the unit.<br />More info: https://cbonte.github.io/haproxy-dconv/2.6/configuration.html | \{ client:5s connect:5s server:10s \} |  |
+| `retries` _integer_ | Retries sets the maximum number of retries on a connection failure. |  | Minimum: 1 <br />Optional: \{\} <br /> |
 | `logging` _[DefaultsLoggingConfiguration](#defaultsloggingconfiguration)_ | Logging is used to configure default logging for all proxies. |  | Optional: \{\} <br /> |
+| `options` _[DefaultsOptions](#defaultsoptions)_ | Options configures additional HAProxy defaults options. |  | Optional: \{\} <br /> |
 | `additionalParameters` _string_ | AdditionalParameters can be used to specify any further configuration statements which are not covered in this section explicitly. |  | Optional: \{\} <br /> |
+
+
+#### DefaultsOptions
+
+
+
+
+
+
+_Appears in:_
+- [DefaultsConfiguration](#defaultsconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `redispatch` _boolean_ | Redispatch enables or disables redispatching in defaults. |  | Optional: \{\} <br /> |
 
 
 #### DefaultsLoggingConfiguration

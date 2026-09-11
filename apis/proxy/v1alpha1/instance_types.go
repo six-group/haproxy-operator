@@ -655,12 +655,25 @@ type DefaultsConfiguration struct {
 	// More info: https://cbonte.github.io/haproxy-dconv/2.6/configuration.html
 	// +kubebuilder:default={"client": "5s", "connect": "5s", "server": "10s"}
 	Timeouts map[string]metav1.Duration `json:"timeouts"`
+	// Retries sets the maximum number of retries on a connection failure.
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	Retries *int64 `json:"retries,omitempty"`
 	// Logging is used to configure default logging for all proxies.
 	// +optional
 	Logging *DefaultsLoggingConfiguration `json:"logging,omitempty"`
+	// Options configures additional HAProxy defaults options.
+	// +optional
+	Options *DefaultsOptions `json:"options,omitempty"`
 	// AdditionalParameters can be used to specify any further configuration statements which are not covered in this section explicitly.
 	// +optional
 	AdditionalParameters string `json:"additionalParameters,omitempty"`
+}
+
+type DefaultsOptions struct {
+	// Redispatch enables or disables redispatching in defaults.
+	// +optional
+	Redispatch *bool `json:"redispatch,omitempty"`
 }
 
 func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
@@ -716,9 +729,22 @@ func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
 		defaults.ErrorFiles = append(defaults.ErrorFiles, &model)
 	}
 
+	if d.Retries != nil {
+		defaults.Retries = d.Retries
+	}
+
 	if d.Logging != nil {
 		defaults.Httplog = ptr.Deref(d.Logging.HTTPLog, false)
 		defaults.Tcplog = ptr.Deref(d.Logging.TCPLog, false)
+	}
+
+	if d.Options != nil && d.Options.Redispatch != nil {
+		enabled := models.RedispatchEnabledDisabled
+		if *d.Options.Redispatch {
+			enabled = models.RedispatchEnabledEnabled
+		}
+
+		defaults.Redispatch = &models.Redispatch{Enabled: ptr.To(enabled)}
 	}
 
 	return defaults, defaults.Validate(strfmt.Default)

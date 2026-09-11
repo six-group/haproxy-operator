@@ -406,6 +406,9 @@ type ServerParams struct {
 	// CheckSNI This option allows you to specify the SNI to be used when doing health checks over SSL
 	// +optional
 	CheckSNI string `json:"checkSNI,omitempty"`
+	// Backup marks the server as a backup server.
+	// +optional
+	Backup bool `json:"backup,omitempty"`
 	// Cookie sets the cookie value assigned to the server.
 	// +optional
 	Cookie bool `json:"cookie,omitempty"`
@@ -453,6 +456,10 @@ func (s *ServerTemplate) Model() (models.ServerTemplate, error) {
 
 	if ptr.Deref(s.SendProxy, false) {
 		model.SendProxy = models.ServerParamsSendProxyEnabled
+	}
+
+	if s.Backup {
+		model.Backup = models.ServerParamsBackupEnabled
 	}
 
 	if s.SendProxyV2 != nil {
@@ -588,6 +595,10 @@ func (s *Server) Model() (models.Server, error) {
 
 	if ptr.Deref(s.SendProxy, false) {
 		model.SendProxy = models.ServerParamsSendProxyEnabled
+	}
+
+	if s.Backup {
+		model.Backup = models.ServerParamsBackupEnabled
 	}
 
 	if s.SendProxyV2 != nil {
