@@ -514,6 +514,7 @@ func (s *ServerTemplate) Model() (models.ServerTemplate, error) {
 
 	if s.Check != nil && s.Check.Enabled {
 		model.Check = models.ServerParamsCheckEnabled
+		model.HealthCheckPort = s.Check.Port
 
 		if s.Check.Inter != nil {
 			model.Inter = ptr.To(s.Check.Inter.Milliseconds())
@@ -652,6 +653,7 @@ func (s *Server) Model() (models.Server, error) {
 
 	if s.Check != nil && s.Check.Enabled {
 		model.Check = models.ServerParamsCheckEnabled
+		model.HealthCheckPort = s.Check.Port
 
 		if s.Check.Inter != nil {
 			model.Inter = ptr.To(s.Check.Inter.Milliseconds())
@@ -703,6 +705,11 @@ type Check struct {
 	// Enable enables health checks on a server. If not set, no health checking is performed, and the server is always
 	// considered available.
 	Enabled bool `json:"enabled"`
+	// Port specifies a port for health checks that differs from the server port.
+	// +kubebuilder:validation:Maximum=65535
+	// +kubebuilder:validation:Minimum=1
+	// +optional
+	Port *int64 `json:"port,omitempty"`
 	// Inter sets the interval between two consecutive health checks. If left unspecified, the delay defaults to 2000 ms.
 	// +optional
 	Inter *metav1.Duration `json:"inter,omitempty"`

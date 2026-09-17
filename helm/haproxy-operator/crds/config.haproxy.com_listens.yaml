@@ -1882,6 +1882,13 @@ spec:
                             This value defaults to 3 if unspecified.
                           format: int64
                           type: integer
+                        port:
+                          description: Port specifies a port for health checks
+                            that differs from the server port.
+                          format: int64
+                          maximum: 65535
+                          minimum: 1
+                          type: integer
                         inter:
                           description: Inter sets the interval between two consecutive
                             health checks. If left unspecified, the delay defaults
@@ -2321,6 +2328,13 @@ spec:
                             Fall specifies the number of consecutive unsuccessful health checks after a server will be considered as dead.
                             This value defaults to 3 if unspecified.
                           format: int64
+                          type: integer
+                        port:
+                          description: Port specifies a port for health checks
+                            that differs from the server port.
+                          format: int64
+                          maximum: 65535
+                          minimum: 1
                           type: integer
                         inter:
                           description: Inter sets the interval between two consecutive
