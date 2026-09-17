@@ -255,6 +255,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of the cookie which will be monitored, modified or inserted in order to bring persistence. |  |  |
+| `customName` _string_ | CustomName allows setting the cookie name as-is. When empty, Name is hashed and used as before. |  | Optional: \{\} <br /> |
 | `mode` _[CookieMode](#cookiemode)_ | Mode could be 'rewrite', 'insert', 'prefix'. Select one. |  | Optional: \{\} <br /> |
 | `indirect` _boolean_ | Indirect no cookie will be emitted to a client which already has a valid one<br />for the server which has processed the request. |  | Optional: \{\} <br /> |
 | `noCache` _boolean_ | NoCache recommended in conjunction with the insert mode when there is a cache<br />between the client and HAProx |  | Optional: \{\} <br /> |

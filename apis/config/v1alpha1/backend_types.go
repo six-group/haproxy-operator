@@ -155,6 +155,12 @@ func (b *Backend) Model() (models.Backend, error) {
 			Dynamic:  ptr.Deref(b.Spec.Cookie.Dynamic, false),
 		}
 
+		// Keep default hashed behavior, then override only when an explicit custom name is set.
+		model.Cookie.Name = ptr.To(name)
+		if b.Spec.Cookie.CustomName != "" {
+			model.Cookie.Name = ptr.To(b.Spec.Cookie.CustomName)
+		}
+
 		for _, attr := range b.Spec.Cookie.Attribute {
 			attrs := &models.Attr{Value: attr}
 			model.Cookie.Attrs = append(model.Cookie.Attrs, attrs)
