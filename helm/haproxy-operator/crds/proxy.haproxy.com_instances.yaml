@@ -170,6 +170,11 @@ spec:
                         format: int64
                         minimum: 1
                         type: integer
+                      maxconn:
+                        description: Maxconn sets the maximum per-process number
+                          of concurrent connections for defaults.
+                        format: int64
+                        type: integer
                       timeouts:
                         additionalProperties:
                           type: string
