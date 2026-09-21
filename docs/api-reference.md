@@ -1260,6 +1260,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `mode` _string_ | Mode can be either 'tcp' or 'http'. In tcp mode it is a layer 4 proxy. In http mode it is a layer 7 proxy. | http | Enum: [http tcp] <br /> |
+| `maxconn` _integer_ | Maxconn sets the maximum per-process number of concurrent connections for defaults. |  | Optional: \{\} <br /> |
 | `errorFiles` _[ErrorFile](#errorfile) array_ | ErrorFiles custom error files to be used |  | Optional: \{\} <br /> |
 | `timeouts` _object (keys:string, values:[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta))_ | Timeouts: check, client, client-fin, connect, http-keep-alive, http-request, queue, server, server-fin, tunnel.<br />The timeout value specified in milliseconds by default, but can be in any other unit if the number is suffixed by the unit.<br />More info: https://cbonte.github.io/haproxy-dconv/2.6/configuration.html | \{ client:5s connect:5s server:10s \} |  |
 | `retries` _integer_ | Retries sets the maximum number of retries on a connection failure. |  | Minimum: 1 <br />Optional: \{\} <br /> |

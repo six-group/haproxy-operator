@@ -647,6 +647,9 @@ type DefaultsConfiguration struct {
 	// +kubebuilder:default=http
 	// +kubebuilder:validation:Enum=http;tcp
 	Mode string `json:"mode"`
+	// Maxconn sets the maximum per-process number of concurrent connections for defaults.
+	// +optional
+	Maxconn *int64 `json:"maxconn,omitempty"`
 	// ErrorFiles custom error files to be used
 	// +optional
 	ErrorFiles []*configv1alpha1.ErrorFile `json:"errorFiles,omitempty"`
@@ -692,6 +695,7 @@ func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
 
 	defaults.Name = defaultsSectionName
 	defaults.Mode = d.Mode
+	defaults.Maxconn = d.Maxconn
 
 	for name, timeout := range d.Timeouts {
 		switch name {
