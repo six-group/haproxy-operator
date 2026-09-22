@@ -668,6 +668,9 @@ type DefaultsConfiguration struct {
 	// Options configures additional HAProxy defaults options.
 	// +optional
 	Options *DefaultsOptions `json:"options,omitempty"`
+	// H1CaseAdjustBogusServer enables h1-case-adjust-bogus-server in the defaults section.
+	// +optional
+	H1CaseAdjustBogusServer bool `json:"h1CaseAdjustBogusServer,omitempty"`
 	// AdditionalParameters can be used to specify any further configuration statements which are not covered in this section explicitly.
 	// +optional
 	AdditionalParameters string `json:"additionalParameters,omitempty"`
@@ -749,6 +752,10 @@ func (d *DefaultsConfiguration) Model() (models.Defaults, error) {
 		}
 
 		defaults.Redispatch = &models.Redispatch{Enabled: ptr.To(enabled)}
+	}
+
+	if d.H1CaseAdjustBogusServer {
+		defaults.H1CaseAdjustBogusServer = models.DefaultsBaseH1CaseAdjustBogusServerEnabled
 	}
 
 	return defaults, defaults.Validate(strfmt.Default)
