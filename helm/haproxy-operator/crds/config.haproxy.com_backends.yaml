@@ -1325,6 +1325,13 @@ spec:
                 description: Redispatch enable or disable session redistribution in
                   case of connection failure
                 type: boolean
+              options:
+                description: Options contains additional backend options.
+                properties:
+                  logHealthChecks:
+                    description: LogHealthChecks enables logging of health checks.
+                    type: boolean
+                type: object
               serverTemplates:
                 description: ServerTemplates defines the backend server templates
                   and its configuration.
