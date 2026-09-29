@@ -104,10 +104,26 @@ _Appears in:_
 | `hostRegex` _string_ | HostRegex specifies a regular expression used for backend switching rules. |  | Optional: \{\} <br /> |
 | `hostCertificate` _[CertificateListElement](#certificatelistelement)_ | HostCertificate specifies a certificate for that host used in the crt-list of a frontend |  | Optional: \{\} <br /> |
 | `redispatch` _boolean_ | Redispatch enable or disable session redistribution in case of connection failure |  | Optional: \{\} <br /> |
+| `options` _[BackendOptions](#backendoptions)_ | Options contains additional backend options. |  | Optional: \{\} <br /> |
 | `hashType` _[HashType](#hashtype)_ | HashType specifies a method to use for mapping hashes to servers |  | Optional: \{\} <br /> |
 | `cookie` _[Cookie](#cookie)_ | Cookie enables cookie-based persistence in a backend. |  | Optional: \{\} <br /> |
 | `httpchk` _[HTTPChk](#httpchk)_ | HTTPChk Enables HTTP protocol to check on the servers health |  | Optional: \{\} <br /> |
 | `tcpCheck` _boolean_ | TCPCheck Perform health checks using tcp-check send/expect sequences |  | Optional: \{\} <br /> |
+
+
+#### BackendOptions
+
+
+
+
+
+
+_Appears in:_
+- [BackendSpec](#backendspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `logHealthChecks` _boolean_ | LogHealthChecks enables logging of health checks. |  | Optional: \{\} <br /> |
 
 
 #### BackendSwitchingRule
@@ -1301,6 +1317,26 @@ _Appears in:_
 | `enabled` _boolean_ | Enabled will enable logs for all proxies |  |  |
 | `httpLog` _boolean_ | HTTPLog enables HTTP log format which is the most complete and the best suited for HTTP proxies. It provides<br />the same level of information as the TCP format with additional features which<br />are specific to the HTTP protocol. |  | Optional: \{\} <br /> |
 | `tcpLog` _boolean_ | TCPLog enables advanced logging of TCP connections with session state and timers. By default, the log output format<br />is very poor, as it only contains the source and destination addresses, and the instance name. |  | Optional: \{\} <br /> |
+
+
+#### DefaultsOptions
+
+
+
+
+
+
+_Appears in:_
+- [DefaultsConfiguration](#defaultsconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `logSeparateErrors` _boolean_ | LogSeparateErrors causes error and normal logs to be emitted separately. |  | Optional: \{\} <br /> |
+| `logHealthChecks` _boolean_ | LogHealthChecks enables logging of health checks. |  | Optional: \{\} <br /> |
+| `dontlognull` _boolean_ | Dontlognull controls logging of null connections. |  | Optional: \{\} <br /> |
+| `dontlogNormal` _boolean_ | DontlogNormal controls logging of normal traffic. |  | Optional: \{\} <br /> |
+| `httpLogClf` _boolean_ | HTTPLogCLF enables HTTP logging in CLF format (emits `option httplog clf`). |  | Optional: \{\} <br /> |
+| `redispatch` _boolean_ | Redispatch enables or disables redispatching in defaults. |  | Optional: \{\} <br /> |
 
 
 #### GlobalConfiguration

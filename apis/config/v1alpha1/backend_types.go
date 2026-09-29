@@ -38,6 +38,9 @@ type BackendSpec struct {
 	// Redispatch enable or disable session redistribution in case of connection failure
 	// +optional
 	Redispatch *bool `json:"redispatch,omitempty"`
+	// Options contains additional backend options.
+	// +optional
+	Options *BackendOptions `json:"options,omitempty"`
 	// HashType specifies a method to use for mapping hashes to servers
 	// +optional
 	HashType *HashType `json:"hashType,omitempty"`
@@ -50,6 +53,12 @@ type BackendSpec struct {
 	// TCPCheck Perform health checks using tcp-check send/expect sequences
 	// +optional
 	TCPCheck *bool `json:"tcpCheck,omitempty"`
+}
+
+type BackendOptions struct {
+	// LogHealthChecks enables logging of health checks.
+	// +optional
+	LogHealthChecks *bool `json:"logHealthChecks,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -123,6 +132,14 @@ func (b *Backend) Model() (models.Backend, error) {
 		model.Redispatch = &models.Redispatch{
 			Enabled:  ptr.To(models.RedispatchEnabledEnabled),
 			Interval: ptr.To(int64(3)),
+		}
+	}
+
+	if b.Spec.Options != nil && b.Spec.Options.LogHealthChecks != nil {
+		if *b.Spec.Options.LogHealthChecks {
+			model.LogHealthChecks = models.BackendBaseLogHealthChecksEnabled
+		} else {
+			model.LogHealthChecks = models.BackendBaseLogHealthChecksDisabled
 		}
 	}
 
