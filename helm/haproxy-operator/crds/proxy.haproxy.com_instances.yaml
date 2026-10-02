@@ -2428,6 +2428,7 @@ spec:
 
                             Only applicable when the action is `HashMod`.
                           format: int64
+                          minimum: 0
                           type: integer
                         regex:
                           description: regex defines the regular expression against
@@ -2608,6 +2609,33 @@ spec:
                 description: Placement define how the instance's pods should be scheduled.
                 nullable: true
                 properties:
+                  antiAffinity:
+                    description: AntiAffinity prevents pods selected by MatchLabels
+                      from being scheduled in the same topology domain.
+                    properties:
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels selects the pods that must not share
+                          the topology domain.
+                        minProperties: 1
+                        type: object
+                      required:
+                        description: Required enforces the rule. When false, the rule
+                          is not applied.
+                        type: boolean
+                      topologyKey:
+                        description: TopologyKey is the node label key that defines
+                          the scheduling domain.
+                        type: string
+                    required:
+                    - matchLabels
+                    type: object
+                  enforcePodAntiAffinity:
+                    description: |-
+                      EnforcePodAntiAffinity prevents pods of the same Instance from being scheduled on the same node.
+                      Pods remain Pending when no distinct node is available.
+                    type: boolean
                   nodeSelector:
                     additionalProperties:
                       type: string
