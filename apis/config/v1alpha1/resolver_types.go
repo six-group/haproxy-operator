@@ -12,7 +12,7 @@ import (
 
 // ResolverSpec defines the desired state of Resolver
 type ResolverSpec struct {
-	// Nameservers used to configure a nameservers.
+	// Nameservers used to configure nameservers.
 	Nameservers []Nameserver `json:"nameservers,omitempty"`
 	// AcceptedPayloadSize defines the maximum payload size accepted by HAProxy and announced to all the  name servers
 	// configured in this resolver.
@@ -65,7 +65,7 @@ type Hold struct {
 	Obsolete *metav1.Duration `json:"obsolete,omitempty"`
 	// Other defines interval between two successive name resolution when the last answer was other.
 	Other *metav1.Duration `json:"other,omitempty"`
-	// Refused defines interval between two successive name resolution when the last answer was nx.
+	// Refused defines interval between two successive name resolution when the last answer was refused.
 	Refused *metav1.Duration `json:"refused,omitempty"`
 	// Timeout defines interval between two successive name resolution when the last answer was timeout.
 	Timeout *metav1.Duration `json:"timeout,omitempty"`

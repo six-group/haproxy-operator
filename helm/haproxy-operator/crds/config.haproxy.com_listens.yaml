@@ -24,7 +24,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Listen is the Schema for the frontends API
+        description: Listen is the Schema for the listens API
         properties:
           apiVersion:
             description: |-

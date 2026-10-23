@@ -204,7 +204,7 @@ func (f *Frontend) AddToParser(p parser.Parser) error {
 
 //+kubebuilder:object:root=true
 
-// FrontendList contains a list of Fronted
+// FrontendList contains a list of Frontend
 type FrontendList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
