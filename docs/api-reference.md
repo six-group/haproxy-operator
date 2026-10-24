@@ -658,7 +658,7 @@ _Appears in:_
 | `nx` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta)_ | Nx defines interval between two successive name resolution when the last answer was nx. |  |  |
 | `obsolete` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta)_ | Obsolete defines interval between two successive name resolution when the last answer was obsolete. |  |  |
 | `other` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta)_ | Other defines interval between two successive name resolution when the last answer was other. |  |  |
-| `refused` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta)_ | Refused defines interval between two successive name resolution when the last answer was nx. |  |  |
+| `refused` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta)_ | Refused defines interval between two successive name resolution when the last answer was refused. |  |  |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta)_ | Timeout defines interval between two successive name resolution when the last answer was timeout. |  |  |
 | `valid` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#duration-v1-meta)_ | Valid defines interval between two successive name resolution when the last answer was valid. |  |  |
 
@@ -667,7 +667,7 @@ _Appears in:_
 
 
 
-Listen is the Schema for the frontends API
+Listen is the Schema for the listens API
 
 
 
@@ -979,7 +979,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `nameservers` _[Nameserver](#nameserver) array_ | Nameservers used to configure a nameservers. |  |  |
+| `nameservers` _[Nameserver](#nameserver) array_ | Nameservers used to configure nameservers. |  |  |
 | `acceptedPayloadSize` _integer_ | AcceptedPayloadSize defines the maximum payload size accepted by HAProxy and announced to all the  name servers<br />configured in this resolver. |  | Maximum: 8192 <br />Minimum: 512 <br />Optional: \{\} <br /> |
 | `parseResolvConf` _boolean_ | ParseResolvConf if true, adds all nameservers found in /etc/resolv.conf to this resolvers nameservers list. |  | Optional: \{\} <br /> |
 | `resolveRetries` _integer_ | ResolveRetries defines the number <nb> of queries to send to resolve a server name before giving up. Default value: 3 |  | Minimum: 1 <br />Optional: \{\} <br /> |

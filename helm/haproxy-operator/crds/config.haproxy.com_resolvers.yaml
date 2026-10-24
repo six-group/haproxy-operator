@@ -72,7 +72,7 @@ spec:
                     type: string
                   refused:
                     description: Refused defines interval between two successive name
-                      resolution when the last answer was nx.
+                      resolution when the last answer was refused.
                     type: string
                   timeout:
                     description: Timeout defines interval between two successive name
@@ -84,7 +84,7 @@ spec:
                     type: string
                 type: object
               nameservers:
-                description: Nameservers used to configure a nameservers.
+                description: Nameservers used to configure nameservers.
                 items:
                   properties:
                     address:

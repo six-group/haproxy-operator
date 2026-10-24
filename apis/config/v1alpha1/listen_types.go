@@ -51,7 +51,7 @@ type ListenSpec struct {
 //+kubebuilder:printcolumn:name=Mode,type=string,JSONPath=`.spec.mode`
 //+kubebuilder:printcolumn:name=Phase,type=string,JSONPath=`.status.phase`
 
-// Listen is the Schema for the frontends API
+// Listen is the Schema for the listens API
 type Listen struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
